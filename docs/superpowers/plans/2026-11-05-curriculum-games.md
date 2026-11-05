@@ -1,6 +1,6 @@
 # Curriculum Games Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Ship original flight-building and robot-vision browser games, each with six curriculum-linked missions and real measurable underlying mechanisms.
 
@@ -36,11 +36,11 @@
 
 **Interfaces:** Produces `GameProps`, `MissionDefinition`, `AttemptResult`, `ControlSettings`, `ProgressData` in `types.ts`; `readRecord<T>(key, fallback): Promise<T>`, `writeRecord(key, value): Promise<void>` in `storage.ts`; pure progression/import/export helpers. Games export default components at `src/games/{flight,vision}/{Flight,Vision}Workshop.tsx` and named arrays `flightMissions` / `visionMissions` from `missions.ts`.
 
-- [ ] Write failing progression tests: a failed attempt explores but does not complete; passing a check does not invent gameplay completion; one game's results do not unlock the other; history capped at 30; malformed/nonfinite imports rejected atomically.
-- [ ] Run `npm test -- tests/core.test.ts`; observe missing behavior.
-- [ ] Implement versioned IndexedDB records, monotonic progress, validated import/export, bounded history, curriculum/mission hub, source notes, settings, and debrief.
-- [ ] Run the focused tests, `npm run typecheck`, and relevant browser flow.
-- [ ] Commit the independently usable shared application.
+- [x] Write failing progression tests: a failed attempt explores but does not complete; passing a check does not invent gameplay completion; one game's results do not unlock the other; history capped at 30; malformed/nonfinite imports rejected atomically.
+- [x] Run `npm test -- tests/core.test.ts`; observe missing behavior.
+- [x] Implement versioned IndexedDB records, monotonic progress, validated import/export, bounded history, curriculum/mission hub, source notes, settings, and debrief.
+- [x] Run the focused tests, `npm run typecheck`, and relevant browser flow.
+- [x] Commit the independently usable shared application.
 
 ### Task 2: Flight builder, deterministic physics, renderer, and six missions
 
@@ -48,13 +48,13 @@
 
 **Interfaces:** Consumes shared `GameProps` and storage helpers. Produces default `FlightWorkshop` and `flightMissions: MissionDefinition[]`; testable engine with fixed-step advancement, actual telemetry, and pause/resume/reset/dispose. Use IDs `flight-1` through `flight-6`. Calls `onAttempt` only for finished attempts; debrief must not interrupt active flight.
 
-- [ ] Write failing tests for mass/COM/inertia, blueprint validity/128-part cap, force/mass, ballistic motion, off-axis torque, nonnegative battery energy, dissipative drag, and equal trajectories at 30/60/120 rendering rates.
-- [ ] Run flight tests and confirm meaningful failures before implementing the core.
-- [ ] Implement builder and physics, with three flyable fixtures, real per-part forces, battery/motor bookkeeping, controlled test bench, and actual six mission predicates.
-- [ ] Prove stock solutions satisfy each predicate and near-miss invalid configurations fail.
-- [ ] Build the 3D world and editor, accessible controls, camera/orbit/pause/reset, real graphs/force/COM overlays, import/export and local saves, settings, debrief callbacks, lifecycle cleanup.
-- [ ] Run the core suite, typecheck, browser build/fly/crash/rebuild/complete flow, and record measured performance.
-- [ ] Commit the complete physics chapter after review fixes.
+- [x] Write failing tests for mass/COM/inertia, blueprint validity/128-part cap, force/mass, ballistic motion, off-axis torque, nonnegative battery energy, dissipative drag, and equal trajectories at 30/60/120 rendering rates.
+- [x] Run flight tests and confirm meaningful failures before implementing the core.
+- [x] Implement builder and physics, with three flyable fixtures, real per-part forces, battery/motor bookkeeping, controlled test bench, and actual six mission predicates.
+- [x] Prove stock solutions satisfy each predicate and near-miss invalid configurations fail.
+- [x] Build the 3D world and editor, accessible controls, camera/orbit/pause/reset, real graphs/force/COM overlays, import/export and local saves, settings, debrief callbacks, lifecycle cleanup.
+- [x] Run the core suite, typecheck, browser build/fly/crash/rebuild/complete flow, and record measured performance.
+- [x] Commit the complete physics chapter after review fixes.
 
 ### Task 3: Genuine model training, worker lifecycle, and vision game
 
@@ -62,12 +62,12 @@
 
 **Interfaces:** Consumes shared `GameProps` and storage. Produces default `VisionWorkshop`, `visionMissions: MissionDefinition[]`, genuine train/predict/inspect APIs. Use IDs `vision-1` through `vision-6`. Worker requests carry job IDs; cancellation/reset invalidate obsolete results.
 
-- [ ] Write failing tests for disjoint dataset families, input bounds, real held-out learning on sensor/image fixtures, inspector outputs matching active tensors, and stale-job rejection.
-- [ ] Run vision tests and confirm missing behavior.
-- [ ] Implement bounded procedural two-sensor and 16x16 grayscale datasets, perceptron/MLP/CNN presets, genuine TensorFlow.js learning/inference and intermediate activations in a CPU worker, starter models, cancellation/disposal, and model persistence.
-- [ ] Implement conveyor sorting, sample labeling/selection and augmentation, training progress, model inspectors, six measured mission predicates and free play.
-- [ ] Verify actual training improves held-out fixtures, reset/retrain/save/restore works, and default browser training meets the measured time budget.
-- [ ] Commit the complete CS chapter after review fixes.
+- [x] Write failing tests for disjoint dataset families, input bounds, real held-out learning on sensor/image fixtures, inspector outputs matching active tensors, and stale-job rejection.
+- [x] Run vision tests and confirm missing behavior.
+- [x] Implement bounded procedural two-sensor and 16x16 grayscale datasets, perceptron/MLP/CNN presets, genuine TensorFlow.js learning/inference and intermediate activations in a CPU worker, starter models, cancellation/disposal, and model persistence.
+- [x] Implement conveyor sorting, sample labeling/selection and augmentation, training progress, model inspectors, six measured mission predicates and free play.
+- [x] Verify actual training improves held-out fixtures, reset/retrain/save/restore works, and default browser training meets the measured time budget.
+- [x] Commit the complete CS chapter after review fixes.
 
 ### Task 4: Cross-browser integration, documentation, and public delivery
 
