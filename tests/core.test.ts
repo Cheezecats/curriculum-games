@@ -1,21 +1,45 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, it } from 'vitest';
-import { emptyProgress, recordAttempt, recordCheck, isMissionUnlocked, parseProgress, exportProgress } from '../src/core/progress';
+import {
+  emptyProgress,
+  recordAttempt,
+  recordCheck,
+  isMissionUnlocked,
+  parseProgress,
+  exportProgress,
+} from '../src/core/progress';
 import { readRecord, writeRecord } from '../src/core/storage';
 import type { AttemptResult, MissionDefinition } from '../src/core/types';
 
 const attempt = (overrides: Partial<AttemptResult> = {}): AttemptResult => ({
-  id: 'attempt-1', game: 'flight', missionId: 'flight-1', completed: false,
-  createdAt: 1000, metrics: { distance: 42 }, summary: 'A short flight.', ...overrides,
+  id: 'attempt-1',
+  game: 'flight',
+  missionId: 'flight-1',
+  completed: false,
+  createdAt: 1000,
+  metrics: { distance: 42 },
+  summary: 'A short flight.',
+  ...overrides,
 });
-const mission = (game: 'flight' | 'vision', order: number) => ({ id: `${game}-${order}`, game, order }) as MissionDefinition;
-const missions = [mission('flight', 1), mission('flight', 2), mission('vision', 1), mission('vision', 2)];
+const mission = (game: 'flight' | 'vision', order: number) =>
+  ({ id: `${game}-${order}`, game, order }) as MissionDefinition;
+const missions = [
+  mission('flight', 1),
+  mission('flight', 2),
+  mission('vision', 1),
+  mission('vision', 2),
+];
 
 describe('progression evidence', () => {
   it('records a failed attempt as exploration without granting completion', () => {
     const original = emptyProgress();
     const next = recordAttempt(original, attempt());
-    expect(next.missions['flight-1']).toMatchObject({ explored: true, completed: false, demonstrated: false, attempts: 1 });
+    expect(next.missions['flight-1']).toMatchObject({
+      explored: true,
+      completed: false,
+      demonstrated: false,
+      attempts: 1,
+    });
     expect(original.missions).toEqual({});
   });
   it('keeps earned completion when a subsequent attempt fails', () => {
@@ -56,17 +80,43 @@ describe('save boundaries', () => {
   });
   it('round-trips legitimate progress without changing its evidence', () => {
     const progress = recordAttempt(emptyProgress(), attempt({ completed: true }));
-    expect(parseProgress(exportProgress(progress), missions.map(m => m.id))).toEqual(progress);
+    expect(
+      parseProgress(
+        exportProgress(progress),
+        missions.map((m) => m.id),
+      ),
+    ).toEqual(progress);
   });
   it.each([
     '{broken',
     JSON.stringify({ version: 2, missions: {}, recentAttempts: [] }),
-    JSON.stringify({ version: 1, missions: { 'unknown-1': { explored: true } }, recentAttempts: [] }),
-    JSON.stringify({ version: 1, missions: { 'flight-1': { explored: true, completed: true, demonstrated: true, attempts: -1, bestMetrics: {} } }, recentAttempts: [] }),
+    JSON.stringify({
+      version: 1,
+      missions: { 'unknown-1': { explored: true } },
+      recentAttempts: [],
+    }),
+    JSON.stringify({
+      version: 1,
+      missions: {
+        'flight-1': {
+          explored: true,
+          completed: true,
+          demonstrated: true,
+          attempts: -1,
+          bestMetrics: {},
+        },
+      },
+      recentAttempts: [],
+    }),
     '{"version":1,"missions":{},"recentAttempts":[{"id":"x","game":"flight","missionId":"flight-1","completed":true,"createdAt":1,"metrics":{"distance":1e999},"summary":"x"}]}',
-  ])('rejects malformed imports before live state can be replaced', text => {
+  ])('rejects malformed imports before live state can be replaced', (text) => {
     const live = recordAttempt(emptyProgress(), attempt());
-    expect(() => parseProgress(text, missions.map(m => m.id))).toThrow();
+    expect(() =>
+      parseProgress(
+        text,
+        missions.map((m) => m.id),
+      ),
+    ).toThrow();
     expect(live.missions['flight-1'].completed).toBe(false);
   });
 });

@@ -58,9 +58,16 @@ export interface ControlSettings {
 }
 
 export const DEFAULT_CONTROLS: ControlSettings = {
-  pitchUp: 'KeyS', pitchDown: 'KeyW', rollLeft: 'KeyA', rollRight: 'KeyD',
-  yawLeft: 'KeyQ', yawRight: 'KeyE', throttleUp: 'ShiftLeft', throttleDown: 'ControlLeft',
-  invertPitch: false, reducedMotion: false,
+  pitchUp: 'KeyS',
+  pitchDown: 'KeyW',
+  rollLeft: 'KeyA',
+  rollRight: 'KeyD',
+  yawLeft: 'KeyQ',
+  yawRight: 'KeyE',
+  throttleUp: 'ShiftLeft',
+  throttleDown: 'ControlLeft',
+  invertPitch: false,
+  reducedMotion: false,
 };
 
 export interface GameProps {
