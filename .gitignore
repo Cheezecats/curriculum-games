@@ -5,6 +5,7 @@ test-results/
 .superpowers/
 .DS_Store
 *.tsbuildinfo
+output/
 .env
 .env.*
 !.env.example
