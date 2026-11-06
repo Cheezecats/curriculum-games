@@ -1,6 +1,8 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import { Vector3, Quaternion } from 'three';
 import { massProperties, PARTS, PART_HALF_EXTENT, type Blueprint } from './blueprints';
+import { crossesDeliveryGate } from './gate';
+export { missionPassed } from './assessment';
 export const STEP = 1 / 120;
 let ready: Promise<void> | undefined;
 export const initPhysics = () => (ready ??= RAPIER.init().then(() => {}));
@@ -19,41 +21,14 @@ export function dragForce(
 export interface Metrics {
   [key: string]: number;
 }
-export function missionPassed(id: string, m: Metrics) {
-  switch (id) {
-    case 'flight-1':
-      return m.time >= 4 && m.distance >= 45 && !m.crashed;
-    case 'flight-2':
-      return m.benchRuns >= 1 && Math.abs(m.acceleration / m.expectedAcceleration - 1) < 0.03;
-    case 'flight-3':
-      return (
-        m.time >= 4 &&
-        m.distance >= 65 &&
-        m.delivered === 1 &&
-        m.payload >= 3 &&
-        m.maxRoll < 0.6 &&
-        !m.crashed
-      );
-    case 'flight-4':
-      return m.time >= 5 && m.distance >= 60 && m.energyUsed < 6000 && !m.crashed;
-    case 'flight-5':
-      return m.benchRuns >= 1 && m.balanceError < 0.01;
-    case 'flight-6':
-      return (
-        m.benchRuns >= 2 &&
-        m.inertiaRatio > 1.2 &&
-        Math.abs(m.angularRatio * m.inertiaRatio - 1) < 0.08
-      );
-    default:
-      return false;
-  }
-}
 export interface Options {
   gravity?: boolean;
   aero?: boolean;
   ground?: boolean;
   velocity?: number;
 }
+export type FlightEndReason =
+  'safe-landing' | 'hard-landing' | 'launch-pad-collision' | 'valley-boundary';
 export class FlightEngine {
   world!: RAPIER.World;
   body!: RAPIER.RigidBody;
@@ -72,6 +47,10 @@ export class FlightEngine {
   landed = false;
   delivered = false;
   maxRoll = 0;
+  endReason: FlightEndReason | null = null;
+  impactVerticalSpeed = 0;
+  impactHorizontalSpeed = 0;
+  private launchPadHandle: number | null = null;
   externalForce = { x: 0, y: 0, z: 0 };
   forces: {
     position: Vector3;
@@ -104,7 +83,9 @@ export class FlightEngine {
     this.body.setLinvel({ x: this.options.velocity ?? 18, y: 0, z: 0 }, true);
     if (this.options.ground !== false) {
       this.world.createCollider(RAPIER.ColliderDesc.cuboid(600, 1, 180).setTranslation(250, -1, 0));
-      this.world.createCollider(RAPIER.ColliderDesc.cuboid(12, 16, 12).setTranslation(-8, 16, 0));
+      this.launchPadHandle = this.world.createCollider(
+        RAPIER.ColliderDesc.cuboid(12, 16, 12).setTranslation(-8, 16, 0),
+      ).handle;
     }
     this.initialEnergy = this.blueprint.parts.filter((p) => p.kind === 'battery').length * 60000;
     this.energy = this.initialEnergy;
@@ -196,33 +177,56 @@ export class FlightEngine {
     const up = new Vector3(0, 1, 0).applyQuaternion(q);
     this.maxRoll = Math.max(this.maxRoll, Math.acos(Math.max(-1, Math.min(1, up.y))));
     const now = this.body.translation();
-    if (
-      now.x >= 65 &&
-      now.x <= 66 &&
-      now.y >= 25 &&
-      now.y <= 50 &&
-      Math.abs(now.z) < 10 &&
-      this.blueprint.parts.some((p) => p.kind === 'cargo')
-    )
-      this.delivered = true;
+    if (!this.delivered) {
+      const nextRotation = this.body.rotation(),
+        nextQ = new Quaternion(nextRotation.x, nextRotation.y, nextRotation.z, nextRotation.w);
+      this.delivered = this.blueprint.parts.some((p) => {
+        if (p.kind !== 'cargo') return false;
+        const before = new Vector3(p.x, p.y, p.z)
+            .applyQuaternion(q)
+            .add(new Vector3(pos.x, pos.y, pos.z)),
+          after = new Vector3(p.x, p.y, p.z)
+            .applyQuaternion(nextQ)
+            .add(new Vector3(now.x, now.y, now.z));
+        return crossesDeliveryGate(before, after);
+      });
+    }
     if (this.options.ground !== false) {
-      let contact = false;
+      let contact = false,
+        topContact = false,
+        padContact = false;
       for (let i = 0; i < this.body.numColliders(); i++) {
         const collider = this.body.collider(i);
         this.world.contactPairsWith(collider, (other) =>
           this.world.contactPair(collider, other, (manifold) => {
-            if (manifold.numSolverContacts() > 0) contact = true;
+            if (manifold.numSolverContacts() > 0) {
+              contact = true;
+              topContact ||= Math.abs(manifold.normal().y) > 0.7;
+              padContact ||= other.handle === this.launchPadHandle;
+            }
           }),
         );
       }
       if (contact) {
         const gentle = Math.abs(v.y) < 2 && Math.hypot(v.x, v.z) < 22 && up.y > 0.85;
-        if (gentle && (now.y < 4 || now.y > 32)) this.landed = true;
-        else this.crashed = true;
+        this.impactVerticalSpeed = Math.abs(v.y);
+        this.impactHorizontalSpeed = Math.hypot(v.x, v.z);
+        if (gentle && topContact) {
+          this.landed = true;
+          this.endReason = 'safe-landing';
+        } else {
+          this.crashed = true;
+          this.endReason = padContact ? 'launch-pad-collision' : 'hard-landing';
+        }
       }
     }
-    if (Math.abs(now.x) > 550 || Math.abs(now.z) > 160 || now.y > 220 || now.y < -10)
+    if (
+      !this.endReason &&
+      (Math.abs(now.x) > 550 || Math.abs(now.z) > 160 || now.y > 220 || now.y < -10)
+    ) {
       this.crashed = true;
+      this.endReason = 'valley-boundary';
+    }
   }
   metrics(): Metrics {
     const p = this.body.translation(),
@@ -242,6 +246,8 @@ export class FlightEngine {
       landed: Number(this.landed),
       delivered: Number(this.delivered),
       crashed: Number(this.crashed),
+      impactVerticalSpeed: this.impactVerticalSpeed,
+      impactHorizontalSpeed: this.impactHorizontalSpeed,
     };
   }
   pause() {
@@ -260,6 +266,9 @@ export class FlightEngine {
     this.delivered = false;
     this.paused = false;
     this.maxRoll = 0;
+    this.endReason = null;
+    this.impactVerticalSpeed = 0;
+    this.impactHorizontalSpeed = 0;
     this.throttle = 0;
     this.pitch = this.roll = this.yaw = 0;
     this.externalForce = { x: 0, y: 0, z: 0 };

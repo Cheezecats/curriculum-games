@@ -1,12 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import type { GameProps } from '../../core/types';
 import { readRecord, writeRecord } from '../../core/storage';
 import { dataset, augment } from './datasets';
 import type { DataKind, Sample } from './datasets';
-import type { Epoch, Inspection, Preset, Snapshot } from './engine';
+import type { Preset, Snapshot } from './engine';
 import { VisionClient } from './client';
-import { missionComplete } from './outcome';
+import { evaluateVisionMission } from './outcome';
 import { modelEvidence, provenanceMetrics } from './provenance';
+import { draftStatus, evidenceReducer, freshEvidence, linearDecision } from './experiment';
+import type { InspectedPart } from './experiment';
+import ObjectiveChecklist from '../../components/ObjectiveChecklist';
 import { StartupGate } from './startup';
 import './vision.css';
 const names = ['Circle', 'Square', 'Triangle'];
@@ -60,10 +63,23 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
   const [status, setStatus] = useState('Preparing your robot’s starter brain…');
   const [busy, setBusy] = useState(true);
   const [ready, setReady] = useState(false);
-  const [curve, setCurve] = useState<Epoch[]>([]);
-  const [inspection, setInspection] = useState<Inspection | null>(null);
+  const [evidence, dispatch] = useReducer(evidenceReducer, undefined, freshEvidence);
+  const {
+    curve,
+    curveEpochs,
+    inspection,
+    inspected,
+    elapsed,
+    lastAccuracy,
+    mistakes,
+    paused,
+    resultMessage,
+    inspectorOpen,
+    lastDecision,
+    binCounts,
+    criteria,
+  } = evidence;
   const [saved, setSaved] = useState<Snapshot | null>(null);
-  const [elapsed, setElapsed] = useState(0);
   const [stage, setStage] = useState<'data' | 'train' | 'deploy'>('data');
   const [run, setRun] = useState<{
     samples: Sample[];
@@ -71,27 +87,48 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
     index: number;
     correct: number;
   } | null>(null);
-  const [mistakes, setMistakes] = useState<{ sample: Sample; prediction: number }[]>([]);
-  const [lastAccuracy, setLastAccuracy] = useState<number | null>(null);
-  const [paused, setPaused] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const [resultMessage, setResultMessage] = useState('');
   const client = useRef<VisionClient | null>(null);
   const deploySamples = useRef<Sample[]>([]);
-  const current = useRef({ kind, preset, units, epochs, rate, samples, selected, augmentation });
-  current.current = { kind, preset, units, epochs, rate, samples, selected, augmentation };
+  const training = useMemo(() => samples.filter((s) => selected.has(s.id)), [samples, selected]);
+  const trainingRows = useMemo(
+    () => (augmentation ? training.flatMap((s) => [s, ...augment(s)]) : training),
+    [training, augmentation],
+  );
+  const current = useRef({ kind, preset, units, epochs, rate, training, trainingRows });
+  current.current = { kind, preset, units, epochs, rate, training, trainingRows };
   const activeModel = useRef<Snapshot | null>(null);
+  const restoring = useRef(false);
   const startup = useRef<StartupGate | null>(null);
+  const pendingInspection = useRef<InspectedPart | null>(null);
+  const inspectorRef = useRef<HTMLDetailsElement | null>(null);
   const launchTraining = (starter = false) => {
     if (document.hidden) return;
     startup.current?.invalidate();
     const c = current.current;
-    const training = c.samples.filter((s) => c.selected.has(s.id));
-    setCurve([]);
+    restoring.current = false;
+    dispatch({
+      type: 'patch',
+      values: {
+        curve: [],
+        curveEpochs: c.epochs,
+        mistakes: [],
+        lastAccuracy: null,
+        resultMessage: '',
+        lastDecision: null,
+        paused: false,
+        binCounts: [0, 0, 0],
+        criteria: [],
+        inspection: null,
+        inspected: null,
+      },
+    });
     setBusy(true);
     setReady(false);
     setRun(null);
-    setMistakes([]);
+    pendingInspection.current = c.training[0]
+      ? { sample: c.training[0], source: 'training' }
+      : null;
     setStatus(starter ? 'Preparing a real starter model…' : 'Learning from your selected labels…');
     client.current!.request({
       action: 'train',
@@ -101,7 +138,7 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
       epochs: c.epochs,
       rate: c.rate,
       auditRepairedLabels: order === 3 && c.kind === 'linear',
-      train: c.augmentation ? training.flatMap((s) => [s, ...augment(s)]) : training,
+      train: c.trainingRows,
       validation: dataset(c.kind, 'validation', 24),
     });
   };
@@ -112,7 +149,7 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
     const c = new VisionClient((response) => {
       if (disposed || document.hidden) return;
       if (response.type === 'progress' && response.epoch) {
-        setCurve((p) => [...p, response.epoch!]);
+        dispatch({ type: 'epoch', epoch: response.epoch });
         setStatus(`Learning · epoch ${response.epoch.epoch}`);
       }
       if (response.type === 'ready') {
@@ -124,13 +161,19 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
         }
         setBusy(false);
         setReady(!!model);
-        setInspection(response.inspection ?? null);
+        dispatch({
+          type: 'model-ready',
+          restored: restoring.current,
+          snapshot: model,
+          inspection: response.inspection ?? null,
+          inspected: pendingInspection.current,
+        });
+        restoring.current = false;
         setSaved(model ?? null);
         const evidence = model?.provenance;
-        setElapsed(evidence?.status === 'known' ? evidence.trainingMs : 0);
         setStatus(
           evidence?.status === 'known'
-            ? 'Robot ready. Send unseen parts down the belt.'
+            ? 'Robot ready. Deploy the held-out comparison batch.'
             : 'Robot ready · saved training evidence unknown. Retrain to earn data-repair or augmentation credit.',
         );
         if (model)
@@ -150,9 +193,13 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
           index: 0,
           correct: 0,
         });
-        setStatus('Sorting unseen parts…');
+        setStatus('Sorting the held-out comparison batch…');
       }
-      if (response.type === 'inspection' && response.inspection) setInspection(response.inspection);
+      if (response.type === 'inspection' && response.inspection)
+        dispatch({
+          type: 'patch',
+          values: { inspection: response.inspection, inspected: pendingInspection.current },
+        });
     });
     client.current = c;
     const visibility = () => {
@@ -163,6 +210,7 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
         setBusy(false);
         setReady(false);
         setRun(null);
+        dispatch({ type: 'hidden' });
         setStatus('Paused while hidden. Restore your model or retrain to continue.');
       }
     };
@@ -173,6 +221,9 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
       (model) => {
         if (model && model.kind === initialKind) {
           setPreset(model.preset);
+          restoring.current = true;
+          dispatch({ type: 'restore-started' });
+          pendingInspection.current = { sample: samples[0]!, source: 'training' };
           c.request({
             action: 'restore',
             snapshot: model,
@@ -191,53 +242,81 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
     };
     // A mission view owns exactly one worker; parent remounts when changing missions.
   }, []);
+  const advancePart = useCallback(() => {
+    if (!run || hidden) return;
+    const index = run.index;
+    const sample = run.samples[index]!;
+    const p = run.predictions[index]!;
+    const prediction = p.indexOf(Math.max(...p));
+    const correct = run.correct + Number(prediction === sample.label);
+    dispatch({
+      type: 'decision',
+      decision: { sample, prediction, scores: p, correct: prediction === sample.label },
+    });
+    if (index + 1 === run.samples.length) {
+      const accuracy = correct / run.samples.length;
+      const model = activeModel.current!;
+      const t = modelEvidence(model);
+      const parameters = model.weights.reduce((sum, w) => sum + w.values.length, 0);
+      const evaluation = mission
+        ? evaluateVisionMission(order, {
+            ...t,
+            accuracy,
+            parameters,
+            correct,
+            total: run.samples.length,
+          })
+        : { completed: false, criteria: [] };
+      const complete = evaluation.completed;
+      setRun(null);
+      setStatus(`Batch finished · ${correct} of ${run.samples.length} sorted correctly`);
+      const resultMessage = !mission
+        ? 'Experiment finished. Inspect the mistakes or try another model.'
+        : complete
+          ? 'Contract fulfilled. Your measurements meet the target.'
+          : (evaluation.criteria.find((c) => !c.passed)?.hint ??
+            'Inspect the mistakes and compare another experiment.');
+      dispatch({
+        type: 'patch',
+        values: { lastAccuracy: accuracy, resultMessage, criteria: evaluation.criteria },
+      });
+      const provenance = model.provenance;
+      const known = provenance?.status === 'known' ? provenance : null;
+      onAttempt({
+        id: crypto.randomUUID(),
+        game: 'vision',
+        missionId: mission?.id ?? null,
+        completed: complete,
+        createdAt: Date.now(),
+        metrics: {
+          accuracy,
+          correct,
+          total: run.samples.length,
+          parameters,
+          ...provenanceMetrics(model),
+        },
+        criteria: evaluation.criteria,
+        configuration: {
+          task: model.kind,
+          model: model.preset,
+          preset: model.preset,
+          hiddenUnits: model.preset === 'mlp' ? model.units : 0,
+          epochs: known?.epochs ?? 'unknown',
+          augmentation: known?.augmented ?? 'unknown',
+          learningRate: known?.learningRate ?? 'unknown',
+          trainingExamples: known?.examples ?? 'unknown',
+          trainingData: known?.fingerprint ?? 'unknown',
+          batch: order === 5 ? 'shifted comparison 01' : 'comparison 01',
+        },
+        summary: `Sorted ${correct}/${run.samples.length} held-out comparison parts with ${t.preset}; ${parameters} learned parameters.`,
+      });
+    } else setRun({ ...run, index: index + 1, correct });
+  }, [run, hidden, order, mission, onAttempt]);
   useEffect(() => {
     if (!run || paused || hidden) return;
-    const timer = setTimeout(
-      () => {
-        const index = run.index;
-        const sample = run.samples[index]!;
-        const p = run.predictions[index]!;
-        const prediction = p.indexOf(Math.max(...p));
-        const correct = run.correct + Number(prediction === sample.label);
-        if (prediction !== sample.label) setMistakes((old) => [...old, { sample, prediction }]);
-        if (index + 1 === run.samples.length) {
-          const accuracy = correct / run.samples.length;
-          const model = activeModel.current!;
-          const t = modelEvidence(model);
-          const parameters = inspection?.parameters ?? Infinity;
-          const complete = !!mission && missionComplete(order, { ...t, accuracy, parameters });
-          setLastAccuracy(accuracy);
-          setRun(null);
-          setStatus(`Batch finished · ${correct} of ${run.samples.length} sorted correctly`);
-          setResultMessage(
-            !mission
-              ? 'Experiment finished. Inspect the mistakes or try another model.'
-              : complete
-                ? 'Contract fulfilled. Your measurements meet the target.'
-                : 'The contract needs another experiment. Inspect the mistakes, then adjust your training.',
-          );
-          onAttempt({
-            id: crypto.randomUUID(),
-            game: 'vision',
-            missionId: mission?.id ?? null,
-            completed: complete,
-            createdAt: Date.now(),
-            metrics: {
-              accuracy,
-              correct,
-              total: run.samples.length,
-              parameters,
-              ...provenanceMetrics(model),
-            },
-            summary: `Sorted ${correct}/${run.samples.length} unseen parts with ${t.preset}; ${parameters} learned parameters.`,
-          });
-        } else setRun({ ...run, index: index + 1, correct });
-      },
-      settings.reducedMotion ? 120 : 420,
-    );
+    const timer = setTimeout(advancePart, settings.reducedMotion ? 120 : 420);
     return () => clearTimeout(timer);
-  }, [run, paused, hidden, order, inspection, elapsed, mission, onAttempt, settings.reducedMotion]);
+  }, [run, paused, hidden, advancePart, settings.reducedMotion]);
   const changeKind = (k: DataKind) => {
     startup.current?.invalidate();
     client.current?.cancel();
@@ -251,25 +330,39 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
     setReady(false);
     setBusy(false);
     setSaved(null);
-    setInspection(null);
+    activeModel.current = null;
+    pendingInspection.current = null;
+    dispatch({ type: 'reset' });
     setRun(null);
-    setCurve([]);
     setStatus('New dataset loaded. Train a robot for these inputs.');
   };
   const deploy = () => {
-    if (!ready || document.hidden) return;
-    const test = dataset(kind, 'test', 24, order === 5);
+    if (!ready || document.hidden || !activeModel.current) return;
+    const test = dataset(activeModel.current.kind, 'test', 24, order === 5);
     deploySamples.current = test;
     setStage('deploy');
     setBusy(true);
-    setMistakes([]);
-    setResultMessage('');
+    dispatch({
+      type: 'patch',
+      values: {
+        mistakes: [],
+        resultMessage: '',
+        paused: false,
+        lastDecision: null,
+        binCounts: [0, 0, 0],
+        criteria: [],
+        lastAccuracy: null,
+      },
+    });
     client.current!.request({ action: 'predict', inputs: test.map((s) => s.input) });
   };
   const restore = () => {
     if (!saved || document.hidden) return;
     startup.current?.invalidate();
     setBusy(true);
+    restoring.current = true;
+    dispatch({ type: 'restore-started' });
+    pendingInspection.current = { sample: samples[focus]!, source: 'training' };
     client.current!.request({
       action: 'restore',
       snapshot: saved,
@@ -281,8 +374,38 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
     client.current?.cancel();
     setBusy(false);
     setReady(false);
+    dispatch({ type: 'cancelled' });
     setStatus('Training cancelled. The last saved model is available to restore.');
   };
+  const inspectPart = (sample: Sample, source: InspectedPart['source'], reveal = true) => {
+    if (!ready || busy || run || activeModel.current?.kind !== kind) return;
+    pendingInspection.current = { sample, source };
+    dispatch({ type: 'patch', values: { inspected: null, inspectorOpen: true } });
+    client.current?.request({ action: 'inspect', inputs: [sample.input] });
+    if (reveal)
+      requestAnimationFrame(() =>
+        inspectorRef.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' }),
+      );
+  };
+  const trained = activeModel.current;
+  const draft = useMemo(
+    () =>
+      draftStatus(trained, {
+        kind,
+        preset,
+        units,
+        epochs,
+        rate,
+        augmentation,
+        train: trainingRows,
+      }),
+    [trained, kind, preset, units, epochs, rate, augmentation, trainingRows],
+  );
+  const trainedEvidence = trained?.provenance?.status === 'known' ? trained.provenance : null;
+  const linear =
+    trained?.preset === 'perceptron' && trained.kind !== 'image' && inspection && inspected
+      ? linearDecision(inspection.weights, inspected.sample.input)
+      : null;
   const active = run?.samples[run.index];
   const activePrediction = run?.predictions[run.index];
   const predicted = activePrediction ? activePrediction.indexOf(Math.max(...activePrediction)) : -1;
@@ -307,6 +430,34 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
         </p>
         <strong>{mission?.objective ?? 'Experiment freely with sensors and shapes.'}</strong>
       </div>
+      <section className="vision-model-state" aria-label="Trained model status">
+        <div>
+          <strong>
+            {trained
+              ? `${ready ? 'Active' : 'Last'} trained model · ${trained.preset.toUpperCase()}`
+              : 'No trained model ready'}
+          </strong>
+          <span>
+            {trainedEvidence
+              ? `${trainedEvidence.epochs} completed epochs · augmentation ${trainedEvidence.augmented ? 'used' : 'off'}${trainedEvidence.examples ? ` · ${trainedEvidence.examples} training rows` : ''}`
+              : 'Training settings unknown until a fresh training run.'}
+          </span>
+        </div>
+        <p data-testid="vision-draft-status">
+          {draft === 'changed'
+            ? 'Draft changed. Deploy still uses the trained model; retrain to apply your edits.'
+            : draft === 'unknown'
+              ? 'Saved weights are available; full training settings are unknown. Retrain to apply this draft.'
+              : draft === 'current'
+                ? 'Draft matches the trained model. Deployment uses these weights.'
+                : 'Choose your examples and train a model for this task.'}
+        </p>
+        {(draft === 'changed' || draft === 'unknown') && (
+          <button disabled={busy || !!run} onClick={() => setStage('train')}>
+            Review draft & retrain →
+          </button>
+        )}
+      </section>
       <div className="vision-layout">
         <main className="vision-factory">
           <div className="vision-floor-label">
@@ -314,7 +465,7 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
               LINE 04 <b> / VISION SORTING</b>
             </span>
             <span className="vision-live">
-              {run ? '● SORTING' : busy ? '● LEARNING' : '● STANDBY'}
+              {run ? (paused ? '● BELT PAUSED' : '● SORTING') : busy ? '● LEARNING' : '● STANDBY'}
             </span>
           </div>
           <div className="vision-scene" aria-label="Robot sorting conveyor">
@@ -327,13 +478,13 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                 <span />
               </div>
               <div className="vision-body">V / 04</div>
-              <div className={`vision-arm ${run ? 'vision-working' : ''}`} />
+              <div className={`vision-arm ${run && !paused ? 'vision-working' : ''}`} />
             </div>
             <div className="vision-scanner">
               <span>OPTICAL GATE</span>
               <div />
             </div>
-            <div className={`vision-belt ${run ? 'vision-moving' : ''}`}>
+            <div className={`vision-belt ${run && !paused ? 'vision-moving' : ''}`}>
               {(run ? run.samples.slice(run.index, run.index + 5) : samples.slice(0, 5)).map(
                 (s, i) => (
                   <div
@@ -347,17 +498,23 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
               )}
             </div>
             <div className="vision-bin vision-bin-a">
-              <b>{kind === 'image' ? '○ CIRCLE' : '0 / LOW'}</b>
-              <span>{active ? (predicted === 0 ? '↓ receiving' : 'waiting') : 'READY'}</span>
+              <b>{kind === 'image' ? '○ CIRCLE' : 'BIN 0'}</b>
+              <span>
+                {binCounts[0]} sorted {active && predicted === 0 ? '↓ receiving' : ''}
+              </span>
             </div>
             <div className="vision-bin vision-bin-b">
-              <b>{kind === 'image' ? '□ SQUARE' : '1 / HIGH'}</b>
-              <span>{active ? (predicted === 1 ? '↓ receiving' : 'waiting') : 'READY'}</span>
+              <b>{kind === 'image' ? '□ SQUARE' : 'BIN 1'}</b>
+              <span>
+                {binCounts[1]} sorted {active && predicted === 1 ? '↓ receiving' : ''}
+              </span>
             </div>
             {kind === 'image' && (
               <div className="vision-bin vision-bin-c">
                 <b>△ TRIANGLE</b>
-                <span>{predicted === 2 ? '↓ receiving' : 'READY'}</span>
+                <span>
+                  {binCounts[2]} sorted {active && predicted === 2 ? '↓ receiving' : ''}
+                </span>
               </div>
             )}
           </div>
@@ -366,20 +523,24 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
               <small>THIS BATCH</small>
               <strong>
                 {run
-                  ? `${run.index + 1} / 24`
+                  ? `${run.correct} / ${run.index} correct`
                   : lastAccuracy !== null
-                    ? `${Math.round(lastAccuracy * 100)}%`
+                    ? `${(lastAccuracy * 100).toFixed(1)}%`
                     : '24 parts'}
               </strong>
             </div>
             <div>
-              <small>ROBOT’S DECISION</small>
+              <small>{run ? `SCANNING PART ${run.index + 1} / 24` : 'ROBOT’S DECISION'}</small>
               <strong>
                 {active
                   ? kind === 'image'
                     ? names[predicted]
                     : `Bin ${predicted}`
-                  : 'Awaiting batch'}
+                  : lastDecision
+                    ? kind === 'image'
+                      ? names[lastDecision.prediction]
+                      : `Bin ${lastDecision.prediction}`
+                    : 'Awaiting batch'}
               </strong>
             </div>
             <div>
@@ -389,22 +550,59 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
               </strong>
             </div>
           </div>
-          <div className="vision-status" role="status">
-            {status}
-          </div>
-          {resultMessage && <p className="vision-result">{resultMessage}</p>}
           <div className="vision-actions">
             <button className="vision-primary" disabled={!ready || busy || !!run} onClick={deploy}>
               ▶ Deploy robot · 24 parts
             </button>
             {run && (
-              <button onClick={() => setPaused((p) => !p)}>
+              <button onClick={() => dispatch({ type: 'toggle-pause' })}>
                 {paused ? 'Resume belt' : 'Pause belt'}
               </button>
             )}
+            {run && paused && <button onClick={advancePart}>Step one part</button>}
             {busy && <button onClick={cancelWork}>Cancel</button>}
             {saved && !ready && !busy && <button onClick={restore}>Restore last model</button>}
           </div>
+          {lastDecision && (
+            <div
+              className={`vision-decision ${lastDecision.correct ? 'vision-correct' : 'vision-wrong'}`}
+              aria-label="Latest sorting decision"
+            >
+              <Part sample={lastDecision.sample} size={44} />
+              <div>
+                <strong>{lastDecision.correct ? 'Correct bin' : 'Wrong bin'}</strong>
+                <p>
+                  Robot chose{' '}
+                  {kind === 'image'
+                    ? names[lastDecision.prediction]
+                    : `bin ${lastDecision.prediction}`}{' '}
+                  · verified label{' '}
+                  {kind === 'image'
+                    ? names[lastDecision.sample.label]
+                    : `bin ${lastDecision.sample.label}`}
+                </p>
+                <div className="vision-score-bars" aria-label="Latest model scores">
+                  {lastDecision.scores.map((score, i) => (
+                    <span key={i}>
+                      {kind === 'image' ? names[i] : `Bin ${i}`}{' '}
+                      <meter
+                        min="0"
+                        max="1"
+                        value={score}
+                        aria-label={`${kind === 'image' ? names[i] : `Bin ${i}`} model score`}
+                      />{' '}
+                      {(score * 100).toFixed(1)}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="vision-status" role="status">
+            {status}
+          </div>
+          {resultMessage && <p className="vision-result">{resultMessage}</p>}
+          {criteria.length > 0 && <ObjectiveChecklist criteria={criteria} compact />}
           {mistakes.length > 0 && (
             <div className="vision-mistakes">
               <h3>
@@ -414,10 +612,9 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                 {mistakes.map(({ sample, prediction }) => (
                   <button
                     key={sample.id}
-                    disabled={busy || !!run}
-                    onClick={() =>
-                      client.current?.request({ action: 'inspect', inputs: [sample.input] })
-                    }
+                    disabled={!ready || busy || !!run}
+                    aria-label={`Inspect held-out example ${sample.id}`}
+                    onClick={() => inspectPart(sample, 'held-out')}
                   >
                     <Part sample={sample} size={30} />
                     <span>
@@ -473,8 +670,7 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                     className={`${focus === i ? 'vision-focused' : ''} ${!selected.has(s.id) ? 'vision-excluded' : ''}`}
                     onClick={() => {
                       setFocus(i);
-                      if (ready && !busy && !run)
-                        client.current?.request({ action: 'inspect', inputs: [s.input] });
+                      if (ready && !busy && !run) inspectPart(s, 'training', false);
                     }}
                   >
                     <Part sample={s} size={32} />
@@ -484,6 +680,30 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
               </div>
               <div className="vision-label-editor">
                 <strong>Example {focus + 1}</strong>
+                {kind !== 'image' && (
+                  <div className="vision-sensor-readings" aria-label="Selected sensor readings">
+                    <span>
+                      A = {samples[focus]!.input[0]!.toFixed(6)} · B ={' '}
+                      {samples[focus]!.input[1]!.toFixed(6)}
+                    </span>
+                    {kind === 'linear' ? (
+                      <span>
+                        Factory rule: 0.7A + 0.3B ={' '}
+                        {(
+                          samples[focus]!.input[0]! * 0.7 +
+                          samples[focus]!.input[1]! * 0.3
+                        ).toFixed(6)}
+                        . Above 0.5 → bin 1; otherwise bin 0.
+                      </span>
+                    ) : (
+                      <span>
+                        Factory rule: exactly one sensor above 0.5 → bin 1; otherwise bin 0. A is{' '}
+                        {samples[focus]!.input[0]! > 0.5 ? 'above' : 'at or below'} 0.5; B is{' '}
+                        {samples[focus]!.input[1]! > 0.5 ? 'above' : 'at or below'} 0.5.
+                      </span>
+                    )}
+                  </div>
+                )}
                 <label>
                   Training label
                   <select
@@ -520,6 +740,13 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                   />{' '}
                   Include in training
                 </label>
+                <button
+                  className="vision-inspect-selected"
+                  disabled={!ready || busy || !!run}
+                  onClick={() => inspectPart(samples[focus]!, 'training')}
+                >
+                  Inspect selected model response ↓
+                </button>
               </div>
               {order === 3 && (
                 <p className="vision-hint">
@@ -559,7 +786,6 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                   value={preset}
                   onChange={(e) => {
                     setPreset(e.target.value as Preset);
-                    setReady(false);
                   }}
                 >
                   <option value="perceptron">Perceptron · linear softmax</option>
@@ -620,7 +846,10 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
               <div className="vision-learning">
                 <div>
                   <strong>Learning curve</strong>
-                  <span>train / validation loss</span>
+                  <div className="vision-curve-legend" aria-label="Loss curve legend">
+                    <span className="vision-training-loss">Training loss</span>
+                    <span className="vision-validation-loss">Validation loss</span>
+                  </div>
                 </div>
                 <svg viewBox="0 0 300 100" aria-label="Actual training and validation loss curve">
                   <path d="M0 90H300" stroke="#ccc" />
@@ -628,12 +857,13 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                     <polyline
                       key={key}
                       fill="none"
-                      stroke={j ? '#d78154' : '#1e6a61'}
+                      stroke={j ? '#ef2b12' : '#111111'}
+                      strokeDasharray={j ? '6 4' : undefined}
                       strokeWidth="2"
                       points={curve
                         .map(
                           (e, i) =>
-                            `${(i / Math.max(1, epochs - 1)) * 300},${95 - Math.min(3, e[key as 'loss']) * 28}`,
+                            `${(i / Math.max(1, curveEpochs - 1)) * 300},${95 - Math.min(3, e[key as 'loss']) * 28}`,
                         )
                         .join(' ')}
                     />
@@ -642,7 +872,9 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                 <p>
                   {curve.length
                     ? `Epoch ${curve.at(-1)!.epoch} · validation ${Math.round(curve.at(-1)!.valAccuracy * 100)}%`
-                    : 'Training measurements appear here.'}
+                    : ready
+                      ? 'No learning curve is stored with this model. Retrain to record one.'
+                      : 'Training measurements appear here.'}
                   {elapsed > 0 && ` · ${(elapsed / 1000).toFixed(2)}s last training`}
                 </p>
               </div>
@@ -654,16 +886,30 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
               <p>
                 {order === 5
                   ? 'This batch has dimmer, shifted shapes from separate test families.'
-                  : 'These 24 parts belong to held-out test families. Your robot only receives sensor readings or pixels.'}
+                  : 'These 24 parts form a held-out comparison batch. Your robot only receives sensor readings or pixels.'}
               </p>
               <div className="vision-deploy-target">
-                <small>CONTRACT TARGET</small>
-                <strong>{order === 5 ? '65' : order >= 4 ? '75' : '80'}% accuracy</strong>
-                {order === 6 && <span>≤ 1,500 learned parameters</span>}
+                <small>{mission ? 'CONTRACT TARGET' : 'COMPARISON BATCH'}</small>
+                <strong>
+                  {mission ? (
+                    <>At least {order === 5 ? '16' : order >= 4 ? '18' : '20'} / 24 correct</>
+                  ) : (
+                    'Explore 24 parts'
+                  )}
+                </strong>
+                {mission ? (
+                  <>
+                    <span>Accuracy threshold {order === 5 ? '65' : order >= 4 ? '75' : '80'}%</span>
+                    {order === 6 && <span>≤ 1,500 learned parameters</span>}
+                  </>
+                ) : (
+                  <span>Compare accuracy, model size, and mistakes across experiments.</span>
+                )}
               </div>
               <p>
-                Deploy, inspect errors, return to the data drawer, and retrain. The answer key is
-                used only to score completed decisions.
+                Retries use the same comparison batch so you can compare changes. Reviewed parts
+                stay outside training; they are not fresh unseen evidence. The answer key only
+                scores completed decisions.
               </p>
               <button onClick={() => setStage('data')}>← Improve the training data</button>
             </section>
@@ -671,14 +917,82 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
         </aside>
       </div>
       {inspection && (
-        <details className="vision-inspector">
+        <details
+          className="vision-inspector"
+          ref={inspectorRef}
+          open={inspectorOpen}
+          onToggle={(e) =>
+            dispatch({ type: 'patch', values: { inspectorOpen: e.currentTarget.open } })
+          }
+        >
           <summary>Inside the active model · real weights, decision surface & feature maps</summary>
+          <div className="vision-inspected-input" aria-label="Inspected model input">
+            {inspected ? (
+              <>
+                <Part sample={inspected.sample} size={80} />
+                <div>
+                  <h3>Inspected {inspected.source} example</h3>
+                  <p>{inspected.sample.id}</p>
+                  <p>
+                    {inspected.source === 'training' ? 'Training label' : 'Verified held-out label'}
+                    :{' '}
+                    {kind === 'image'
+                      ? names[inspected.sample.label]
+                      : `Bin ${inspected.sample.label}`}
+                  </p>
+                  {kind !== 'image' && (
+                    <p>
+                      A = {inspected.sample.input[0]!.toFixed(6)} · B ={' '}
+                      {inspected.sample.input[1]!.toFixed(6)}
+                    </p>
+                  )}
+                  <div className="vision-score-bars" aria-label="Inspected model scores">
+                    {inspection.scores.map((score, i) => (
+                      <span key={i}>
+                        {kind === 'image' ? names[i] : `Bin ${i}`}{' '}
+                        <meter
+                          min="0"
+                          max="1"
+                          value={score}
+                          aria-label={`${kind === 'image' ? names[i] : `Bin ${i}`} inspected model score`}
+                        />{' '}
+                        {(score * 100).toFixed(2)}%
+                      </span>
+                    ))}
+                  </div>
+                  <small>Softmax model scores computed from these active weights.</small>
+                </div>
+              </>
+            ) : (
+              <p>Reading the selected input through the active model…</p>
+            )}
+          </div>
+          {linear && (
+            <p className="vision-linear-rule">
+              Learned decision: {linear.a.toFixed(4)} × A + {linear.b.toFixed(4)} × B +{' '}
+              {linear.bias.toFixed(4)} = <strong>{linear.score.toFixed(4)}</strong>. Positive → bin
+              1; zero or negative → bin 0. These are class-one minus class-zero weights and biases.
+            </p>
+          )}
           <div className="vision-inspector-grid">
             <div>
               <h3>Learned tensors</h3>
               {inspection.weights.map((w, i) => (
                 <p key={i}>
-                  <b>{w.shape.join(' × ')}</b> [
+                  <b>
+                    {trained?.preset === 'perceptron'
+                      ? i === 0
+                        ? 'Input → class weights'
+                        : 'Class biases'
+                      : [
+                          'Input/filter weights',
+                          'Hidden/filter biases',
+                          'Hidden → class weights',
+                          'Class biases',
+                        ][i]}{' '}
+                    · {w.shape.join(' × ')}
+                  </b>{' '}
+                  [
                   {w.values
                     .slice(0, 12)
                     .map((v) => v.toFixed(3))
@@ -701,12 +1015,12 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                 <small>A → · B ↓ · colour = P(bin 1)</small>
               </div>
             )}
-            {inspection.activations.length > 0 && (
+            {inspection.activations.length > 0 && inspected && (
               <div>
                 <h3>Active convolution · {inspection.activationShape.slice(1).join(' × ')}</h3>
                 <div className="vision-feature-maps">
                   {[0, 1, 2, 3].map((channel) => (
-                    <div key={channel}>
+                    <div key={channel} aria-label={`Filter ${channel + 1} activation map`}>
                       {Array.from({ length: 196 }, (_, i) => (
                         <i
                           key={i}

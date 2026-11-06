@@ -11,6 +11,7 @@ import {
   parseProgress,
   recordAttempt,
   recordCheck,
+  findPreviousComparableAttempt,
 } from './core/progress';
 import { readRecord, writeRecord } from './core/storage';
 import { DEFAULT_CONTROLS } from './core/types';
@@ -240,6 +241,7 @@ export default function App() {
         <Debrief
           key={debrief.id}
           attempt={debrief}
+          previousAttempt={findPreviousComparableAttempt(debrief, progress.recentAttempts)}
           mission={allMissions.find((m) => m.id === debrief.missionId) ?? null}
           onClose={() => setDebrief(null)}
           onCheck={(correct) => {

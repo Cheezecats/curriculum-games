@@ -1,7 +1,16 @@
 import type { Snapshot } from './engine';
 export type TrainingProvenance =
   | { status: 'unknown' }
-  | { status: 'known'; augmented: boolean; repairs: number; epochs: number; trainingMs: number };
+  | {
+      status: 'known';
+      augmented: boolean;
+      repairs: number;
+      epochs: number;
+      trainingMs: number;
+      learningRate?: number;
+      examples?: number;
+      fingerprint?: string;
+    };
 export function validProvenance(value: unknown): value is TrainingProvenance {
   if (!value || typeof value !== 'object') return false;
   const p = value as Record<string, unknown>;
@@ -20,7 +29,19 @@ export function validProvenance(value: unknown): value is TrainingProvenance {
       typeof p.trainingMs === 'number' &&
       Number.isFinite(p.trainingMs) &&
       p.trainingMs >= 0 &&
-      p.trainingMs <= 86400000)
+      p.trainingMs <= 86400000 &&
+      (p.learningRate === undefined ||
+        (typeof p.learningRate === 'number' &&
+          Number.isFinite(p.learningRate) &&
+          p.learningRate >= 0.001 &&
+          p.learningRate <= 0.1)) &&
+      (p.examples === undefined ||
+        (typeof p.examples === 'number' &&
+          Number.isInteger(p.examples) &&
+          p.examples >= 6 &&
+          p.examples <= 360)) &&
+      (p.fingerprint === undefined ||
+        (typeof p.fingerprint === 'string' && /^[0-9a-f]{8}$/.test(p.fingerprint))))
   );
 }
 export function modelEvidence(snapshot: Snapshot) {

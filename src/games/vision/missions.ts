@@ -45,7 +45,7 @@ const rows = [
     'Little windows, big clues',
     'Teach the robot to see shapes.',
     'Use a small convolutional network to sort circles, squares and triangles from 16 × 16 grayscale images. Inspect the active convolution outputs.',
-    'Use a CNN and sort 75% of unseen shapes correctly.',
+    'Use a CNN and sort at least 75% of the held-out comparison shapes correctly.',
     ['Convolution', 'ReLU', 'Pooling'],
     'What does a feature map contain?',
     [
@@ -59,8 +59,8 @@ const rows = [
   [
     'The night shift',
     'A factory changes its lighting.',
-    'New parts move and look dimmer. Add translated training examples, then inspect mistakes on a separate shifted test set.',
-    'Use augmentation and reach 65% on shifted unseen shapes.',
+    'Parts move and look dimmer. Add translated training examples, then inspect mistakes on a separate shifted held-out comparison batch.',
+    'Use augmentation and reach 65% on the shifted held-out comparison batch.',
     ['Generalization', 'Augmentation', 'Distribution shift'],
     'Which augmentation avoids evaluation leakage?',
     [
@@ -75,7 +75,7 @@ const rows = [
     'Small robot, big job',
     'Accuracy has a computation price.',
     'Fit a useful model within the robot’s parameter budget. Compare architecture size and held-out errors.',
-    'Sort 75% of unseen shapes using at most 1,500 learned parameters.',
+    'Sort at least 75% of the held-out comparison shapes using at most 1,500 learned parameters.',
     ['Model capacity', 'Accuracy', 'Computation budget'],
     'What does a larger parameter count guarantee?',
     ['Higher held-out accuracy', 'Lower inference cost', 'Neither of those'],

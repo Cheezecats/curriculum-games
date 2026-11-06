@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-06T06:14:51.093Z",
+  "browser": "156.0.8078.4",
+  "base": "http://127.0.0.1:4173",
+  "sortingControls": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "scrollY": 0,
+    "pause": {
+      "x": 380.5,
+      "y": 798.453125,
+      "width": 98.046875,
+      "height": 56.796875
+    }
+  },
+  "sortingStep": {
+    "before": "THIS BATCH\n2 / 2 CORRECT",
+    "after": "THIS BATCH\n3 / 3 CORRECT",
+    "freeplayCopy": "01 DATA\n02 TRAIN\n03 DEPLOY\nPUT IT TO WORK.\n\nThese 24 parts form a held-out comparison batch. Your robot only receives sensor readings or pixels.\n\nCOMPARISON BATCH\nExplore 24 parts\nCompare accuracy, model size, and mistakes across experiments.\n\nRetries use the same comparison batch so you can compare changes. Reviewed parts stay outside training; they are not fresh unseen evidence. The answer key only scores completed decisions.\n\n← Improve the training data"
+  },
+  "flightStatus": "PAUSED",
+  "mobileReview": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "retry": {
+      "x": 36,
+      "y": 741.796875,
+      "width": 175.796875,
+      "height": 42
+    },
+    "bodyWidth": 390
+  },
+  "pageErrors": []
+}

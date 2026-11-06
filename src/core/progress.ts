@@ -1,15 +1,38 @@
-import type { AttemptResult, MissionDefinition, MissionProgress, ProgressData } from './types';
+import type {
+  AttemptResult,
+  MissionDefinition,
+  MissionProgress,
+  ObjectiveEvidence,
+  ProgressData,
+} from './types';
 
 export const emptyProgress = (): ProgressData => ({ version: 1, missions: {}, recentAttempts: [] });
+
+const lowerIsBetter = new Set([
+  'energyUsed',
+  'balanceError',
+  'maxRoll',
+  'parameters',
+  'loss',
+  'valLoss',
+]);
+const higherIsBetter = new Set(['distance', 'accuracy', 'correct']);
 
 export function recordAttempt(progress: ProgressData, attempt: AttemptResult): ProgressData {
   if (progress.recentAttempts.some((item) => item.id === attempt.id)) return progress;
   const missions = { ...progress.missions };
   if (attempt.missionId) {
     const before = missions[attempt.missionId];
-    const bestMetrics = { ...before?.bestMetrics };
+    const bestMetrics = Object.fromEntries(
+      Object.entries(before?.bestMetrics ?? {}).filter(
+        ([key]) => lowerIsBetter.has(key) || higherIsBetter.has(key),
+      ),
+    );
     for (const [key, value] of Object.entries(attempt.metrics)) {
-      if (Number.isFinite(value)) bestMetrics[key] = Math.max(bestMetrics[key] ?? -Infinity, value);
+      if (!Number.isFinite(value)) continue;
+      if (lowerIsBetter.has(key)) bestMetrics[key] = Math.min(bestMetrics[key] ?? Infinity, value);
+      else if (higherIsBetter.has(key))
+        bestMetrics[key] = Math.max(bestMetrics[key] ?? -Infinity, value);
     }
     missions[attempt.missionId] = {
       explored: true,
@@ -37,6 +60,23 @@ export function recordCheck(
     ...progress,
     missions: { ...progress.missions, [missionId]: { ...before, demonstrated: true } },
   };
+}
+
+export function findPreviousComparableAttempt(
+  current: AttemptResult,
+  history: AttemptResult[],
+): AttemptResult | undefined {
+  return history.reduce<AttemptResult | undefined>((previous, item) => {
+    if (
+      item.id === current.id ||
+      item.game !== current.game ||
+      item.missionId !== current.missionId ||
+      item.configuration?.task !== current.configuration?.task ||
+      item.createdAt > current.createdAt
+    )
+      return previous;
+    return !previous || item.createdAt > previous.createdAt ? item : previous;
+  }, undefined);
 }
 
 export function isMissionUnlocked(
@@ -67,6 +107,54 @@ function metrics(value: unknown): Record<string, number> {
       !/^[a-zA-Z][a-zA-Z0-9_ -]{0,63}$/.test(key) ||
       typeof item !== 'number' ||
       !Number.isFinite(item)
+    )
+      return fail();
+    result[key] = item;
+  }
+  return result;
+}
+
+function boundedText(value: unknown, maximum: number): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && value.length <= maximum;
+}
+
+function criteria(value: unknown): ObjectiveEvidence[] {
+  if (!Array.isArray(value) || value.length > 20) return fail();
+  const result = value.map((item) => {
+    if (
+      !object(item) ||
+      !boundedText(item.id, 64) ||
+      !boundedText(item.label, 160) ||
+      !boundedText(item.actual, 240) ||
+      !boundedText(item.target, 240) ||
+      typeof item.passed !== 'boolean' ||
+      (item.hint !== undefined && !boundedText(item.hint, 500))
+    )
+      return fail();
+    return {
+      id: item.id,
+      label: item.label,
+      actual: item.actual,
+      target: item.target,
+      passed: item.passed,
+      ...(item.hint !== undefined ? { hint: item.hint } : {}),
+    };
+  });
+  if (new Set(result.map((item) => item.id)).size !== result.length) return fail();
+  return result;
+}
+
+function configuration(value: unknown): Record<string, string | number | boolean> {
+  if (!object(value) || Object.keys(value).length > 24) return fail();
+  const result: Record<string, string | number | boolean> = {};
+  for (const [key, item] of Object.entries(value)) {
+    if (
+      !/^[a-zA-Z][a-zA-Z0-9_ -]{0,63}$/.test(key) ||
+      !(
+        typeof item === 'boolean' ||
+        (typeof item === 'number' && Number.isFinite(item)) ||
+        boundedText(item, 240)
+      )
     )
       return fail();
     result[key] = item;
@@ -139,6 +227,10 @@ export function parseProgress(text: string, knownIds: string[]): ProgressData {
       createdAt: item.createdAt,
       metrics: metrics(item.metrics),
       summary: item.summary,
+      ...(item.criteria !== undefined ? { criteria: criteria(item.criteria) } : {}),
+      ...(item.configuration !== undefined
+        ? { configuration: configuration(item.configuration) }
+        : {}),
     };
   });
   if (new Set(recentAttempts.map((item) => item.id)).size !== recentAttempts.length) return fail();

@@ -402,3 +402,140 @@ describe('asymmetric compound inertia inspector', () => {
       }
     });
 });
+
+describe('readable delivery gates and truthful flight endings', () => {
+  beforeAll(initPhysics);
+  it('does not deliver a translated aircraft whose actual cargo misses the ring', () => {
+    const beside = structuredClone(PRESETS[2]);
+    for (const part of beside.parts) part.z += 20;
+    const e = new FlightEngine(validateBlueprint(beside), {
+      gravity: false,
+      aero: false,
+      ground: false,
+    });
+    try {
+      e.body.setTranslation({ x: 64.9, y: 37, z: 0 }, true);
+      e.advance(1 / 120);
+      expect(e.delivered).toBe(false);
+    } finally {
+      e.dispose();
+    }
+  });
+  it('delivers actual cargo through the ring even when the body origin stays outside it', () => {
+    const translated = structuredClone(PRESETS[2]);
+    for (const part of translated.parts) part.z += 20;
+    const e = new FlightEngine(validateBlueprint(translated), {
+      gravity: false,
+      aero: false,
+      ground: false,
+    });
+    try {
+      e.body.setTranslation({ x: 64, y: 37, z: -20 }, true);
+      e.body.setLinvel({ x: 360, y: 0, z: 0 }, true);
+      e.advance(1 / 120);
+      expect(e.delivered).toBe(true);
+    } finally {
+      e.dispose();
+    }
+  });
+  it('transforms local cargo by aircraft rotation before sweeping the gate', () => {
+    const translated = structuredClone(PRESETS[2]);
+    for (const part of translated.parts) part.z += 20;
+    const e = new FlightEngine(validateBlueprint(translated), {
+      gravity: false,
+      aero: false,
+      ground: false,
+    });
+    try {
+      e.body.setRotation({ x: 0, y: Math.SQRT1_2, z: 0, w: Math.SQRT1_2 }, true);
+      e.body.setTranslation({ x: 44, y: 37, z: 0 }, true);
+      e.body.setLinvel({ x: 360, y: 0, z: 0 }, true);
+      e.advance(1 / 120);
+      expect(e.delivered).toBe(true);
+    } finally {
+      e.dispose();
+    }
+  });
+  it('does not award delivery outside the visible circular aperture', () => {
+    const e = new FlightEngine(PRESETS[2], { gravity: false, aero: false, ground: false });
+    try {
+      e.body.setTranslation({ x: 64.9, y: 49, z: 0 }, true);
+      e.advance(1 / 120);
+      expect(e.delivered).toBe(false);
+    } finally {
+      e.dispose();
+    }
+  });
+  it('detects a gate crossing even when a timestep skips the whole gate plane', () => {
+    const e = new FlightEngine(PRESETS[2], { gravity: false, aero: false, ground: false });
+    try {
+      e.body.setTranslation({ x: 64, y: 37, z: 0 }, true);
+      e.body.setLinvel({ x: 360, y: 0, z: 0 }, true);
+      e.advance(1 / 120);
+      expect(e.body.translation().x).toBeGreaterThan(66);
+      expect(e.delivered).toBe(true);
+    } finally {
+      e.dispose();
+    }
+  });
+  it('distinguishes leaving the valley from a ground impact', () => {
+    const e = new FlightEngine(PRESETS[0], { gravity: false, aero: false, ground: false });
+    try {
+      e.body.setTranslation({ x: 551, y: 37, z: 0 }, true);
+      e.advance(1 / 120);
+      expect(e.crashed).toBe(true);
+      expect(e.endReason).toBe('valley-boundary');
+      e.reset();
+      expect(e.endReason).toBe(null);
+    } finally {
+      e.dispose();
+    }
+  });
+  it('retains the reason and pre-impact speed for a hard landing', () => {
+    const e = new FlightEngine(PRESETS[0], { aero: false, velocity: 0 });
+    try {
+      e.body.setTranslation({ x: 150, y: 3, z: 0 }, true);
+      e.body.setLinvel({ x: 0, y: -15, z: 0 }, true);
+      e.advance(0.3);
+      expect(e.crashed).toBe(true);
+      expect(e.endReason).toBe('hard-landing');
+      expect(e.metrics().impactVerticalSpeed).toBeGreaterThan(15);
+    } finally {
+      e.dispose();
+    }
+  });
+  it('identifies the contacted surface rather than guessing from aircraft origin height', () => {
+    const tall = structuredClone(PRESETS[0]);
+    for (let y = -2; y >= -24; y--)
+      tall.parts.push({ id: `column${y}`, kind: 'structure', x: 0, y, z: 0, rotation: 0 });
+    const e = new FlightEngine(validateBlueprint(tall), { aero: false, velocity: 0 });
+    try {
+      e.body.setTranslation({ x: 150, y: 26, z: 0 }, true);
+      e.body.setLinvel({ x: 0, y: -15, z: 0 }, true);
+      e.advance(0.3);
+      expect(e.crashed).toBe(true);
+      expect(e.endReason).toBe('hard-landing');
+    } finally {
+      e.dispose();
+    }
+  });
+  it('accepts gentle top-surface contact for a tall connected aircraft', () => {
+    const tall = structuredClone(PRESETS[0]);
+    for (let y = -2; y >= -24; y--)
+      tall.parts.push({ id: `column${y}`, kind: 'structure', x: 0, y, z: 0, rotation: 0 });
+    const e = new FlightEngine(validateBlueprint(tall), {
+      gravity: false,
+      aero: false,
+      velocity: 0,
+    });
+    try {
+      e.body.setTranslation({ x: 150, y: 24.55, z: 0 }, true);
+      e.body.setLinvel({ x: 0, y: -0.5, z: 0 }, true);
+      e.advance(0.3);
+      expect(e.landed).toBe(true);
+      expect(e.endReason).toBe('safe-landing');
+    } finally {
+      e.dispose();
+    }
+  });
+});

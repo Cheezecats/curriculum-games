@@ -1,6 +1,14 @@
 import * as T from 'three';
 import { PARTS, massProperties, type Blueprint } from './blueprints';
 import type { FlightEngine } from './engine';
+import { DELIVERY_GATE } from './gate';
+import {
+  aircraftFocus,
+  chaseOffset,
+  followCamera,
+  OrbitGesture,
+  type ChaseHeading,
+} from './camera';
 export class FlightScene {
   renderer: T.WebGLRenderer;
   scene = new T.Scene();
@@ -16,6 +24,11 @@ export class FlightScene {
   zoom = 16;
   drag = false;
   last = { x: 0, y: 0 };
+  private gesture = new OrbitGesture();
+  private suppressClick = false;
+  private building = true;
+  private chaseInitialized = false;
+  private chaseHeading: ChaseHeading = { angle: null };
   observer: ResizeObserver;
   ground: T.Mesh;
   constructor(
@@ -99,11 +112,11 @@ export class FlightScene {
       this.scene.add(rock);
     }
     const ring = new T.Mesh(
-      new T.TorusGeometry(10, 0.3, 8, 40),
+      new T.TorusGeometry(DELIVERY_GATE.radius, DELIVERY_GATE.tube, 8, 40),
       new T.MeshStandardMaterial({ color: 0xef2b12, emissive: 0x3d0600 }),
     );
     ring.rotation.y = Math.PI / 2;
-    ring.position.set(65, 37, 0);
+    ring.position.set(DELIVERY_GATE.x, DELIVERY_GATE.y, DELIVERY_GATE.z);
     this.scene.add(ring);
     this.observer = new ResizeObserver(() => {
       const w = host.clientWidth,
@@ -128,14 +141,20 @@ export class FlightScene {
     return m;
   }
   down = (e: PointerEvent) => {
+    if (!this.building || e.button !== 0) return;
     this.drag = true;
+    this.suppressClick = false;
+    this.gesture.begin(e.clientX, e.clientY);
     this.last = { x: e.clientX, y: e.clientY };
   };
   up = () => {
+    if (!this.drag) return;
+    this.suppressClick = !this.gesture.end();
     this.drag = false;
   };
   move = (e: PointerEvent) => {
     if (!this.drag) return;
+    this.gesture.move(e.clientX, e.clientY);
     this.yaw -= (e.clientX - this.last.x) * 0.008;
     this.elevation = Math.max(
       0.08,
@@ -144,10 +163,15 @@ export class FlightScene {
     this.last = { x: e.clientX, y: e.clientY };
   };
   wheel = (e: WheelEvent) => {
+    if (!this.building) return;
     e.preventDefault();
     this.zoom = Math.max(7, Math.min(40, this.zoom + e.deltaY * 0.015));
   };
   click = (e: MouseEvent) => {
+    if (!this.building || this.suppressClick) {
+      this.suppressClick = false;
+      return;
+    }
     const r = this.renderer.domElement.getBoundingClientRect(),
       ray = new T.Raycaster();
     ray.setFromCamera(
@@ -161,6 +185,8 @@ export class FlightScene {
     this.onSelect(hit?.object.userData.part ?? null);
   };
   blueprint(b: Blueprint, selected: string | null) {
+    this.chaseInitialized = false;
+    this.chaseHeading.angle = null;
     for (const child of [...this.craft.children])
       if (child !== this.com) {
         this.craft.remove(child);
@@ -200,16 +226,30 @@ export class FlightScene {
     this.craft.position.set(0, 36, 0);
     this.craft.quaternion.identity();
   }
-  render(engine: FlightEngine | null, showForces: boolean, showCom: boolean) {
-    const target = new T.Vector3(0, 36, 0);
+  resetView() {
+    this.yaw = 0.65;
+    this.elevation = 0.43;
+    this.zoom = 16;
+    this.chaseInitialized = false;
+  }
+  render(
+    engine: FlightEngine | null,
+    showForces: boolean,
+    showCom: boolean,
+    dt = 1 / 60,
+    reducedMotion = false,
+  ) {
+    this.building = !engine;
     if (engine) {
       const p = engine.body.translation(),
         q = engine.body.rotation();
       this.craft.position.set(p.x, p.y, p.z);
       this.craft.quaternion.set(q.x, q.y, q.z, q.w);
-      target.copy(this.craft.position);
       this.com.position.set(engine.mass.com.x, engine.mass.com.y, engine.mass.com.z);
     }
+    const target = engine
+      ? new T.Vector3().copy(engine.body.worldCom())
+      : aircraftFocus(this.com.position, this.craft.position, this.craft.quaternion);
     this.com.visible = showCom;
     for (const c of [...this.overlay.children]) {
       this.overlay.remove(c);
@@ -234,13 +274,18 @@ export class FlightScene {
           );
       }
     const offset = engine
-      ? new T.Vector3(-14, 7, 15)
+      ? chaseOffset(engine.body.rotation(), this.chaseHeading, dt)
       : new T.Vector3(
           Math.cos(this.yaw) * this.zoom,
           Math.sin(this.elevation) * this.zoom,
           Math.sin(this.yaw) * this.zoom,
         );
-    this.camera.position.copy(target).add(offset);
+    const destination = target.clone().add(offset);
+    if (engine && this.chaseInitialized)
+      followCamera(this.camera.position, destination, dt, reducedMotion);
+    else this.camera.position.copy(destination);
+    this.chaseInitialized = !!engine;
+    this.camera.up.set(0, 1, 0);
     this.camera.lookAt(target);
     this.renderer.render(this.scene, this.camera);
   }

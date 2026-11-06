@@ -47,14 +47,27 @@ export function dataset(kind: DataKind, split: Split, count = 72, shifted = fals
   });
 }
 export function augment(sample: Sample): Sample[] {
-  if (sample.input.length !== 256)
+  if (sample.input.length !== 256) {
+    const kind = sample.family.startsWith('xor-') ? 'xor' : 'linear';
+    const original = sensorLabel(kind, sample.input);
+    let distance = 0.025;
+    let input = sample.input;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const candidate = sample.input.map((x) => Math.min(1, Math.max(0, x + distance)));
+      if (sensorLabel(kind, candidate) === original) {
+        input = candidate;
+        break;
+      }
+      distance /= 2;
+    }
     return [
       {
         ...sample,
         id: sample.id + '-jitter',
-        input: sample.input.map((x) => Math.min(1, Math.max(0, x + 0.025))),
+        input,
       },
     ];
+  }
   return [
     [-2, 0, 1],
     [2, 0, 1],
@@ -69,4 +82,7 @@ export function augment(sample: Sample): Sample[] {
       return x >= 0 && x < 16 && y >= 0 && y < 16 ? sample.input[y * 16 + x]! * gain! : 0;
     }),
   }));
+}
+function sensorLabel(kind: 'linear' | 'xor', [x = 0, y = 0]: number[]) {
+  return kind === 'xor' ? Number(x > 0.5 !== y > 0.5) : Number(x * 0.7 + y * 0.3 > 0.5);
 }

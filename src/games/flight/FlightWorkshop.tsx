@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { GameProps, ControlSettings } from '../../core/types';
+import type { GameProps, ControlSettings, AttemptResult } from '../../core/types';
+import ObjectiveChecklist from '../../components/ObjectiveChecklist';
 import { readRecord, writeRecord } from '../../core/storage';
 import {
   PRESETS,
@@ -9,8 +10,10 @@ import {
   type Blueprint,
   type PartKind,
 } from './blueprints';
-import { FlightEngine, initPhysics, missionPassed, runBench, type Metrics } from './engine';
+import { FlightEngine, initPhysics, runBench, type Metrics } from './engine';
 import { FlightScene } from './scene';
+import { BuilderHistory, type BuilderSnapshot } from './history';
+import { evaluateFlightMission } from './assessment';
 import './flight.css';
 const keyLabels: Record<string, string> = {
   pitchUp: 'Pitch up',
@@ -35,6 +38,7 @@ export default function FlightWorkshop(props: GameProps) {
     frameRef = useRef(0),
     binding = useRef<string | null>(null),
     ended = useRef(false),
+    builderHistory = useRef(new BuilderHistory()),
     overlay = useRef({ forces: false, com: true });
   const [blueprint, setBlueprint] = useState(blueprintRef.current),
     [selected, setSelected] = useState<string | null>(blueprint.parts[0].id),
@@ -52,22 +56,37 @@ export default function FlightWorkshop(props: GameProps) {
       }[]
     >([]),
     [bench, setBench] = useState<Metrics | null>(null),
+    [benchExample, setBenchExample] = useState(false),
     [bindLabel, setBindLabel] = useState<string | null>(null),
     [coords, setCoords] = useState({ x: 0, y: 0, z: 0 });
   latest.current = props;
   blueprintRef.current = blueprint;
   overlay.current = { forces, com };
   const finishRef = useRef<(reason: string) => void>(() => {});
-  const report = (metrics: Metrics, summary: string) => {
-    const mission = latest.current.mission;
+  const report = (
+    metrics: Metrics,
+    summary: string,
+    configuration?: AttemptResult['configuration'],
+  ) => {
+    const mission = latest.current.mission,
+      evaluation = evaluateFlightMission(mission?.id ?? '', metrics),
+      flown = engine.current?.blueprint ?? blueprintRef.current;
     latest.current.onAttempt({
       id: crypto.randomUUID(),
       game: 'flight',
       missionId: mission?.id ?? null,
-      completed: mission ? missionPassed(mission.id, metrics) : false,
+      completed: evaluation.completed,
       createdAt: Date.now(),
       metrics,
       summary,
+      criteria: evaluation.criteria,
+      configuration: configuration ?? {
+        task: 'flight',
+        aircraft: flown.name,
+        parts: flown.parts.length,
+        launchSpeed: 18,
+        endReason: engine.current?.endReason ?? 'pilot-ended',
+      },
     });
   };
   finishRef.current = (reason) => {
@@ -78,6 +97,7 @@ export default function FlightWorkshop(props: GameProps) {
     setMode('ended');
     const m = engine.current.metrics();
     setTelemetry(m);
+    setMessage(reason);
     report(m, reason);
   };
   useEffect(() => {
@@ -111,15 +131,24 @@ export default function FlightWorkshop(props: GameProps) {
             0,
             Math.min(1, e.throttle + (down(s.throttleUp) - down(s.throttleDown)) * dt * 0.5),
           );
+          const deliveredBefore = e.delivered;
           e.advance(dt);
+          if (!deliveredBefore && e.delivered)
+            setMessage(
+              'Parcel carried through the gate. Keep it steady, then finish to record the flight.',
+            );
           if (e.crashed || e.landed)
             finishRef.current(
-              e.crashed
-                ? 'The aircraft touched down too hard. Rebuild and try again.'
-                : 'A safe landing. Compare the recorded forces and energy.',
+              e.endReason === 'valley-boundary'
+                ? 'The aircraft left the flight valley. Turn back earlier on the next flight.'
+                : e.endReason === 'launch-pad-collision'
+                  ? 'The aircraft struck the launch pad. Try keeping the nose level until clear of the edge.'
+                  : e.crashed
+                    ? `The aircraft touched down too hard. Vertical impact speed ${e.impactVerticalSpeed.toFixed(1)} m/s; horizontal ${e.impactHorizontalSpeed.toFixed(1)} m/s.`
+                    : 'A safe landing. Compare the recorded forces and energy.',
             );
         }
-        scene.current?.render(e, overlay.current.forces, overlay.current.com);
+        scene.current?.render(e, overlay.current.forces, overlay.current.com, dt, s.reducedMotion);
         if (now - lastSample > 100 && e && !e.paused) {
           const v = e.body.linvel(),
             speed = Math.hypot(v.x, v.y, v.z);
@@ -191,16 +220,32 @@ export default function FlightWorkshop(props: GameProps) {
     if (mode === 'build') scene.current?.blueprint(blueprint, selected);
     const p = blueprint.parts.find((p) => p.id === selected);
     if (p) setCoords({ x: p.x, y: p.y, z: p.z });
-  }, [blueprint, selected, mode]);
-  const apply = (next: Blueprint) => {
+  }, [blueprint, selected, mode, ready]);
+  const apply = (next: Blueprint, nextSelected = selected) => {
     try {
-      const valid = validateBlueprint(next);
-      setBlueprint(valid);
+      const edit = builderHistory.current.record(
+        { blueprint, selected },
+        { blueprint: next, selected: nextSelected },
+      );
+      setBlueprint(edit.blueprint);
+      setSelected(edit.selected);
       setBench(null);
       setMessage('Aircraft updated. Every part is connected.');
+      return true;
     } catch (err) {
       setMessage((err as Error).message);
+      return false;
     }
+  };
+  const restoreEdit = (direction: 'undo' | 'redo') => {
+    const edit: BuilderSnapshot | null = builderHistory.current[direction]({ blueprint, selected });
+    if (!edit) return;
+    setBlueprint(edit.blueprint);
+    setSelected(edit.selected);
+    setBench(null);
+    setMessage(
+      direction === 'undo' ? 'Previous aircraft edit restored.' : 'Aircraft edit reapplied.',
+    );
   };
   const launch = () => {
     engine.current?.dispose();
@@ -227,26 +272,18 @@ export default function FlightWorkshop(props: GameProps) {
   };
   const preset = (i: number) => {
     const b = structuredClone(PRESETS[i]);
-    setSelected(b.parts[0].id);
-    apply(b);
+    apply(b, b.parts[0].id);
   };
   const add = (axis: 'x' | 'y' | 'z', delta: number) => {
     const p = blueprint.parts.find((p) => p.id === selected) ?? blueprint.parts[0];
     const n = { id: crypto.randomUUID(), kind, x: p.x, y: p.y, z: p.z, rotation: 0 };
     n[axis] += delta;
-    try {
-      const b = validateBlueprint({ ...blueprint, parts: [...blueprint.parts, n] });
-      setBlueprint(b);
-      setSelected(n.id);
-      setBench(null);
-      setMessage('Part attached.');
-    } catch (e) {
-      setMessage((e as Error).message);
-    }
+    if (apply({ ...blueprint, parts: [...blueprint.parts, n] }, n.id)) setMessage('Part attached.');
   };
   const doBench = (compare = false) => {
     try {
-      const a = runBench(blueprint);
+      const testedBlueprint = compare ? structuredClone(PRESETS[2]) : blueprint,
+        a = runBench(testedBlueprint);
       let m: Metrics = {
         benchRuns: 1,
         acceleration: a.acceleration,
@@ -257,12 +294,12 @@ export default function FlightWorkshop(props: GameProps) {
         mass: a.mass,
       };
       if (compare) {
-        const compact = structuredClone(PRESETS[2]),
+        const compact = testedBlueprint,
           wide = structuredClone(compact);
         const cargo = wide.parts.find((p) => p.kind === 'cargo')!;
         cargo.x = 3;
         cargo.y = 0;
-        const one = runBench(validateBlueprint(compact)),
+        const one = a,
           two = runBench(validateBlueprint(wide));
         m = {
           ...m,
@@ -277,16 +314,28 @@ export default function FlightWorkshop(props: GameProps) {
         };
       }
       setBench(m);
+      setBenchExample(compare);
       setMessage(
         compare
-          ? 'Equal-mass cargo layouts tested. The nose load resists angular acceleration more.'
+          ? 'Preset example: two equal-mass Cargo courier layouts tested. The nose load resists angular acceleration more.'
           : '10 N force and 20 N·m torque measured. Gravity and airflow are disabled on the bench.',
       );
       report(
         m,
         compare
-          ? 'Two equal-mass layouts received the same torque.'
+          ? 'Preset courier example: two equal-mass layouts received the same torque.'
           : 'A controlled force and torque experiment.',
+        {
+          task: 'bench',
+          aircraft: testedBlueprint.name,
+          parts: testedBlueprint.parts.length,
+          experiment: compare
+            ? 'Equal-mass Cargo courier preset example'
+            : 'Current-aircraft force and torque',
+          forceN: 10,
+          armM: 2,
+          ...(compare ? { layoutA: 'Cargo above centre', layoutB: 'Cargo at nose' } : {}),
+        },
       );
     } catch (e) {
       setMessage((e as Error).message);
@@ -308,10 +357,7 @@ export default function FlightWorkshop(props: GameProps) {
         return;
       }
       const valid = validateBlueprint(b);
-      setBlueprint(valid);
-      setSelected(valid.parts[0].id);
-      setBench(null);
-      setMessage('Saved aircraft restored.');
+      if (apply(valid, valid.parts[0].id)) setMessage('Saved aircraft restored.');
     } catch {
       setMessage('The saved aircraft could not be read. Your current design is retained.');
     }
@@ -330,7 +376,8 @@ export default function FlightWorkshop(props: GameProps) {
     part = blueprint.parts.find((p) => p.id === selected),
     isBuild = mode === 'build',
     m = telemetry;
-  const successful = props.mission && missionPassed(props.mission.id, m);
+  const evaluation = evaluateFlightMission(props.mission?.id ?? '', bench ?? m),
+    successful = evaluation.completed;
   return (
     <div className="flight-workshop">
       <header className="flight-header">
@@ -366,6 +413,7 @@ export default function FlightWorkshop(props: GameProps) {
               {props.mission?.objective ??
                 'No limits on the experiment. Up to 128 connected parts.'}
             </div>
+            <ObjectiveChecklist criteria={evaluation.criteria} compact />
           </div>
           <div className="flight-section">
             <span className="flight-eyebrow">STARTING AIRCRAFT</span>
@@ -393,6 +441,20 @@ export default function FlightWorkshop(props: GameProps) {
             <div className="flight-section-title">
               <span className="flight-eyebrow">BUILD YOUR AIRCRAFT</span>
               <span>{blueprint.parts.length}/128</span>
+            </div>
+            <div className="flight-row flight-history">
+              <button
+                disabled={!isBuild || !builderHistory.current.canUndo}
+                onClick={() => restoreEdit('undo')}
+              >
+                Undo edit
+              </button>
+              <button
+                disabled={!isBuild || !builderHistory.current.canRedo}
+                onClick={() => restoreEdit('redo')}
+              >
+                Redo edit
+              </button>
             </div>
             <label className="flight-label">
               Attach a part
@@ -501,11 +563,16 @@ export default function FlightWorkshop(props: GameProps) {
                 Test force & torque
               </button>
               <button disabled={!ready || !isBuild} onClick={() => doBench(true)}>
-                Compare inertia
+                Compare courier example
               </button>
             </div>
             {bench && (
               <div className="flight-bench-results">
+                <strong>
+                  {benchExample
+                    ? 'Preset example · Cargo courier'
+                    : 'Your aircraft · force & torque'}
+                </strong>
                 <span>
                   Mass <b>{bench.mass.toFixed(2)} kg</b>
                 </span>
@@ -564,10 +631,8 @@ export default function FlightWorkshop(props: GameProps) {
                       if (f.size > 100000)
                         throw Error('Aircraft file is too large (100 kB maximum).');
                       const valid = validateBlueprint(JSON.parse(await f.text()));
-                      setBlueprint(valid);
-                      setSelected(valid.parts[0].id);
-                      setBench(null);
-                      setMessage('Imported aircraft is connected and ready.');
+                      if (apply(valid, valid.parts[0].id))
+                        setMessage('Imported aircraft is connected and ready.');
                     } catch (error) {
                       setMessage((error as Error).message);
                     }
@@ -589,18 +654,23 @@ export default function FlightWorkshop(props: GameProps) {
             <div className="flight-scene-label">
               {isBuild
                 ? 'THE HANGAR'
-                : successful
-                  ? 'OBJECTIVE MEASURED — FINISH TO RECORD'
-                  : mode === 'ended'
-                    ? 'READY FOR ANOTHER FLIGHT'
+                : mode === 'ended'
+                  ? successful
+                    ? 'OBJECTIVE RECORDED'
+                    : 'FLIGHT RECORDED'
+                  : successful
+                    ? 'OBJECTIVE MEASURED — FINISH TO RECORD'
                     : 'THE VALLEY'}
               <small>
                 {isBuild
                   ? 'Click a part to select · drag to orbit'
-                  : 'Orange gate: 65 m · landing strip: 110–190 m'}
+                  : mode === 'ended'
+                    ? 'Compare your measurements or fly again'
+                    : 'Orange gate: 65 m · landing strip: 110–190 m'}
               </small>
             </div>
             <div className="flight-overlay-controls">
+              <button onClick={() => scene.current?.resetView()}>Reset view</button>
               <label>
                 <input
                   type="checkbox"
@@ -618,7 +688,13 @@ export default function FlightWorkshop(props: GameProps) {
           <div className="flight-flightbar">
             <div>
               <span className="flight-eyebrow">
-                {isBuild ? 'ALL SYSTEMS READY' : 'LIVE FLIGHT'}
+                {isBuild
+                  ? 'ALL SYSTEMS READY'
+                  : mode === 'ended'
+                    ? 'RECORDED FLIGHT'
+                    : mode === 'paused'
+                      ? 'PAUSED FLIGHT'
+                      : 'LIVE FLIGHT'}
               </span>
               <strong>
                 {isBuild

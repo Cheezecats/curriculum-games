@@ -7,11 +7,13 @@ export default function Modal({
   eyebrow,
   onClose,
   children,
+  footer,
 }: {
   title: string;
   eyebrow: string;
   onClose: () => void;
   children: ReactNode;
+  footer?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -54,6 +56,7 @@ export default function Modal({
         </button>
       </div>
       <div className="modal-content">{children}</div>
+      {footer && <div className="modal-footer">{footer}</div>}
     </dialog>
   );
 }

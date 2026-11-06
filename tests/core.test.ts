@@ -49,6 +49,42 @@ describe('progression evidence', () => {
     expect(next.missions['flight-1'].attempts).toBe(2);
     expect(next.missions['flight-1'].bestMetrics.distance).toBe(42);
   });
+  it('keeps smaller error, energy, tilt and model cost without ranking mass', () => {
+    const first = recordAttempt(
+      emptyProgress(),
+      attempt({
+        metrics: {
+          distance: 42,
+          energyUsed: 5000,
+          balanceError: 0.02,
+          maxRoll: 0.5,
+          parameters: 1400,
+          mass: 8,
+        },
+      }),
+    );
+    const next = recordAttempt(
+      first,
+      attempt({
+        id: 'attempt-2',
+        metrics: {
+          distance: 35,
+          energyUsed: 3000,
+          balanceError: 0.01,
+          maxRoll: 0.2,
+          parameters: 900,
+          mass: 12,
+        },
+      }),
+    );
+    expect(next.missions['flight-1'].bestMetrics).toEqual({
+      distance: 42,
+      energyUsed: 3000,
+      balanceError: 0.01,
+      maxRoll: 0.2,
+      parameters: 900,
+    });
+  });
   it('does not invent gameplay completion from a correct concept check', () => {
     const explored = recordAttempt(emptyProgress(), attempt());
     const next = recordCheck(explored, 'flight-1', true);
@@ -86,6 +122,65 @@ describe('save boundaries', () => {
         missions.map((m) => m.id),
       ),
     ).toEqual(progress);
+  });
+  it('round-trips objective evidence and the configuration that produced it', () => {
+    const run = attempt({
+      criteria: [
+        {
+          id: 'range',
+          label: 'Distance',
+          actual: '42 m',
+          target: '45 m',
+          passed: false,
+          hint: 'Try a gentler pitch input.',
+        },
+      ],
+      configuration: { task: 'flight', aircraft: 'Valley glider', parts: 15, motor: false },
+    });
+    const progress = recordAttempt(emptyProgress(), run);
+    expect(parseProgress(exportProgress(progress), ['flight-1'])).toEqual(progress);
+  });
+  it.each([
+    { criteria: null },
+    {
+      criteria: [{ id: 'range', label: 'Distance', actual: '42 m', target: '45 m', passed: 'no' }],
+    },
+    {
+      criteria: [
+        {
+          id: 'range',
+          label: 'Distance',
+          actual: '42 m',
+          target: '45 m',
+          passed: false,
+          hint: 'x'.repeat(501),
+        },
+      ],
+    },
+    {
+      criteria: Array.from({ length: 21 }, (_, i) => ({
+        id: `c${i}`,
+        label: 'Distance',
+        actual: '0 m',
+        target: '45 m',
+        passed: false,
+      })),
+    },
+    {
+      criteria: [0, 1].map(() => ({
+        id: 'same',
+        label: 'Distance',
+        actual: '0 m',
+        target: '45 m',
+        passed: false,
+      })),
+    },
+    { configuration: { task: ['flight'] } },
+    { configuration: { task: 'x'.repeat(241) } },
+    { configuration: Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`key${i}`, true])) },
+  ])('rejects malformed or unbounded optional attempt details: %j', (details) => {
+    const raw = { version: 1, missions: {}, recentAttempts: [{ ...attempt(), ...details }] };
+    expect(() => parseProgress(JSON.stringify(raw), ['flight-1'])).toThrow();
   });
   it.each([
     '{broken',

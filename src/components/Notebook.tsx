@@ -4,6 +4,8 @@ import Modal from './Modal';
 import type { ProgressData } from '../core/types';
 import { allMissions, sourceRepository } from '../core/registry';
 import { exportProgress, parseProgress } from '../core/progress';
+import { attemptConfiguration, attemptMeasurements } from '../core/attempt-feedback';
+import ObjectiveChecklist from './ObjectiveChecklist';
 
 export function downloadJson(filename: string, text: string) {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
@@ -157,19 +159,43 @@ export default function Notebook({
         <>
           <h3>Recent observations</h3>
           <ul className="recent-list">
-            {progress.recentAttempts.slice(0, 5).map((run) => (
-              <li key={run.id}>
-                <div>
-                  <strong>
-                    {allMissions.find((m) => m.id === run.missionId)?.title ??
-                      (run.game === 'flight' ? 'Flight free play' : 'Vision free play')}
-                  </strong>
-                  <br />
-                  <small>{run.summary.slice(0, 110)}</small>
-                </div>
-                <span className="scope-pill">{run.completed ? 'Complete' : 'Explored'}</span>
-              </li>
-            ))}
+            {progress.recentAttempts.slice(0, 5).map((run) => {
+              const measurements = attemptMeasurements(run);
+              const configuration = attemptConfiguration(run);
+              return (
+                <li key={run.id}>
+                  <div className="notebook-observation">
+                    <strong>
+                      {allMissions.find((m) => m.id === run.missionId)?.title ??
+                        (run.game === 'flight' ? 'Flight free play' : 'Vision free play')}
+                    </strong>
+                    <br />
+                    <small>{run.summary}</small>
+                    <details className="observation-details">
+                      <summary>Inspect this observation</summary>
+                      {!!run.criteria?.length && (
+                        <ObjectiveChecklist criteria={run.criteria} compact />
+                      )}
+                      <dl className="observation-measurements">
+                        {measurements.map((item) => (
+                          <div key={item.key}>
+                            <dt>{item.label}</dt>
+                            <dd>{item.value}</dd>
+                          </div>
+                        ))}
+                        {configuration.map((item) => (
+                          <div key={`configuration-${item.key}`}>
+                            <dt>{item.label}</dt>
+                            <dd>{item.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </details>
+                  </div>
+                  <span className="scope-pill">{run.completed ? 'Complete' : 'Explored'}</span>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}

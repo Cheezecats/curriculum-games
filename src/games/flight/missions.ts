@@ -35,8 +35,8 @@ const lessons = [
   [
     'Precious cargo',
     'Keep the parcel steady.',
-    'Choose Cargo courier and fly the parcel through the orange delivery gate 65 m ahead, between 25 and 50 m altitude. Keep the aircraft within 34° of level.',
-    'Carry 3 kg through the gate with tilt below 34°.',
+    'Choose Cargo courier and fly the parcel through the circular orange delivery gate 65 m ahead. Aim for its centre at 37 m altitude. Keep the aircraft within 34.4° of level.',
+    'Carry 3 kg through the gate with tilt below 0.60 rad (34.4°).',
     'A.2 Forces and momentum',
     ['weight', 'lift', 'stability'],
     'Adding cargo without changing speed or wings initially causes…',
@@ -71,7 +71,7 @@ const lessons = [
   [
     'Mass, spread out',
     'Same load. A different response.',
-    'Run the inertia comparison. Two Cargo courier layouts have equal mass: cargo above the centre or at the nose. Apply the same torque and compare angular acceleration.',
+    'Run the courier example. Two preset Cargo courier layouts have equal mass: cargo above the centre or at the nose. Apply the same torque and compare angular acceleration.',
     'Measure I ratio above 1.2 and inverse angular-acceleration ratio.',
     'A.4 Rigid body mechanics',
     ['moment of inertia', 'mass distribution', 'angular acceleration'],

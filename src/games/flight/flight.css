@@ -149,6 +149,9 @@
     12px ui-monospace,
     monospace;
 }
+.flight-history {
+  margin-top: 12px;
+}
 .flight-label {
   display: grid;
   gap: 6px;
@@ -333,6 +336,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+.flight-overlay-controls button {
+  padding: 4px 8px;
+  font-size: 11px;
 }
 .flight-workshop input[type='checkbox'] {
   accent-color: #ef2b12;

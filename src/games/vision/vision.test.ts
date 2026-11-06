@@ -35,9 +35,16 @@ describe('genuine learning', () => {
       () => {},
     );
     const after = engine.evaluate(fixtures);
+    expect(engine.snapshot().provenance).toMatchObject({
+      status: 'known',
+      epochs: 35,
+      learningRate: 0.06,
+      examples: 96,
+    });
     expect(after.accuracy).toBeGreaterThan(0.85);
     expect(after.loss).toBeLessThan(before.loss);
     const inspection = engine.inspect(fixtures[0]!.input);
+    expect(inspection.scores).toEqual(engine.predict([fixtures[0]!.input])[0]);
     const weights = engine.snapshot().weights;
     expect(inspection.weights[0]!.values).toEqual(weights[0]!.values);
     const restored = new VisionEngine();
@@ -62,6 +69,7 @@ describe('genuine learning', () => {
     );
     expect(engine.evaluate(samples).loss).toBeLessThan(before.loss);
     const inspection = engine.inspect(samples[0]!.input);
+    expect(inspection.scores).toEqual(engine.predict([samples[0]!.input])[0]);
     const input = tf.tensor4d(samples[0]!.input, [1, 16, 16, 1]);
     const intermediate = tf.model({
       inputs: engine.model!.inputs,

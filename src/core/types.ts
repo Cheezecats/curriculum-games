@@ -34,6 +34,15 @@ export interface MissionDefinition {
   check: ConceptCheck;
 }
 
+export interface ObjectiveEvidence {
+  id: string;
+  label: string;
+  actual: string;
+  target: string;
+  passed: boolean;
+  hint?: string;
+}
+
 export interface AttemptResult {
   id: string;
   game: GameId;
@@ -42,6 +51,8 @@ export interface AttemptResult {
   createdAt: number;
   metrics: Record<string, number>;
   summary: string;
+  criteria?: ObjectiveEvidence[];
+  configuration?: Record<string, string | number | boolean>;
 }
 
 export interface ControlSettings {

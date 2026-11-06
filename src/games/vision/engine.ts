@@ -3,6 +3,7 @@ import { dataset } from './datasets';
 import type { DataKind, Sample } from './datasets';
 import { validProvenance } from './provenance';
 import type { TrainingProvenance } from './provenance';
+import { trainingFingerprint } from './experiment';
 export type Preset = 'perceptron' | 'mlp' | 'cnn';
 export interface Snapshot {
   version: 1;
@@ -20,6 +21,7 @@ export interface Epoch {
   valAccuracy: number;
 }
 export interface Inspection {
+  scores: number[];
   weights: Snapshot['weights'];
   activations: number[];
   activationShape: number[];
@@ -180,6 +182,9 @@ export class VisionEngine {
         ).length,
         epochs: completedEpochs,
         trainingMs: performance.now() - started,
+        learningRate: Math.max(0.001, Math.min(0.1, rate)),
+        examples: train.length,
+        fingerprint: trainingFingerprint(train),
       };
     } finally {
       x.dispose();
@@ -259,6 +264,7 @@ export class VisionEngine {
     }
     const grid = Array.from({ length: 225 }, (_, i) => [(i % 15) / 14, Math.floor(i / 15) / 14]);
     return {
+      scores: this.predict([input])[0]!,
       weights: this.snapshot().weights,
       activations,
       activationShape,

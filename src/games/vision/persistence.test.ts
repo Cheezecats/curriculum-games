@@ -5,7 +5,7 @@ import { VisionEngine } from './engine';
 import type { Snapshot } from './engine';
 import { dataset, augment } from './datasets';
 import { missionComplete } from './outcome';
-import { modelEvidence, provenanceMetrics } from './provenance';
+import { modelEvidence, provenanceMetrics, validProvenance } from './provenance';
 
 it.each([3, 5])(
   'retains genuine mission %i evidence across save, new model mount and deployment',
@@ -104,4 +104,20 @@ it('retraining a legacy model earns newly measured provenance without borrowing 
     epochs: 1,
   });
   e.dispose();
+});
+
+it('accepts older evidence while bounding optional saved training settings', () => {
+  const legacy = { status: 'known', augmented: false, repairs: 0, epochs: 45, trainingMs: 100 };
+  expect(validProvenance(legacy)).toBe(true);
+  expect(
+    validProvenance({ ...legacy, learningRate: 0.025, examples: 72, fingerprint: '1234abcd' }),
+  ).toBe(true);
+  for (const fields of [
+    { learningRate: NaN },
+    { learningRate: 0.2 },
+    { examples: 361 },
+    { examples: 5 },
+    { fingerprint: 'unbounded arbitrary settings' },
+  ])
+    expect(validProvenance({ ...legacy, ...fields })).toBe(false);
 });

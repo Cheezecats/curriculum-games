@@ -466,13 +466,18 @@ select {
   width: 710px;
   max-width: calc(100% - 28px);
   max-height: 90vh;
-  overflow: auto;
+  overflow: hidden;
   box-shadow: 12px 12px 0 #0002;
+}
+.modal[open] {
+  display: flex;
+  flex-direction: column;
 }
 .modal::backdrop {
   background: #1119;
 }
 .modal-header {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -495,6 +500,15 @@ select {
 }
 .modal-content {
   padding: 22px 28px 28px;
+  min-height: 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+.modal-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--ink);
+  padding: 16px 28px;
+  background: var(--paper);
 }
 .modal-content p {
   line-height: 1.65;
@@ -604,6 +618,136 @@ select {
   font-size: 15px !important;
   margin: 0 0 22px;
 }
+.objective-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0;
+  display: grid;
+  gap: 8px;
+}
+.objective-checklist > li {
+  display: block;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink);
+  padding: 11px 12px;
+  min-width: 0;
+}
+.objective-checklist > .criterion-unmet {
+  border-left-color: var(--orange);
+}
+.criterion-heading,
+.criterion-measurement {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+.criterion-heading strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.criterion-heading > span {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.criterion-unmet .criterion-heading > span {
+  color: var(--orange);
+}
+.criterion-measurement {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.criterion-measurement b {
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.objective-checklist.compact > li {
+  padding: 8px 10px;
+}
+.next-experiment {
+  background: var(--panel);
+  border-left: 3px solid var(--orange);
+  padding: 12px 15px;
+  margin: 20px 0;
+}
+.next-experiment h3,
+.next-experiment p {
+  margin: 0;
+}
+.next-experiment p {
+  margin-top: 5px;
+}
+.attempt-comparison {
+  margin-top: 24px;
+}
+.attempt-comparison p {
+  font-size: 12px;
+}
+.comparison-scroll {
+  overflow-x: auto;
+}
+.attempt-comparison table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 430px;
+  font-size: 12px;
+}
+.attempt-comparison th,
+.attempt-comparison td {
+  padding: 9px 10px 9px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+.attempt-comparison tbody th {
+  font-weight: 500;
+}
+.attempt-configuration,
+.observation-details {
+  margin-top: 16px;
+  font-size: 12px;
+}
+.attempt-configuration summary,
+.observation-details summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+.attempt-configuration summary:focus-visible,
+.observation-details summary:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 4px;
+}
+.attempt-configuration dl,
+.observation-measurements {
+  margin: 10px 0;
+}
+.attempt-configuration dl > div,
+.observation-measurements > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.attempt-configuration dt,
+.observation-measurements dt {
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.attempt-configuration dd,
+.observation-measurements dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.notebook-observation {
+  min-width: 0;
+  flex: 1;
+}
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -679,7 +823,7 @@ select {
   display: flex;
   gap: 15px;
   justify-content: space-between;
-  margin-top: 25px;
+  margin: 0;
 }
 .game-loading,
 .locked-route,
@@ -938,6 +1082,9 @@ select {
   }
   .modal-content {
     padding: 20px;
+  }
+  .modal-footer {
+    padding: 16px 20px;
   }
   .notebook-stats {
     gap: 12px;
