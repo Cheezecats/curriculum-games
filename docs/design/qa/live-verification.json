@@ -1,0 +1,19 @@
+{
+  "url": "https://cheezecats.github.io/curriculum-games/",
+  "date": "2026-11-06T03:02:39.962Z",
+  "httpStatus": 200,
+  "images": [
+    {
+      "src": "https://cheezecats.github.io/curriculum-games/art/flight-hangar.jpg",
+      "loaded": true
+    },
+    {
+      "src": "https://cheezecats.github.io/curriculum-games/art/robot-conveyor.jpg",
+      "loaded": true
+    }
+  ],
+  "flightSummary": "ATTEMPT RECORDED · A NEW STARTING POINT\nAn observation worth keeping.\n\nFlight ended. Review your measured distance, stability and energy.\n\nSpeed\n17.03\nEnergy\n0\nThrottle\n0\nLift\n95.94\nWeight\n112.32\nTime\n1.91\nDistance\n32.87\nAltitude\n34.06\nMax Roll\n0.142\nBack to the workshop",
+  "training": "Learning curve\ntrain / validation loss\n\nEpoch 16 · validation 100% · 1.37s last training",
+  "licenseStatus": 200,
+  "errors": []
+}

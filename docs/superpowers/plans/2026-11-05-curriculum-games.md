@@ -79,7 +79,7 @@
 - [x] Run them against the actual app and implement targeted repairs from observed failures.
 - [x] Run typecheck/lint/unit/integration tests and production build, then Chromium/Firefox/WebKit checks with real WebGL where available.
 - [x] Document controls, actual curriculum coverage/source scope, physics/model assumptions, reproducible performance measurements and any unverified checks.
-- [ ] Configure CI and GitHub Pages; create source repository and publish the verified demo when account tools permit.
+- [x] Configure CI and GitHub Pages; create source repository and publish the verified demo when account tools permit.
 - [x] Obtain independent whole-project review, repair important findings, rerun affected verification, and commit the finished result.
 
 ## Execution rulings
