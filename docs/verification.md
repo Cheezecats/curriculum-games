@@ -25,6 +25,8 @@ The quiet final benchmark used the Apple M2/16 GB reference machine, regular Chr
 
 [Raw benchmark record](design/quality-2026-11-06/benchmark-metal.json). Both bounded targets were met on this machine. These measurements do not establish performance on other devices, enjoyment, improved learning or complete syllabus coverage. Repeated inspection uses the same held-out comparison batch and is practice evidence rather than a fresh generalization test.
 
+[Release pipeline 42174672961](https://github.com/Cheezecats/curriculum-games/actions/runs/42174672961) passed verification and deployed the quality update from `c67981a`. The live HTTPS check returned 200, completed a real 76.8 m / 4.4 s flight, verified that an open inspector immediately follows an edited training label, trained the 16-epoch CNN in 0.64 s, read its four active feature maps and three actual scores, paused/stepped sorting 2→3, and confirmed workers 1→0 after exit. It recorded zero page errors or failed HTTP assets. [Hosted quality verification](design/quality-2026-11-06/live-verification.json). An earlier hosted probe timed out waiting for robot startup during intermittent network failures; a repeat of the unchanged script completed successfully. This does not establish startup reliability on every connection.
+
 The sections below retain the earlier beta's verification and delivery history.
 
 ## Reference environment

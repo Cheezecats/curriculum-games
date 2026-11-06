@@ -60,8 +60,10 @@ Retain six missions per game, current thresholds/starter solutions,128-part conn
 - [x] Playtest actual controls and capture before/after game screens; add regressions for undo/redo, end-state/checklist, active/draft reset, identified inspection and step behavior, comparison/import persistence.
 - [x] Run format/types/lint/unit/build and Chromium/Firefox/WebKit workflows; record exact results, check viewport fit and errors.
 - [x] Repeat native-graphics128-part benchmark and default training; review actual diffs independently and repair important findings.
-- [ ] Commit, integrate/publish the verified quality update and verify the hosted engines. Preserve the original checkout and current saves.
+- [x] Commit, integrate/publish the verified quality update and verify the hosted engines. Preserve the original checkout and current saves.
 
 ## Execution rulings
 
 Use disjoint subsystem ownership and one root integration branch. The native worktree tool could not verify the Desktop checkout and stalled on retry; local file reads also stalled for multiple agents. A fresh isolated clone at `/private/tmp/fieldwork-quality-20261106` avoids those reads. Root will return verified commits to the user's source checkout. Do not mutate the source checkout while the quality branch is being built. No dependency upgrades or broad rewriting.
+
+The release pipeline and live engines passed. Returning commits to the original Desktop checkout failed because its offloaded index/source files returned read and mmap timeouts; the original HEAD remained at the baseline. Preserve that checkout and provide a fresh verified sibling checkout for continued work instead of forcing an overwrite. No original browser saves were modified.
