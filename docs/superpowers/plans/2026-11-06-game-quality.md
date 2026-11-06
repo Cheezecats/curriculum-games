@@ -58,8 +58,8 @@ Retain six missions per game, current thresholds/starter solutions,128-part conn
 
 - [x] Run the released clean baseline before implementation; isolate work from published main.
 - [x] Playtest actual controls and capture before/after game screens; add regressions for undo/redo, end-state/checklist, active/draft reset, identified inspection and step behavior, comparison/import persistence.
-- [ ] Run format/types/lint/unit/build and Chromium/Firefox/WebKit workflows; record exact results, check viewport fit and errors.
-- [ ] Repeat native-graphics128-part benchmark and default training; review actual diffs independently and repair important findings.
+- [x] Run format/types/lint/unit/build and Chromium/Firefox/WebKit workflows; record exact results, check viewport fit and errors.
+- [x] Repeat native-graphics128-part benchmark and default training; review actual diffs independently and repair important findings.
 - [ ] Commit, integrate/publish the verified quality update and verify the hosted engines. Preserve the original checkout and current saves.
 
 ## Execution rulings

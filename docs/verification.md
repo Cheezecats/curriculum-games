@@ -1,5 +1,32 @@
 # Verification record
 
+## Current game-quality update — 2026-11-06
+
+This update strengthens the existing two-workshop play loops. It preserves all six missions per game, the selected visual direction, the original success thresholds and version1 saves.
+
+- Flight now has bounded undo/redo, orbit-drag selection protection, a heading-following chase camera and reset view. The circular delivery check follows the cargo's actual swept world position. Live objectives and the review use the same mission evaluator; impact feedback reports measured pre-contact speeds.
+- Robot Vision distinguishes draft edits from active trained weights, identifies the inspected input and actual model scores, and clears evidence when its input task changes. Sensor augmentation preserves the underlying class and the supplied label independently. Restored weights cannot inherit a cancelled model's learning curve.
+- Sorting supports pause and one-part stepping with stable controls. Reviews show criteria, units, a next experiment and the previous comparable setup/results. Retry actions remain visible while the evidence scrolls; bounded imported evidence remains compatible with earlier saves.
+
+The full format/type/lint/unit check passed **129 tests across 12 suites**. The final production build passed. **All 36 browser workflows passed**: 12 in Chromium (1.6 minutes) and 24 in Firefox/WebKit (2.3 minutes), including real training, flight, crash/rebuild, save/restore, cancellation, undo/redo, comparison evidence, identified inspection and exact single-step decisions.
+
+Observed native-Chromium play-testing confirmed real yaw/roll flight with a stable horizon, accurate crash review and no page errors. At 1440×900 with the page unscrolled, the Pause control stayed at y798.45 with 56.80px height after feedback appeared; one step advanced 2→3 decisions. At 390×844, the review retry action stayed fully visible and the body width remained 390px. These observations and screenshots are in [the play-test record](design/quality-2026-11-06/observed-playtest.json), [paused sorting](design/quality-2026-11-06/vision-paused.png), [flight turn](design/quality-2026-11-06/flight-turn.png), [review](design/quality-2026-11-06/flight-review.png) and [narrow review](design/quality-2026-11-06/review-mobile.png).
+
+The final review found one minor inspector inconsistency: editing a training label left an open inspector showing the previous label. The fix resolves the displayed training label by inspected sample ID while keeping the inferred input, held-out label and active model scores unchanged. The strengthened affected browser flow passed again in all three engines (3/3 checks, 36.9 seconds), including immediate label edits/reverts, score preservation, genuine retraining, image inspection, cancellation and restoration.
+
+The quiet final benchmark used the Apple M2/16 GB reference machine, regular Chromium 156.0.8078.4 with Metal graphics, a 1920×1080 viewport and a 1400×430 flight drawing buffer:
+
+| Workload                                                     | Measured result                                       |
+| ------------------------------------------------------------ | ----------------------------------------------------- |
+| 128-part aircraft, 6.009-second window, 337 airborne samples | 60.0 mean FPS; 16.8 ms 95th-percentile frame interval |
+| Default 16-epoch CNN, 72 training examples                   | 0.80 seconds worker training; 0.97 seconds wall time  |
+| Dedicated vision workers after exit                          | 0, down from 1                                        |
+| Page errors                                                  | 0                                                     |
+
+[Raw benchmark record](design/quality-2026-11-06/benchmark-metal.json). Both bounded targets were met on this machine. These measurements do not establish performance on other devices, enjoyment, improved learning or complete syllabus coverage. Repeated inspection uses the same held-out comparison batch and is practice evidence rather than a fresh generalization test.
+
+The sections below retain the earlier beta's verification and delivery history.
+
 ## Reference environment
 
 Development machine: Apple M2 MacBook Pro, 16 GB RAM, macOS arm64, Node.js 24.14.0. Browser checks use isolated Playwright contexts, not a personal browser profile. Device serial numbers and credentials are not part of this record.

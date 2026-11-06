@@ -402,6 +402,10 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
     [trained, kind, preset, units, epochs, rate, augmentation, trainingRows],
   );
   const trainedEvidence = trained?.provenance?.status === 'known' ? trained.provenance : null;
+  const currentInspectedTrainingLabel =
+    inspected?.source === 'training'
+      ? samples.find((sample) => sample.id === inspected.sample.id)?.label
+      : undefined;
   const linear =
     trained?.preset === 'perceptron' && trained.kind !== 'image' && inspection && inspected
       ? linearDecision(inspection.weights, inspected.sample.input)
@@ -937,8 +941,8 @@ export default function VisionWorkshop({ mission, onExit, onAttempt, settings }:
                     {inspected.source === 'training' ? 'Training label' : 'Verified held-out label'}
                     :{' '}
                     {kind === 'image'
-                      ? names[inspected.sample.label]
-                      : `Bin ${inspected.sample.label}`}
+                      ? names[currentInspectedTrainingLabel ?? inspected.sample.label]
+                      : `Bin ${currentInspectedTrainingLabel ?? inspected.sample.label}`}
                   </p>
                   {kind !== 'image' && (
                     <p>

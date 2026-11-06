@@ -144,6 +144,27 @@ test('edited robot settings stay distinct from trained weights and inspectors id
   await page.getByRole('button', { name: 'Inspect selected model response ↓' }).click();
   await expect(page.getByLabel('Inspected model input')).toContainText('linear-train-base-0');
   await expect(page.getByLabel('Inspected model scores').getByRole('meter')).toHaveCount(2);
+  const trainingLabel = page.getByRole('combobox', { name: /^Training label/ });
+  const originalLabel = await trainingLabel.inputValue();
+  const editedLabel = originalLabel === '0' ? '1' : '0';
+  const originalScores = await page
+    .getByLabel('Inspected model scores')
+    .getByRole('meter')
+    .evaluateAll((meters) => meters.map((meter) => meter.getAttribute('value')));
+  await trainingLabel.selectOption(editedLabel);
+  await expect(page.getByLabel('Inspected model input')).toContainText(
+    `Training label: Bin ${editedLabel}`,
+  );
+  expect(
+    await page
+      .getByLabel('Inspected model scores')
+      .getByRole('meter')
+      .evaluateAll((meters) => meters.map((meter) => meter.getAttribute('value'))),
+  ).toEqual(originalScores);
+  await trainingLabel.selectOption(originalLabel);
+  await expect(page.getByLabel('Inspected model input')).toContainText(
+    `Training label: Bin ${originalLabel}`,
+  );
   await page.getByRole('button', { name: 'Next · configure brain →' }).click();
   await page.getByLabel('Epochs').fill('12');
   await page.getByLabel('Architecture').selectOption('mlp');
