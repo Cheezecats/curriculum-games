@@ -1,0 +1,366 @@
+/private/tmp/flight-islands-native/native/flight/tools/generate_art.py:27: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m=bpy.data.materials.new(name); m.diffuse_color=(*rgb,1); m.use_nodes=True
+INFO Draco mesh compression is available, use library at /Applications/Blender.app/Contents/Resources/5.1/scripts/addons_core/io_scene_gltf2/libextern_draco.dylib
+21:23:01 | INFO: Starting glTF 2.0 export
+21:23:01 | INFO: Extracting primitive: Cone.051
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Blue bubble canopy
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Riveted lower boat
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Cone
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Red nose wrap
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Finished glTF 2.0 export in 0.01470327377319336 s
+
+ART_ASSET cockpit 1413 2508 5
+21:23:01 | INFO: Starting glTF 2.0 export
+21:23:01 | INFO: Extracting primitive: Cone.067
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Streamlined rear shell
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Reinforced front collar
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Tail band
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Finished glTF 2.0 export in 0.006616830825805664 s
+
+ART_ASSET fuselage 480 888 4
+21:23:01 | INFO: Starting glTF 2.0 export
+21:23:01 | INFO: Extracting primitive: Cone.078
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Aerodynamic strut
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Cube.003
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Finished glTF 2.0 export in 0.0048198699951171875 s
+
+ART_ASSET strut 224 420 3
+21:23:01 | INFO: Starting glTF 2.0 export
+21:23:01 | INFO: Extracting primitive: Stitched cambered airfoil
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Cube.005
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Painted tip
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Cone.082
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Finished glTF 2.0 export in 0.006745100021362305 s
+
+ART_ASSET wing 1104 2108 4
+21:23:01 | INFO: Starting glTF 2.0 export
+21:23:01 | INFO: Extracting primitive: Stitched cambered airfoil.001
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Cube.007
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Painted tip.002
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Cone.102
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Finished glTF 2.0 export in 0.015816211700439453 s
+
+ART_ASSET large_wing 1104 2108 4
+21:23:01 | INFO: Starting glTF 2.0 export
+21:23:01 | INFO: Extracting primitive: Cone.122
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Cube.009
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Moving fabric surface
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Extracting primitive: Red tip
+21:23:01 | INFO: Primitives created: 1
+21:23:01 | INFO: Finished glTF 2.0 export in 0.006717205047607422 s
+
+ART_ASSET aileron 912 1788 4
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Cone.125
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.012
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Moving fabric surface.001
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Red tip.002
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.00907588005065918 s
+
+ART_ASSET elevator 912 1788 4
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Cube.015
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Swept fabric fin
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.128
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.005532026290893555 s
+
+ART_ASSET rudder 260 500 3
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Torus
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.130
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Engine cowling
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.142
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Sphere
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Laminated wood prop blade
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.009305953979492188 s
+
+ART_ASSET motor 994 1908 6
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Cube.019
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.143
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.026
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.017
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.018
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.008275985717773438 s
+
+ART_ASSET battery 664 1276 5
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Cone.153
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.162
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.028
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.145
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.146
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Torus.002
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.008304119110107422 s
+
+ART_ASSET gear 664 1248 6
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Cube.030
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.038
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.029
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.035
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.006913185119628906 s
+
+ART_ASSET cargo_mount 680 1300 4
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Layered pine boughs
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Layered pine boughs.001
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.168
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.005380153656005859 s
+
+ART_ASSET tree_pine 156 256 3
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Icosphere.001
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Icosphere
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cone.169
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.00556492805480957 s
+
+ART_ASSET tree_broad 458 860 3
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Icosphere.006
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.002579927444458008 s
+
+ART_ASSET rock 42 80 1
+21:23:02 | INFO: Starting glTF 2.0 export
+21:23:02 | INFO: Extracting primitive: Cone.177
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.040
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Extracting primitive: Cube.041
+21:23:02 | INFO: Primitives created: 1
+21:23:02 | INFO: Finished glTF 2.0 export in 0.008529186248779297 s
+
+ART_ASSET crate 2064 3952 3
+21:23:06 | INFO: Starting glTF 2.0 export
+21:23:06 | INFO: Extracting primitive: Cube.076
+21:23:06 | INFO: Primitives created: 1
+21:23:06 | INFO: Extracting primitive: Cube.074
+21:23:06 | INFO: Primitives created: 1
+21:23:06 | INFO: Extracting primitive: Cube.156
+21:23:06 | INFO: Primitives created: 1
+21:23:06 | INFO: Extracting primitive: Sphere.004
+21:23:06 | INFO: Primitives created: 1
+21:23:06 | INFO: Extracting primitive: Cube.075
+21:23:06 | INFO: Primitives created: 1
+21:23:06 | INFO: Extracting primitive: Cone.186
+21:23:06 | INFO: Primitives created: 1
+21:23:06 | INFO: Extracting primitive: Cone.356
+21:23:06 | INFO: Primitives created: 1
+21:23:06 | INFO: Finished glTF 2.0 export in 0.025836944580078125 s
+
+ART_ASSET hangar 9582 17828 7
+21:23:07 | INFO: Starting glTF 2.0 export
+21:23:07 | INFO: Extracting primitive: Cone.420
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cube.181
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cube.184
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cube.183
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cube.182
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cube.185
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.400
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.404
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Finished glTF 2.0 export in 0.01672506332397461 s
+
+ART_ASSET tower 1304 2376 8
+21:23:07 | INFO: Starting glTF 2.0 export
+21:23:07 | INFO: Extracting primitive: Cone.450
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.449
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.453
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.451
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.452
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Finished glTF 2.0 export in 0.010377883911132812 s
+
+ART_ASSET wind_sock 464 892 5
+21:23:07 | INFO: Starting glTF 2.0 export
+21:23:07 | INFO: Extracting primitive: Cone.458
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Sphere.006
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.459
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.463
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Finished glTF 2.0 export in 0.00831913948059082 s
+
+ART_ASSET lamp 258 488 4
+21:23:07 | INFO: Starting glTF 2.0 export
+21:23:07 | INFO: Extracting primitive: Torus.004
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.464
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cube.190
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Steel fuel drum
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Finished glTF 2.0 export in 0.007911205291748047 s
+
+ART_ASSET barrel 1016 2020 4
+21:23:07 | INFO: Starting glTF 2.0 export
+21:23:07 | INFO: Extracting primitive: Cone.473
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.465
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.471
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.467
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.466
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Extracting primitive: Cone.470
+21:23:07 | INFO: Primitives created: 1
+21:23:07 | INFO: Finished glTF 2.0 export in 0.00935220718383789 s
+
+ART_ASSET beacon 344 640 6
+21:23:08 | INFO: Starting glTF 2.0 export
+21:23:08 | INFO: Extracting primitive: Cone.477
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Sphere.007
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Cube.200
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Cube.198
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Cube.192
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Pitched standing seam roof
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Cone.511
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Cube.191
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Extracting primitive: Cube.193
+21:23:08 | INFO: Primitives created: 1
+21:23:08 | INFO: Finished glTF 2.0 export in 0.01689600944519043 s
+
+ART_ASSET cottage 3976 7530 9
+21:23:09 | INFO: Starting glTF 2.0 export
+21:23:09 | INFO: Extracting primitive: Cone.527
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cube.248
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Rounded fishing hull
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cone.522
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Red anti fouling lower hull
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Torus.008
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cone.550
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Open working deck
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Finished glTF 2.0 export in 0.014947175979614258 s
+
+ART_ASSET fishing_boat 2469 4682 8
+21:23:09 | INFO: Starting glTF 2.0 export
+21:23:09 | INFO: Extracting primitive: Cone.566
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Sphere.008
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cone.558
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cube.267
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Sphere.009
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cone.559
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cube.265
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cone.560
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Cone.557
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Finished glTF 2.0 export in 0.016592979431152344 s
+
+ART_ASSET lighthouse 4070 7872 9
+21:23:09 | INFO: Starting glTF 2.0 export
+21:23:09 | INFO: Extracting primitive: Icosphere.013
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Extracting primitive: Weathered open stone span
+21:23:09 | INFO: Primitives created: 1
+21:23:09 | INFO: Finished glTF 2.0 export in 0.006094217300415039 s
+
+ART_ASSET rock_arch 636 1208 2
+/private/tmp/flight-islands-native/native/flight/tools/generate_art.py:665: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  scene.world=bpy.data.worlds.new(scene.name+' soft sky');scene.world.use_nodes=True
+00:18.267  render           | Saved: '/private/tmp/flight-islands-native/native/flight/assets/previews/aircraft_kit.png'
+00:30.064  render           | Saved: '/private/tmp/flight-islands-native/native/flight/assets/previews/airfield_props.png'
+00:38.114  render           | Saved: '/private/tmp/flight-islands-native/native/flight/assets/previews/assembled_aircraft.png'
+00:53.368  render           | Saved: '/private/tmp/flight-islands-native/native/flight/assets/previews/coastal_props.png'
+Info: Saved as "flight_islands_master.blend"
+ART_COMPLETE 26 models 36250 vertices
+Blender 5.1.2 (hash ec6e62d40fa9 built 2026-05-19 01:30:33)
+
+Blender quit

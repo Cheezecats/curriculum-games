@@ -1,0 +1,1159 @@
+{
+  "cockpit": {
+    "vertices": 1413,
+    "triangles": 2508,
+    "mesh_nodes": 5,
+    "file": "models/cockpit.glb",
+    "bytes": 99932,
+    "bounds_min": [
+      -0.43598926067352295,
+      -0.3840000033378601,
+      -0.7519999742507935
+    ],
+    "bounds_max": [
+      0.43598926067352295,
+      0.41999998688697815,
+      0.75
+    ],
+    "dimensions": [
+      0.8719785213470459,
+      0.8039999902248383,
+      1.5019999742507935
+    ],
+    "nodes": [
+      "cockpit_Aluminium",
+      "cockpit_Glass",
+      "cockpit_Ivory",
+      "cockpit_Navy",
+      "cockpit_Paint",
+      "cockpit"
+    ],
+    "primitives": 5,
+    "exported_vertices": 2581,
+    "exported_bounds_min": [
+      -0.43598926067352295,
+      -0.3840000033378601,
+      -0.7519999742507935
+    ],
+    "exported_bounds_max": [
+      0.43598926067352295,
+      0.41999998688697815,
+      0.75
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "fuselage": {
+    "vertices": 480,
+    "triangles": 888,
+    "mesh_nodes": 4,
+    "file": "models/fuselage.glb",
+    "bytes": 32072,
+    "bounds_min": [
+      -0.35897478461265564,
+      -0.27799999713897705,
+      -0.6029999852180481
+    ],
+    "bounds_max": [
+      0.35897478461265564,
+      0.27799999713897705,
+      0.6020450592041016
+    ],
+    "dimensions": [
+      0.7179495692253113,
+      0.5559999942779541,
+      1.2050450444221497
+    ],
+    "nodes": [
+      "fuselage_Aluminium",
+      "fuselage_Ivory",
+      "fuselage_Navy",
+      "fuselage_Paint",
+      "fuselage"
+    ],
+    "primitives": 4,
+    "exported_vertices": 748,
+    "exported_bounds_min": [
+      -0.35897478461265564,
+      -0.27799999713897705,
+      -0.6029999852180481
+    ],
+    "exported_bounds_max": [
+      0.35897478461265564,
+      0.27799999713897705,
+      0.6020450592041016
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "strut": {
+    "vertices": 224,
+    "triangles": 420,
+    "mesh_nodes": 3,
+    "file": "models/strut.glb",
+    "bytes": 15784,
+    "bounds_min": [
+      -0.09000000357627869,
+      -0.09000000357627869,
+      -0.5
+    ],
+    "bounds_max": [
+      0.09000000357627869,
+      0.0949999988079071,
+      0.5
+    ],
+    "dimensions": [
+      0.18000000715255737,
+      0.1850000023841858,
+      1.0
+    ],
+    "nodes": [
+      "strut_Aluminium",
+      "strut_Ivory",
+      "strut_Navy",
+      "strut"
+    ],
+    "primitives": 3,
+    "exported_vertices": 328,
+    "exported_bounds_min": [
+      -0.09000000357627869,
+      -0.09000000357627869,
+      -0.5
+    ],
+    "exported_bounds_max": [
+      0.09000000357627869,
+      0.0949999988079071,
+      0.5
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "wing": {
+    "vertices": 1104,
+    "triangles": 2108,
+    "mesh_nodes": 4,
+    "file": "models/wing.glb",
+    "bytes": 59224,
+    "bounds_min": [
+      -1.100000023841858,
+      -0.07150000333786011,
+      -0.3499999940395355
+    ],
+    "bounds_max": [
+      1.100000023841858,
+      0.07019933313131332,
+      0.3633493185043335
+    ],
+    "dimensions": [
+      2.200000047683716,
+      0.14169933646917343,
+      0.713349312543869
+    ],
+    "nodes": [
+      "wing_Ivory",
+      "wing_Navy",
+      "wing_Paint",
+      "wing_WoodLight",
+      "wing"
+    ],
+    "primitives": 4,
+    "exported_vertices": 1496,
+    "exported_bounds_min": [
+      -1.100000023841858,
+      -0.07150000333786011,
+      -0.3499999940395355
+    ],
+    "exported_bounds_max": [
+      1.100000023841858,
+      0.07019933313131332,
+      0.3633493185043335
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "large_wing": {
+    "vertices": 1104,
+    "triangles": 2108,
+    "mesh_nodes": 4,
+    "file": "models/large_wing.glb",
+    "bytes": 59260,
+    "bounds_min": [
+      -1.600000023841858,
+      -0.07850000262260437,
+      -0.42500001192092896
+    ],
+    "bounds_max": [
+      1.600000023841858,
+      0.07979942113161087,
+      0.4412098824977875
+    ],
+    "dimensions": [
+      3.200000047683716,
+      0.15829942375421524,
+      0.8662098944187164
+    ],
+    "nodes": [
+      "large_wing_Ivory",
+      "large_wing_Navy",
+      "large_wing_Paint",
+      "large_wing_WoodLight",
+      "large_wing"
+    ],
+    "primitives": 4,
+    "exported_vertices": 1496,
+    "exported_bounds_min": [
+      -1.600000023841858,
+      -0.07850000262260437,
+      -0.42500001192092896
+    ],
+    "exported_bounds_max": [
+      1.600000023841858,
+      0.07979942113161087,
+      0.4412098824977875
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "aileron": {
+    "vertices": 912,
+    "triangles": 1788,
+    "mesh_nodes": 4,
+    "file": "models/aileron.glb",
+    "bytes": 42728,
+    "bounds_min": [
+      -0.6000000238418579,
+      -0.03705941513180733,
+      -0.15000000596046448
+    ],
+    "bounds_max": [
+      0.6000000238418579,
+      0.04297303035855293,
+      0.15572112798690796
+    ],
+    "dimensions": [
+      1.2000000476837158,
+      0.08003244549036026,
+      0.30572113394737244
+    ],
+    "nodes": [
+      "aileron_Aluminium",
+      "aileron_Navy",
+      "Flap_Ivory",
+      "Flap_Paint",
+      "Flap",
+      "aileron"
+    ],
+    "primitives": 4,
+    "exported_vertices": 1038,
+    "animation_pivot": {
+      "name": "Flap",
+      "translation": [
+        0,
+        0,
+        -0.11400000005960464
+      ]
+    },
+    "exported_bounds_min": [
+      -0.6000000238418579,
+      -0.03705941513180733,
+      -0.15000000596046448
+    ],
+    "exported_bounds_max": [
+      0.6000000238418579,
+      0.04297303035855293,
+      0.15572112053632736
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "elevator": {
+    "vertices": 912,
+    "triangles": 1788,
+    "mesh_nodes": 4,
+    "file": "models/elevator.glb",
+    "bytes": 42716,
+    "bounds_min": [
+      -0.75,
+      -0.04413188621401787,
+      -0.20000000298023224
+    ],
+    "bounds_max": [
+      0.75,
+      0.05196674168109894,
+      0.20762817561626434
+    ],
+    "dimensions": [
+      1.5,
+      0.0960986278951168,
+      0.4076281785964966
+    ],
+    "nodes": [
+      "elevator_Aluminium",
+      "elevator_Navy",
+      "Flap.001_Ivory",
+      "Flap.001_Paint",
+      "Flap",
+      "elevator"
+    ],
+    "primitives": 4,
+    "exported_vertices": 1038,
+    "animation_pivot": {
+      "name": "Flap",
+      "translation": [
+        0,
+        0,
+        -0.15199999511241913
+      ]
+    },
+    "exported_bounds_min": [
+      -0.75,
+      -0.04413188621401787,
+      -0.20000000298023224
+    ],
+    "exported_bounds_max": [
+      0.75,
+      0.05196674168109894,
+      0.20762817561626434
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "rudder": {
+    "vertices": 260,
+    "triangles": 500,
+    "mesh_nodes": 3,
+    "file": "models/rudder.glb",
+    "bytes": 16500,
+    "bounds_min": [
+      -0.05999999865889549,
+      -0.4000000059604645,
+      -0.32499998807907104
+    ],
+    "bounds_max": [
+      0.05999999865889549,
+      0.40000003576278687,
+      0.32999998331069946
+    ],
+    "dimensions": [
+      0.11999999731779099,
+      0.8000000417232513,
+      0.6549999713897705
+    ],
+    "nodes": [
+      "Flap.002_Ivory",
+      "Flap.002_Paint",
+      "Flap",
+      "rudder_Aluminium",
+      "rudder"
+    ],
+    "primitives": 3,
+    "exported_vertices": 344,
+    "animation_pivot": {
+      "name": "Flap",
+      "translation": [
+        0,
+        -0.30000001192092896,
+        -0.23000000417232513
+      ]
+    },
+    "exported_bounds_min": [
+      -0.05999999865889549,
+      -0.4000000059604645,
+      -0.32499998807907104
+    ],
+    "exported_bounds_max": [
+      0.05999999865889549,
+      0.40000003576278687,
+      0.32999999821186066
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "motor": {
+    "vertices": 994,
+    "triangles": 1908,
+    "mesh_nodes": 6,
+    "file": "models/motor.glb",
+    "bytes": 61624,
+    "bounds_min": [
+      -0.2750000059604645,
+      -0.2750000059604645,
+      -0.3499999940395355
+    ],
+    "bounds_max": [
+      0.2750000059604645,
+      0.2750000059604645,
+      0.3499999940395355
+    ],
+    "dimensions": [
+      0.550000011920929,
+      0.550000011920929,
+      0.699999988079071
+    ],
+    "nodes": [
+      "motor_Aluminium",
+      "motor_Navy",
+      "motor_Paint",
+      "Propeller_Aluminium",
+      "Propeller_Ivory",
+      "Propeller_WoodLight",
+      "Propeller",
+      "motor"
+    ],
+    "primitives": 6,
+    "exported_vertices": 1423,
+    "animation_pivot": {
+      "name": "Propeller",
+      "translation": [
+        0,
+        0,
+        -0.29499998688697815
+      ]
+    },
+    "exported_bounds_min": [
+      -0.2750000059604645,
+      -0.2750000059604645,
+      -0.3499999940395355
+    ],
+    "exported_bounds_max": [
+      0.2750000059604645,
+      0.2750000059604645,
+      0.3499999940395355
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "battery": {
+    "vertices": 664,
+    "triangles": 1276,
+    "mesh_nodes": 5,
+    "file": "models/battery.glb",
+    "bytes": 40124,
+    "bounds_min": [
+      -0.25,
+      -0.16949999332427979,
+      -0.3529999852180481
+    ],
+    "bounds_max": [
+      0.25,
+      0.17499999701976776,
+      0.3499999940395355
+    ],
+    "dimensions": [
+      0.5,
+      0.34449999034404755,
+      0.7029999792575836
+    ],
+    "nodes": [
+      "battery_Aluminium",
+      "battery_Brass",
+      "battery_Ivory",
+      "battery_Navy",
+      "battery_Paint",
+      "battery"
+    ],
+    "primitives": 5,
+    "exported_vertices": 892,
+    "exported_bounds_min": [
+      -0.25,
+      -0.16949999332427979,
+      -0.3529999852180481
+    ],
+    "exported_bounds_max": [
+      0.25,
+      0.17499999701976776,
+      0.3499999940395355
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "gear": {
+    "vertices": 664,
+    "triangles": 1248,
+    "mesh_nodes": 6,
+    "file": "models/gear.glb",
+    "bytes": 50880,
+    "bounds_min": [
+      -0.14296500384807587,
+      -0.32499998807907104,
+      -0.22499999403953552
+    ],
+    "bounds_max": [
+      0.14296500384807587,
+      0.32499998807907104,
+      0.22499999403953552
+    ],
+    "dimensions": [
+      0.28593000769615173,
+      0.6499999761581421,
+      0.44999998807907104
+    ],
+    "nodes": [
+      "gear_Aluminium",
+      "gear_Navy",
+      "gear_Paint",
+      "Wheel_Aluminium",
+      "Wheel_Navy",
+      "Wheel_Rubber",
+      "Wheel",
+      "gear"
+    ],
+    "primitives": 6,
+    "exported_vertices": 1167,
+    "animation_pivot": {
+      "name": "Wheel",
+      "translation": [
+        0,
+        -0.10000000149011612,
+        0
+      ]
+    },
+    "exported_bounds_min": [
+      -0.14296500384807587,
+      -0.32499999552965164,
+      -0.22499999403953552
+    ],
+    "exported_bounds_max": [
+      0.14296500384807587,
+      0.32499998807907104,
+      0.22499999403953552
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "cargo_mount": {
+    "vertices": 680,
+    "triangles": 1300,
+    "mesh_nodes": 4,
+    "file": "models/cargo_mount.glb",
+    "bytes": 41896,
+    "bounds_min": [
+      -0.3500000238418579,
+      -0.07500000298023224,
+      -0.4000000059604645
+    ],
+    "bounds_max": [
+      0.3500000238418579,
+      0.08100000023841858,
+      0.4000000059604645
+    ],
+    "dimensions": [
+      0.7000000476837158,
+      0.15600000321865082,
+      0.800000011920929
+    ],
+    "nodes": [
+      "cargo_mount_Aluminium",
+      "cargo_mount_Brass",
+      "cargo_mount_Navy",
+      "cargo_mount_WoodLight",
+      "cargo_mount"
+    ],
+    "primitives": 4,
+    "exported_vertices": 928,
+    "exported_bounds_min": [
+      -0.3500000238418579,
+      -0.07500000298023224,
+      -0.4000000059604645
+    ],
+    "exported_bounds_max": [
+      0.3500000238418579,
+      0.08100000023841858,
+      0.4000000059604645
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "tree_pine": {
+    "vertices": 156,
+    "triangles": 256,
+    "mesh_nodes": 3,
+    "file": "environment/tree_pine.glb",
+    "bytes": 9276,
+    "bounds_min": [
+      -1.664455533027649,
+      0.0,
+      -1.5022822618484497
+    ],
+    "bounds_max": [
+      1.670660138130188,
+      6.579495906829834,
+      1.6040540933609009
+    ],
+    "dimensions": [
+      3.335115671157837,
+      6.579495906829834,
+      3.1063363552093506
+    ],
+    "nodes": [
+      "tree_pine_Leaf",
+      "tree_pine_Pine",
+      "tree_pine_Wood",
+      "tree_pine"
+    ],
+    "primitives": 3,
+    "exported_vertices": 182,
+    "exported_bounds_min": [
+      -1.664455533027649,
+      0,
+      -1.5022822618484497
+    ],
+    "exported_bounds_max": [
+      1.670660138130188,
+      6.579495906829834,
+      1.6040540933609009
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "tree_broad": {
+    "vertices": 458,
+    "triangles": 860,
+    "mesh_nodes": 3,
+    "file": "environment/tree_broad.glb",
+    "bytes": 33044,
+    "bounds_min": [
+      -2.641707181930542,
+      0.0,
+      -2.457465410232544
+    ],
+    "bounds_max": [
+      2.760451316833496,
+      6.6276326179504395,
+      2.550907850265503
+    ],
+    "dimensions": [
+      5.402158498764038,
+      6.6276326179504395,
+      5.008373260498047
+    ],
+    "nodes": [
+      "tree_broad_Leaf",
+      "tree_broad_LeafLight",
+      "tree_broad_Wood",
+      "tree_broad"
+    ],
+    "primitives": 3,
+    "exported_vertices": 769,
+    "exported_bounds_min": [
+      -2.641707181930542,
+      0,
+      -2.457465410232544
+    ],
+    "exported_bounds_max": [
+      2.760451316833496,
+      6.6276326179504395,
+      2.550907850265503
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "rock": {
+    "vertices": 42,
+    "triangles": 80,
+    "mesh_nodes": 1,
+    "file": "environment/rock.glb",
+    "bytes": 3776,
+    "bounds_min": [
+      -1.5195951461791992,
+      0.02500000037252903,
+      -0.9926414489746094
+    ],
+    "bounds_max": [
+      1.5675417184829712,
+      1.553832769393921,
+      0.9564322233200073
+    ],
+    "dimensions": [
+      3.0871368646621704,
+      1.5288327690213919,
+      1.9490736722946167
+    ],
+    "nodes": [
+      "rock_Stone",
+      "rock"
+    ],
+    "primitives": 1,
+    "exported_vertices": 63,
+    "exported_bounds_min": [
+      -1.5195951461791992,
+      0.02500000037252903,
+      -0.9926414489746094
+    ],
+    "exported_bounds_max": [
+      1.5675417184829712,
+      1.553832769393921,
+      0.9564322233200073
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "crate": {
+    "vertices": 2064,
+    "triangles": 3952,
+    "mesh_nodes": 3,
+    "file": "environment/crate.glb",
+    "bytes": 116232,
+    "bounds_min": [
+      -0.699999988079071,
+      0.034999966621398926,
+      -0.7549999952316284
+    ],
+    "bounds_max": [
+      0.699999988079071,
+      1.3075000047683716,
+      0.7549999952316284
+    ],
+    "dimensions": [
+      1.399999976158142,
+      1.2725000381469727,
+      1.5099999904632568
+    ],
+    "nodes": [
+      "crate_Aluminium",
+      "crate_Wood",
+      "crate_WoodLight",
+      "crate"
+    ],
+    "primitives": 3,
+    "exported_vertices": 2788,
+    "exported_bounds_min": [
+      -0.699999988079071,
+      0.034999966621398926,
+      -0.7549999952316284
+    ],
+    "exported_bounds_max": [
+      0.699999988079071,
+      1.3075000047683716,
+      0.7549999952316284
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "hangar": {
+    "vertices": 9582,
+    "triangles": 17828,
+    "mesh_nodes": 7,
+    "file": "environment/hangar.glb",
+    "bytes": 600752,
+    "bounds_min": [
+      -9.024285316467285,
+      0.0,
+      -7.035000324249268
+    ],
+    "bounds_max": [
+      9.024285316467285,
+      8.02999210357666,
+      7.454999923706055
+    ],
+    "dimensions": [
+      18.04857063293457,
+      8.02999210357666,
+      14.490000247955322
+    ],
+    "nodes": [
+      "hangar_Aluminium",
+      "hangar_Concrete",
+      "hangar_Glass",
+      "hangar_Glow",
+      "hangar_Ivory",
+      "hangar_Navy",
+      "hangar_Paint",
+      "hangar"
+    ],
+    "primitives": 7,
+    "exported_vertices": 15200,
+    "exported_bounds_min": [
+      -9.024285316467285,
+      0,
+      -7.035000324249268
+    ],
+    "exported_bounds_max": [
+      9.024285316467285,
+      8.02999210357666,
+      7.454999923706055
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "tower": {
+    "vertices": 1304,
+    "triangles": 2376,
+    "mesh_nodes": 8,
+    "file": "environment/tower.glb",
+    "bytes": 97508,
+    "bounds_min": [
+      -1.850000023841858,
+      0.0,
+      -1.850000023841858
+    ],
+    "bounds_max": [
+      1.850000023841858,
+      10.0,
+      1.850000023841858
+    ],
+    "dimensions": [
+      3.700000047683716,
+      10.0,
+      3.700000047683716
+    ],
+    "nodes": [
+      "tower_Aluminium",
+      "tower_Concrete",
+      "tower_Glass",
+      "tower_Ivory",
+      "tower_Navy",
+      "tower_Paint",
+      "tower_Wood",
+      "tower_WoodLight",
+      "tower"
+    ],
+    "primitives": 8,
+    "exported_vertices": 2346,
+    "exported_bounds_min": [
+      -1.850000023841858,
+      0,
+      -1.850000023841858
+    ],
+    "exported_bounds_max": [
+      1.850000023841858,
+      10,
+      1.850000023841858
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "wind_sock": {
+    "vertices": 464,
+    "triangles": 892,
+    "mesh_nodes": 5,
+    "file": "environment/wind_sock.glb",
+    "bytes": 34656,
+    "bounds_min": [
+      -0.41999998688697815,
+      0.0,
+      -0.41999998688697815
+    ],
+    "bounds_max": [
+      0.41999998688697815,
+      5.668000221252441,
+      2.3013124465942383
+    ],
+    "dimensions": [
+      0.8399999737739563,
+      5.668000221252441,
+      2.7213124334812164
+    ],
+    "nodes": [
+      "wind_sock_Aluminium",
+      "wind_sock_Concrete",
+      "wind_sock_Ivory",
+      "wind_sock_Navy",
+      "wind_sock_Paint",
+      "wind_sock"
+    ],
+    "primitives": 5,
+    "exported_vertices": 787,
+    "exported_bounds_min": [
+      -0.41999998688697815,
+      0,
+      -0.41999998688697815
+    ],
+    "exported_bounds_max": [
+      0.41999998688697815,
+      5.668000221252441,
+      2.3013124465942383
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "lamp": {
+    "vertices": 258,
+    "triangles": 488,
+    "mesh_nodes": 4,
+    "file": "environment/lamp.glb",
+    "bytes": 21724,
+    "bounds_min": [
+      -0.3499999940395355,
+      0.0,
+      -0.3499999940395355
+    ],
+    "bounds_max": [
+      0.3499999940395355,
+      4.814938068389893,
+      0.9700000286102295
+    ],
+    "dimensions": [
+      0.699999988079071,
+      4.814938068389893,
+      1.320000022649765
+    ],
+    "nodes": [
+      "lamp_Concrete",
+      "lamp_Glow",
+      "lamp_Navy",
+      "lamp_Paint",
+      "lamp"
+    ],
+    "primitives": 4,
+    "exported_vertices": 451,
+    "exported_bounds_min": [
+      -0.3499999940395355,
+      0,
+      -0.3499999940395355
+    ],
+    "exported_bounds_max": [
+      0.3499999940395355,
+      4.814938068389893,
+      0.9700000286102295
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "barrel": {
+    "vertices": 1016,
+    "triangles": 2020,
+    "mesh_nodes": 4,
+    "file": "environment/barrel.glb",
+    "bytes": 53048,
+    "bounds_min": [
+      -0.3620000183582306,
+      0.0,
+      -0.3620000183582306
+    ],
+    "bounds_max": [
+      0.3620000183582306,
+      1.059999942779541,
+      0.36500000953674316
+    ],
+    "dimensions": [
+      0.7240000367164612,
+      1.059999942779541,
+      0.7270000278949738
+    ],
+    "nodes": [
+      "barrel_Aluminium",
+      "barrel_Brass",
+      "barrel_Ivory",
+      "barrel_Paint",
+      "barrel"
+    ],
+    "primitives": 4,
+    "exported_vertices": 1190,
+    "exported_bounds_min": [
+      -0.3620000183582306,
+      0,
+      -0.3620000183582306
+    ],
+    "exported_bounds_max": [
+      0.3620000183582306,
+      1.059999942779541,
+      0.36500000953674316
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "beacon": {
+    "vertices": 344,
+    "triangles": 640,
+    "mesh_nodes": 6,
+    "file": "environment/beacon.glb",
+    "bytes": 32444,
+    "bounds_min": [
+      -0.30000001192092896,
+      0.0,
+      -0.30000001192092896
+    ],
+    "bounds_max": [
+      0.30000001192092896,
+      1.7400000095367432,
+      0.30000001192092896
+    ],
+    "dimensions": [
+      0.6000000238418579,
+      1.7400000095367432,
+      0.6000000238418579
+    ],
+    "nodes": [
+      "beacon_Aluminium",
+      "beacon_Concrete",
+      "beacon_Glow",
+      "beacon_Ivory",
+      "beacon_Navy",
+      "beacon_Paint",
+      "beacon"
+    ],
+    "primitives": 6,
+    "exported_vertices": 712,
+    "exported_bounds_min": [
+      -0.30000001192092896,
+      0,
+      -0.30000001192092896
+    ],
+    "exported_bounds_max": [
+      0.30000001192092896,
+      1.7400000095367432,
+      0.30000001192092896
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "cottage": {
+    "vertices": 3976,
+    "triangles": 7530,
+    "mesh_nodes": 9,
+    "file": "environment/cottage.glb",
+    "bytes": 238488,
+    "bounds_min": [
+      -6.092877388000488,
+      0.0,
+      -5.015000343322754
+    ],
+    "bounds_max": [
+      6.092877388000488,
+      8.65999984741211,
+      5.849999904632568
+    ],
+    "dimensions": [
+      12.185754776000977,
+      8.65999984741211,
+      10.865000247955322
+    ],
+    "nodes": [
+      "cottage_Aluminium",
+      "cottage_Brass",
+      "cottage_Concrete",
+      "cottage_Glass",
+      "cottage_Ivory",
+      "cottage_Navy",
+      "cottage_Paint",
+      "cottage_Stone",
+      "cottage_Wood",
+      "cottage"
+    ],
+    "primitives": 9,
+    "exported_vertices": 5749,
+    "exported_bounds_min": [
+      -6.092877388000488,
+      0,
+      -5.015000343322754
+    ],
+    "exported_bounds_max": [
+      6.092877388000488,
+      8.65999984741211,
+      5.849999904632568
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "fishing_boat": {
+    "vertices": 2469,
+    "triangles": 4682,
+    "mesh_nodes": 8,
+    "file": "environment/fishing_boat.glb",
+    "bytes": 148392,
+    "bounds_min": [
+      -1.4850000143051147,
+      0.07199999690055847,
+      -4.0
+    ],
+    "bounds_max": [
+      1.4850000143051147,
+      4.400000095367432,
+      3.799999952316284
+    ],
+    "dimensions": [
+      2.9700000286102295,
+      4.328000098466873,
+      7.799999952316284
+    ],
+    "nodes": [
+      "fishing_boat_Aluminium",
+      "fishing_boat_Glass",
+      "fishing_boat_Ivory",
+      "fishing_boat_Navy",
+      "fishing_boat_Paint",
+      "fishing_boat_Rubber",
+      "fishing_boat_Wood",
+      "fishing_boat_WoodLight",
+      "fishing_boat"
+    ],
+    "primitives": 8,
+    "exported_vertices": 3503,
+    "exported_bounds_min": [
+      -1.4850000143051147,
+      0.07199999690055847,
+      -4
+    ],
+    "exported_bounds_max": [
+      1.4850000143051147,
+      4.400000095367432,
+      3.799999952316284
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "lighthouse": {
+    "vertices": 4070,
+    "triangles": 7872,
+    "mesh_nodes": 9,
+    "file": "environment/lighthouse.glb",
+    "bytes": 253412,
+    "bounds_min": [
+      -2.6500000953674316,
+      0.0,
+      -2.6500000953674316
+    ],
+    "bounds_max": [
+      2.6500000953674316,
+      16.34000015258789,
+      2.6500000953674316
+    ],
+    "dimensions": [
+      5.300000190734863,
+      16.34000015258789,
+      5.300000190734863
+    ],
+    "nodes": [
+      "lighthouse_Aluminium",
+      "lighthouse_Brass",
+      "lighthouse_Concrete",
+      "lighthouse_Glass",
+      "lighthouse_Glow",
+      "lighthouse_Ivory",
+      "lighthouse_Navy",
+      "lighthouse_Paint",
+      "lighthouse_Stone",
+      "lighthouse"
+    ],
+    "primitives": 9,
+    "exported_vertices": 6145,
+    "exported_bounds_min": [
+      -2.6500000953674316,
+      0,
+      -2.6500000953674316
+    ],
+    "exported_bounds_max": [
+      2.6500000953674316,
+      16.34000015258789,
+      2.6500000953674316
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  },
+  "rock_arch": {
+    "vertices": 636,
+    "triangles": 1208,
+    "mesh_nodes": 2,
+    "file": "environment/rock_arch.glb",
+    "bytes": 36820,
+    "bounds_min": [
+      -14.597430229187012,
+      0.05063581466674805,
+      -4.284180641174316
+    ],
+    "bounds_max": [
+      14.74539852142334,
+      15.8671236038208,
+      4.064463138580322
+    ],
+    "dimensions": [
+      29.34282875061035,
+      15.816487789154053,
+      8.348643779754639
+    ],
+    "nodes": [
+      "rock_arch_Leaf",
+      "rock_arch_Stone",
+      "rock_arch"
+    ],
+    "primitives": 2,
+    "exported_vertices": 852,
+    "exported_bounds_min": [
+      -14.597430229187012,
+      0.05063581466674805,
+      -4.284180641174316
+    ],
+    "exported_bounds_max": [
+      14.74539852142334,
+      15.8671236038208,
+      4.064463138580322
+    ],
+    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+  }
+}
