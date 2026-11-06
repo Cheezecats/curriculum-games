@@ -41,3 +41,11 @@ The separate Chromium headless shell used by the correctness suite fell back to 
 Results can change with viewport, refresh rate, graphics backend, device load, overlays, or training configuration. Repeat after material rendering or model changes.
 
 Human enjoyment, long-term learning, exam improvement, complete syllabus coverage, and experimentally accurate aircraft engineering have not been established by these checks.
+
+## Public delivery
+
+The public source is [Cheezecats/curriculum-games](https://github.com/Cheezecats/curriculum-games) and the verified demo is [Fieldwork on GitHub Pages](https://cheezecats.github.io/curriculum-games/). [Release pipeline 42147084568](https://github.com/Cheezecats/curriculum-games/actions/runs/42147084568) passed the full check/build, actual WebGL 2 preflight in all three engines, and all 24 browser checks in 2.9 minutes, then deployed successfully.
+
+The first hosted run passed 20 checks but could not initialize Firefox flight in Linux headless mode. Running the complete unchanged assertions in display-backed browsers under Xvfb resolved that environment failure. The pipeline now fails explicitly if WebGL 2 is unavailable and retains browser screenshots/traces as artifacts. This setup follows [Playwright's Linux headed-browser guidance](https://playwright.dev/docs/ci#running-headed).
+
+A separate smoke check of the live HTTPS site returned 200, loaded both artwork assets, launched and reviewed an actual flight, trained the 16-epoch CNN and inspected its four active feature maps, and returned to the hub. The hosted model reported 1.37 seconds training in that check. Font license delivery returned 200 and the browser recorded zero page/console errors. [Live verification record](design/qa/live-verification.json). This smoke check verifies the hosted worker and relative asset routes; it is separate from the more complete local/CI play-through suites.
