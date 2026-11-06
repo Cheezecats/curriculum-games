@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-06T00:38:15.237Z",
+  "cpu": "Apple M2",
+  "memoryGiB": 16,
+  "platform": "darwin arm64",
+  "node": "v24.14.0",
+  "browser": "156.0.8078.4",
+  "viewport": {
+    "width": 1920,
+    "height": 1080,
+    "deviceScaleFactor": 1
+  },
+  "baseUrl": "http://127.0.0.1:4173",
+  "flight": {
+    "parts": 128,
+    "windowMs": 6006.899999994039,
+    "airborneSamples": 163,
+    "meanFps": 29.021632689397315,
+    "p95FrameMs": 66.70000000000073,
+    "drawingBuffer": {
+      "width": 1400,
+      "height": 430
+    },
+    "instruments": "SPEED11.8 m/sALTITUDE36.7 mMASS80.90 kgBATTERY0.0 kJTHROTTLE0 %",
+    "finalState": "AIRBORNE"
+  },
+  "vision": {
+    "wallMs": 903.7862909999985,
+    "workerTrainingSeconds": 0.79,
+    "actualLearningText": "Learning curve\ntrain / validation loss\n\nEpoch 16 · validation 100% · 0.79s last training"
+  },
+  "workerCleanup": {
+    "duringVision": 1,
+    "afterExit": 0
+  },
+  "pageErrors": []
+}

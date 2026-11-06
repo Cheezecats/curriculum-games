@@ -27,14 +27,14 @@ export const PARTS: Record<
     area: number;
   }
 > = {
-  cockpit: { label: 'Cockpit', mass: 2, color: 0x1e6a61, area: 0.3 },
-  structure: { label: 'Fuselage', mass: 0.7, color: 0xf5f3ec, area: 0.1 },
-  wing: { label: 'Wing', mass: 0.45, color: 0xe7ed91, area: 0.35 },
-  control: { label: 'Control surface', mass: 0.35, color: 0xf1a078, area: 0.35 },
-  engine: { label: 'Motor', mass: 2, color: 0x172f35, area: 0.1 },
-  battery: { label: 'Battery', mass: 2, color: 0x1e6a61, area: 0.2 },
-  cargo: { label: 'Cargo', mass: 3, color: 0xcf956d, area: 0.3 },
-  skid: { label: 'Skid', mass: 0.6, color: 0x6c7a79, area: 0.05 },
+  cockpit: { label: 'Cockpit', mass: 2, color: 0x24282c, area: 0.3 },
+  structure: { label: 'Fuselage', mass: 0.7, color: 0xe8e7df, area: 0.1 },
+  wing: { label: 'Wing', mass: 0.45, color: 0xf2f1ea, area: 0.35 },
+  control: { label: 'Control surface', mass: 0.35, color: 0xef2b12, area: 0.35 },
+  engine: { label: 'Motor', mass: 2, color: 0x171a1e, area: 0.1 },
+  battery: { label: 'Battery', mass: 2, color: 0xef2b12, area: 0.2 },
+  cargo: { label: 'Cargo', mass: 3, color: 0x8b9094, area: 0.3 },
+  skid: { label: 'Skid', mass: 0.6, color: 0x454b51, area: 0.05 },
 };
 export function validateBlueprint(value: unknown): Blueprint {
   if (!value || typeof value !== 'object') throw Error('Choose an aircraft JSON file.');

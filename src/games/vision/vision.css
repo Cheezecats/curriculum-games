@@ -3,7 +3,8 @@
   margin: auto;
   padding: 26px 38px;
   color: var(--ink);
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-body, 'IBM Plex Sans', sans-serif);
+  font-size: 14px;
 }
 .vision-workshop button,
 .vision-workshop select,
@@ -12,7 +13,7 @@
 }
 .vision-workshop button {
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 0;
   background: var(--panel);
   color: var(--ink);
   padding: 10px 15px;
@@ -29,7 +30,7 @@
 .vision-workshop button:focus-visible,
 .vision-workshop input:focus-visible,
 .vision-workshop select:focus-visible {
-  outline: 3px solid var(--teal);
+  outline: 3px solid #ef2b12;
   outline-offset: 3px;
 }
 .vision-header {
@@ -40,7 +41,7 @@
 }
 .vision-eyebrow {
   font:
-    10px ui-monospace,
+    12px ui-monospace,
     monospace;
   letter-spacing: 2px;
   color: var(--teal);
@@ -55,7 +56,7 @@
   font-weight: 400;
 }
 .vision-header > button {
-  font-size: 12px;
+  font-size: 14px;
 }
 .vision-brief {
   display: flex;
@@ -65,7 +66,7 @@
   border-bottom: 1px solid var(--line);
   padding: 14px 0;
   margin-bottom: 22px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .vision-contract {
   font-weight: 700;
@@ -78,7 +79,7 @@
   color: var(--muted);
 }
 .vision-brief > strong {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   margin-left: auto;
   max-width: 250px;
@@ -96,7 +97,7 @@
   display: flex;
   justify-content: space-between;
   font:
-    10px ui-monospace,
+    12px ui-monospace,
     monospace;
   letter-spacing: 1px;
   padding: 0 0 12px;
@@ -107,23 +108,23 @@
 }
 .vision-live {
   color: var(--teal);
-  font-size: 9px;
+  font-size: 11px;
 }
 .vision-scene {
   height: 300px;
   position: relative;
   overflow: hidden;
-  border: 1px solid #d0d8cd;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #e5e9de 0%, #edf0e7 72%, #d4ddcc 72%);
+  border: 1px solid #444a50;
+  border-radius: 0;
+  background: linear-gradient(180deg, #d6d9dc 0%, #e6e8ea 72%, #9ba0a5 72%);
 }
 .vision-scene:before {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(#becab733 1px, transparent 1px),
-    linear-gradient(90deg, #becab733 1px, transparent 1px);
+    linear-gradient(#ffffff20 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff20 1px, transparent 1px);
   background-size: 34px 34px;
   transform: perspective(400px) rotateX(20deg);
   opacity: 0.5;
@@ -134,11 +135,11 @@
   left: 24px;
   width: 160px;
   height: 75px;
-  border: 7px solid #cad5c6;
-  border-radius: 5px;
+  border: 7px solid #343b42;
+  border-radius: 0;
   background:
-    linear-gradient(90deg, transparent 49%, #cad5c6 49%, #cad5c6 53%, transparent 53%),
-    linear-gradient(180deg, #c4d6d0, #edf5e3);
+    linear-gradient(90deg, transparent 49%, #343b42 49%, #343b42 53%, transparent 53%),
+    linear-gradient(180deg, #a3bfd1, #dbe6ed);
 }
 .vision-belt {
   position: absolute;
@@ -146,11 +147,11 @@
   left: -6%;
   width: 112%;
   height: 66px;
-  background: repeating-linear-gradient(90deg, #263e40 0, #263e40 22px, #375051 23px, #375051 25px);
-  border-top: 7px solid #68817a;
-  border-bottom: 9px solid #a7b3a5;
-  box-shadow: 0 10px 0 #60756d;
-  border-radius: 24px;
+  background: repeating-linear-gradient(90deg, #202326 0, #202326 22px, #3a3e42 23px, #3a3e42 25px);
+  border-top: 7px solid #798086;
+  border-bottom: 9px solid #b9bdc1;
+  box-shadow: 0 10px 0 #42484d;
+  border-radius: 0;
   z-index: 3;
 }
 .vision-moving {
@@ -163,23 +164,23 @@
   filter: drop-shadow(3px 5px 2px #0003);
 }
 .vision-belt-object svg {
-  border-radius: 5px;
-  border: 3px solid #d1d7c7;
-  box-shadow: 2px 5px 0 #122b2f44;
+  border-radius: 0;
+  border: 3px solid #e4e4df;
+  box-shadow: 2px 5px 0 #11111144;
 }
 .vision-sensor-part {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border-radius: 8px;
+  border-radius: 0;
   box-shadow:
     inset 0 0 0 2px #ffffff77,
-    2px 3px 0 #264a4622;
+    2px 3px 0 #11111133;
   font:
-    10px ui-monospace,
+    12px ui-monospace,
     monospace;
-  color: #173c37;
+  color: #111111;
 }
 .vision-robot {
   position: absolute;
@@ -192,7 +193,7 @@
 .vision-antenna {
   height: 17px;
   width: 4px;
-  background: #6c8b7e;
+  background: #697179;
   position: absolute;
   left: 52px;
   top: -10px;
@@ -201,7 +202,7 @@
   content: '';
   width: 10px;
   height: 10px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--orange);
   position: absolute;
   top: -5px;
@@ -213,12 +214,12 @@
   left: 4px;
   width: 100px;
   height: 65px;
-  border-radius: 17px;
-  background: #f4e5c4;
+  border-radius: 0;
+  background: #f1f0ea;
   box-shadow:
-    inset -7px -5px 0 #ddcba5,
-    0 3px 0 #688078;
-  border: 2px solid #6a8275;
+    inset -7px -5px 0 #c4c4bf,
+    0 3px 0 #4c5359;
+  border: 2px solid #454b50;
 }
 .vision-head i {
   position: absolute;
@@ -226,9 +227,9 @@
   top: 24px;
   width: 13px;
   height: 14px;
-  background: #254942;
-  border-radius: 5px;
-  box-shadow: 0 2px 0 #bfc9a0;
+  background: #22272c;
+  border-radius: 0;
+  box-shadow: 0 2px 0 #9ca2a7;
 }
 .vision-head i + i {
   left: 64px;
@@ -238,8 +239,8 @@
   left: 45px;
   top: 48px;
   width: 16px;
-  border-bottom: 3px solid #496958;
-  border-radius: 50%;
+  border-bottom: 3px solid #60666b;
+  border-radius: 0;
 }
 .vision-body {
   position: absolute;
@@ -247,12 +248,12 @@
   top: 73px;
   width: 72px;
   height: 51px;
-  background: #e9a878;
-  border: 2px solid #827f5d;
-  border-radius: 12px 12px 4px 4px;
-  box-shadow: inset -6px -4px 0 #d28d65;
+  background: #ef2b12;
+  border: 2px solid #7f1b10;
+  border-radius: 0;
+  box-shadow: inset -6px -4px 0 #bb200e;
   font:
-    10px ui-monospace,
+    12px ui-monospace,
     monospace;
   text-align: center;
   padding-top: 16px;
@@ -264,9 +265,9 @@
   top: 88px;
   width: 70px;
   height: 15px;
-  background: #f1ce96;
-  border: 3px solid #6f8576;
-  border-radius: 9px;
+  background: #e5e3dc;
+  border: 3px solid #62686e;
+  border-radius: 0;
   transform: rotate(34deg);
   transform-origin: left center;
 }
@@ -276,7 +277,7 @@
   right: -18px;
   top: -14px;
   font-size: 32px;
-  color: #426b5b;
+  color: #262b30;
 }
 .vision-working {
   animation: vision-arm-sort 0.84s ease-in-out infinite alternate;
@@ -288,10 +289,10 @@
   z-index: 5;
   width: 50px;
   height: 94px;
-  border: 6px solid #9eaea0;
+  border: 6px solid #535b63;
   border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  box-shadow: 2px -2px 0 #cad2c5;
+  border-radius: 0;
+  box-shadow: 2px -2px 0 #949ca3;
 }
 .vision-scanner span {
   position: absolute;
@@ -299,18 +300,18 @@
   left: -20px;
   white-space: nowrap;
   font:
-    8px ui-monospace,
+    11px ui-monospace,
     monospace;
-  color: #5c7769;
+  color: #333a41;
   letter-spacing: 1px;
 }
 .vision-scanner div {
   height: 80px;
   width: 1px;
-  background: #b2d99a;
+  background: #ef2b12;
   position: absolute;
   left: 23px;
-  box-shadow: 0 0 16px 10px #d1efab55;
+  box-shadow: 0 0 16px 10px #ef2b1240;
 }
 .vision-bin {
   position: absolute;
@@ -318,9 +319,9 @@
   width: 100px;
   height: 43px;
   background: var(--orange);
-  border: 2px solid #a18968;
-  border-top: 6px solid #bda783;
-  border-radius: 3px 3px 9px 9px;
+  border: 2px solid #3c4247;
+  border-top: 6px solid #73797e;
+  border-radius: 0;
   z-index: 4;
   display: flex;
   flex-direction: column;
@@ -328,7 +329,7 @@
   justify-content: center;
   gap: 4px;
   font:
-    8px ui-monospace,
+    11px ui-monospace,
     monospace;
   box-shadow: inset -7px -3px 0 #00000008;
 }
@@ -337,14 +338,14 @@
 }
 .vision-bin-b {
   left: 46%;
-  background: #dbe89b;
+  background: #dddeda;
 }
 .vision-bin-c {
   left: 71%;
-  background: #b1d1c2;
+  background: #989fa5;
 }
 .vision-bin span {
-  font-size: 7px;
+  font-size: 11px;
   opacity: 0.6;
 }
 .vision-scoreboard {
@@ -361,7 +362,7 @@
 }
 .vision-scoreboard small {
   font:
-    9px ui-monospace,
+    11px ui-monospace,
     monospace;
   letter-spacing: 1px;
   color: var(--muted);
@@ -371,14 +372,14 @@
   letter-spacing: -0.5px;
 }
 .vision-scoreboard em {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   font-weight: 400;
   font-style: normal;
 }
 .vision-status {
   font:
-    11px ui-monospace,
+    13px ui-monospace,
     monospace;
   color: var(--teal);
   padding: 14px 0;
@@ -389,18 +390,18 @@
   flex-wrap: wrap;
 }
 .vision-workshop .vision-primary {
-  background: var(--teal);
-  border-color: var(--teal);
+  background: #ef2b12;
+  border-color: #ef2b12;
   color: white;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
 }
 .vision-workshop .vision-primary:hover:not(:disabled) {
-  background: #174f49;
+  background: #c91e0a;
 }
 .vision-console {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--panel);
   overflow: hidden;
 }
@@ -415,18 +416,18 @@
   border: 0;
   background: transparent;
   text-transform: capitalize;
-  font-size: 11px;
+  font-size: 13px;
   padding: 10px 7px;
   color: var(--muted);
 }
 .vision-console nav button b {
   font:
-    9px ui-monospace,
+    11px ui-monospace,
     monospace;
   margin-right: 3px;
 }
 .vision-console nav button[aria-current] {
-  background: #e8eddc;
+  background: #111111;
   color: var(--teal);
 }
 .vision-console section {
@@ -439,7 +440,7 @@
   line-height: 1.15;
 }
 .vision-console p {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.6;
   margin: 0 0 16px;
@@ -448,7 +449,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   margin: 12px 0;
 }
@@ -456,16 +457,16 @@
 .vision-console input[type='number'] {
   padding: 8px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: 0;
   color: var(--ink);
   background: var(--panel);
   width: 100%;
   box-sizing: border-box;
-  font-size: 11px;
+  font-size: 13px;
 }
 .vision-data-summary {
   font:
-    10px ui-monospace,
+    12px ui-monospace,
     monospace;
   color: var(--muted);
   margin: 15px 0 10px;
@@ -491,15 +492,15 @@
   align-items: center;
   flex-direction: column;
   gap: 4px;
-  border-radius: 5px;
+  border-radius: 0;
 }
 .vision-sample-grid button span {
-  font-size: 7px;
+  font-size: 11px;
 }
 .vision-sample-grid .vision-focused {
   outline: 2px solid var(--teal);
   outline-offset: 0;
-  background: #e7eddc;
+  background: #f0f0f0;
 }
 .vision-excluded {
   opacity: 0.35;
@@ -512,7 +513,7 @@
   align-items: center;
 }
 .vision-label-editor strong {
-  font-size: 11px;
+  font-size: 13px;
 }
 .vision-label-editor label {
   margin: 6px 0;
@@ -521,17 +522,17 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  font-size: 10px;
+  font-size: 12px;
   grid-column: 1/-1;
   font-weight: 400;
   gap: 7px;
 }
 .vision-check input {
-  accent-color: var(--teal);
+  accent-color: #ef2b12;
 }
 .vision-console .vision-hint {
-  font-size: 10px;
-  background: #f8eddb;
+  font-size: 12px;
+  background: #eeeeee;
   padding: 8px;
   margin-top: 9px;
 }
@@ -555,11 +556,11 @@
 .vision-learning > div {
   display: flex;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 12px;
 }
 .vision-learning span {
   font:
-    8px ui-monospace,
+    11px ui-monospace,
     monospace;
   color: var(--muted);
 }
@@ -569,21 +570,21 @@
 }
 .vision-learning p {
   font:
-    9px ui-monospace,
+    11px ui-monospace,
     monospace;
 }
 .vision-deploy-target {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: #edf1df;
+  background: #f0f0f0;
   padding: 22px;
-  border-radius: 8px;
+  border-radius: 0;
   margin: 20px 0;
 }
 .vision-deploy-target small {
   font:
-    9px ui-monospace,
+    11px ui-monospace,
     monospace;
   color: var(--muted);
   letter-spacing: 1px;
@@ -593,26 +594,26 @@
   letter-spacing: -1px;
 }
 .vision-deploy-target span {
-  font-size: 11px;
+  font-size: 13px;
 }
 .vision-result {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
-  background: #e9efdb;
+  background: #f1f1f1;
   padding: 12px;
-  border-radius: 6px;
+  border-radius: 0;
   margin: 0 0 14px;
 }
 .vision-mistakes {
   margin-top: 18px;
 }
 .vision-mistakes h3 {
-  font-size: 12px;
+  font-size: 14px;
   margin: 0 0 10px;
 }
 .vision-mistakes h3 small {
   font:
-    9px ui-monospace,
+    11px ui-monospace,
     monospace;
   color: var(--muted);
   margin-left: 8px;
@@ -627,20 +628,20 @@
   gap: 7px;
   align-items: center;
   white-space: nowrap;
-  font-size: 9px;
+  font-size: 11px;
   padding: 5px;
 }
 .vision-inspector {
   margin-top: 22px;
   border-top: 1px solid var(--line);
   padding-top: 14px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .vision-inspector summary {
   cursor: pointer;
   color: var(--muted);
   font:
-    10px ui-monospace,
+    12px ui-monospace,
     monospace;
 }
 .vision-inspector-grid {
@@ -653,16 +654,16 @@
   max-width: 440px;
 }
 .vision-inspector h3 {
-  font-size: 11px;
+  font-size: 13px;
 }
 .vision-inspector p {
   font:
-    9px ui-monospace,
+    11px ui-monospace,
     monospace;
   word-break: break-all;
 }
 .vision-inspector small {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--muted);
 }
 .vision-boundary {
@@ -763,6 +764,362 @@
   }
   .vision-scene {
     height: 290px;
+  }
+  .vision-inspector-grid {
+    display: block;
+  }
+}
+
+/* FIELDWORK workshop edition: editorial type, flat panels and safety-red actions. */
+.vision-workshop {
+  padding: 24px 32px 32px;
+  background: #fff;
+}
+.vision-header {
+  margin-bottom: 18px;
+}
+.vision-header h1 {
+  font: 900 44px/1.12 var(--font-display, 'Roboto Condensed', sans-serif);
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+.vision-header h1 span {
+  font-weight: 400;
+}
+.vision-header > button {
+  background: #fff;
+  font-size: 13px;
+}
+.vision-eyebrow {
+  font-family: var(--font-body, sans-serif);
+  font-weight: 600;
+  color: #626262;
+  letter-spacing: 1.2px;
+}
+.vision-brief {
+  border-top: 2px solid #111;
+  padding: 14px 0;
+  font-size: 14px;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+.vision-contract {
+  font-weight: 600;
+  white-space: normal;
+  min-width: 140px;
+  max-width: 195px;
+}
+.vision-brief p {
+  line-height: 1.5;
+  max-width: 620px;
+}
+.vision-brief > strong {
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+  max-width: 270px;
+}
+.vision-layout {
+  grid-template-columns: minmax(0, 1fr) 395px;
+  gap: 28px;
+}
+.vision-floor-label {
+  font-size: 11px;
+  padding-bottom: 12px;
+  color: #111;
+}
+.vision-live {
+  color: #b91e0b;
+  font-size: 11px;
+  font-weight: 600;
+}
+.vision-scene {
+  border: 1px solid #70777e;
+  height: 330px;
+}
+.vision-factory-window {
+  border-width: 6px;
+  box-shadow: 0 2px 0 #ffffff55;
+}
+.vision-head {
+  border-radius: 3px;
+}
+.vision-head i {
+  border-radius: 2px;
+}
+.vision-head span {
+  border-radius: 0;
+}
+.vision-antenna:before {
+  border-radius: 50%;
+}
+.vision-body {
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.vision-belt {
+  border-radius: 3px;
+}
+.vision-arm {
+  border-radius: 3px;
+}
+.vision-bin {
+  color: #111;
+  border-radius: 0;
+  height: 46px;
+  font-size: 10px;
+}
+.vision-bin-a {
+  color: #111;
+}
+.vision-bin span {
+  font-size: 10px;
+  opacity: 0.85;
+}
+.vision-scanner span {
+  font-size: 10px;
+  font-weight: 600;
+}
+.vision-scoreboard {
+  padding: 17px 0;
+  border-bottom-color: #111;
+}
+.vision-scoreboard > div + div {
+  padding-left: 18px;
+  border-left: 1px solid #d4d4d4;
+}
+.vision-scoreboard small {
+  font-size: 11px;
+}
+.vision-scoreboard strong {
+  font: 900 28px/1.15 var(--font-display, 'Roboto Condensed', sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+.vision-scoreboard em {
+  font: 12px var(--font-body, sans-serif);
+  text-transform: none;
+}
+.vision-status {
+  font: 13px/1.55 var(--font-body, sans-serif);
+  padding: 13px 0;
+  min-height: 46px;
+  color: #626262;
+}
+.vision-workshop .vision-primary {
+  font: 900 24px/1.2 var(--font-display, 'Roboto Condensed', sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 13px 20px;
+}
+.vision-console {
+  background: #f5f5f5;
+  border-color: #d4d4d4;
+  border-top: 3px solid #111;
+}
+.vision-console nav {
+  padding: 0;
+  gap: 0;
+  background: #fff;
+}
+.vision-console nav button {
+  font-size: 13px;
+  padding: 15px 8px;
+  border-right: 1px solid #d4d4d4;
+  text-transform: uppercase;
+  color: #626262;
+}
+.vision-console nav button:last-child {
+  border-right: 0;
+}
+.vision-console nav button[aria-current] {
+  background: #111;
+  color: #fff;
+  box-shadow: inset 0 -3px #ef2b12;
+}
+.vision-console nav button b {
+  font-size: 11px;
+  margin-right: 5px;
+}
+.vision-console section {
+  padding: 20px;
+}
+.vision-console h2 {
+  font: 900 30px/1.15 var(--font-display, 'Roboto Condensed', sans-serif);
+  text-transform: uppercase;
+  letter-spacing: 0;
+  margin-bottom: 10px;
+}
+.vision-console p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.vision-console label {
+  font-size: 13px;
+  font-weight: 500;
+  gap: 6px;
+}
+.vision-console select,
+.vision-console input[type='number'] {
+  background: #fff;
+  padding: 10px;
+  border-color: #aaa;
+  font-size: 14px;
+}
+.vision-data-summary {
+  font-size: 12px;
+}
+.vision-data-summary strong {
+  color: #111;
+  font-size: 18px;
+}
+.vision-sample-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  max-height: 177px;
+  gap: 4px;
+}
+.vision-sample-grid button {
+  background: #fff;
+  min-width: 0;
+}
+.vision-sample-grid button span {
+  font-size: 10px;
+}
+.vision-sample-grid .vision-focused {
+  outline-color: #ef2b12;
+  background: #fff;
+}
+.vision-label-editor strong {
+  font-size: 13px;
+}
+.vision-console .vision-check {
+  font-size: 13px;
+}
+.vision-console .vision-hint {
+  background: #e9e9e9;
+  border-left: 3px solid #111;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.vision-learning {
+  margin-top: 20px;
+}
+.vision-learning > div {
+  font-size: 13px;
+}
+.vision-learning span,
+.vision-learning p {
+  font-size: 11px;
+}
+.vision-learning polyline:first-of-type {
+  stroke: #111;
+}
+.vision-learning polyline:last-of-type {
+  stroke: #ef2b12;
+}
+.vision-deploy-target {
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #111;
+  padding: 20px 0;
+  background: transparent;
+}
+.vision-deploy-target small {
+  font-size: 11px;
+}
+.vision-deploy-target strong {
+  font: 900 32px/1.2 var(--font-display, 'Roboto Condensed', sans-serif);
+  letter-spacing: 0;
+}
+.vision-deploy-target span {
+  font-size: 14px;
+}
+.vision-result {
+  border-left: 3px solid #ef2b12;
+  font-size: 14px;
+}
+.vision-mistakes h3 {
+  font-size: 14px;
+}
+.vision-mistakes h3 small {
+  font-size: 11px;
+}
+.vision-mistakes button {
+  background: #fff;
+  font-size: 12px;
+}
+.vision-inspector {
+  font-size: 13px;
+}
+.vision-inspector summary {
+  font: 13px var(--font-body, sans-serif);
+  font-weight: 500;
+  color: #111;
+}
+.vision-inspector h3 {
+  font-size: 13px;
+}
+.vision-inspector p,
+.vision-inspector small {
+  font-size: 11px;
+}
+.vision-boundary,
+.vision-feature-maps {
+  filter: grayscale(1);
+}
+@media (min-width: 1350px) {
+  .vision-scene {
+    height: 340px;
+  }
+}
+@media (max-width: 1100px) {
+  .vision-workshop {
+    padding: 20px;
+  }
+  .vision-layout {
+    grid-template-columns: minmax(0, 1fr) 355px;
+    gap: 20px;
+  }
+  .vision-brief > strong {
+    display: none;
+  }
+  .vision-header h1 {
+    font-size: 38px;
+  }
+  .vision-bin {
+    width: 82px;
+  }
+}
+@media (max-width: 800px) {
+  .vision-layout {
+    grid-template-columns: 1fr;
+  }
+  .vision-header {
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .vision-header h1 {
+    font-size: 32px;
+  }
+  .vision-header > button {
+    font-size: 12px;
+    padding: 8px;
+  }
+  .vision-brief {
+    display: block;
+  }
+  .vision-contract {
+    max-width: none;
+  }
+  .vision-brief p {
+    margin-top: 8px;
+  }
+  .vision-console {
+    order: 2;
+  }
+  .vision-scene {
+    height: 300px;
   }
   .vision-inspector-grid {
     display: block;

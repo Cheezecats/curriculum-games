@@ -75,12 +75,12 @@
 
 **Interfaces:** Uses both game exports and shared saved data without changing their contracts unless a documented ruling is necessary.
 
-- [ ] Write failing browser checks for navigation, mission progression/check separation, save/restore/import, flight and vision play flows, and lifecycle disposal.
-- [ ] Run them against the actual app and implement targeted repairs from observed failures.
-- [ ] Run typecheck/lint/unit/integration tests and production build, then Chromium/Firefox/WebKit checks with real WebGL where available.
-- [ ] Document controls, actual curriculum coverage/source scope, physics/model assumptions, reproducible performance measurements and any unverified checks.
+- [x] Write failing browser checks for navigation, mission progression/check separation, save/restore/import, flight and vision play flows, and lifecycle disposal.
+- [x] Run them against the actual app and implement targeted repairs from observed failures.
+- [x] Run typecheck/lint/unit/integration tests and production build, then Chromium/Firefox/WebKit checks with real WebGL where available.
+- [x] Document controls, actual curriculum coverage/source scope, physics/model assumptions, reproducible performance measurements and any unverified checks.
 - [ ] Configure CI and GitHub Pages; create source repository and publish the verified demo when account tools permit.
-- [ ] Obtain independent whole-project review, repair important findings, rerun affected verification, and commit the finished result.
+- [x] Obtain independent whole-project review, repair important findings, rerun affected verification, and commit the finished result.
 
 ## Execution rulings
 

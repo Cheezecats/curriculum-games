@@ -9,7 +9,7 @@ export class FlightScene {
   overlay = new T.Group();
   com = new T.Mesh(
     new T.SphereGeometry(0.15, 12, 8),
-    new T.MeshBasicMaterial({ color: 0xf26b48, depthTest: false }),
+    new T.MeshBasicMaterial({ color: 0xef2b12, depthTest: false }),
   );
   yaw = 0.65;
   elevation = 0.43;
@@ -24,39 +24,83 @@ export class FlightScene {
   ) {
     this.renderer = new T.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    this.renderer.setClearColor(0xdce9df);
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.setClearColor(0xc7d7e5);
+    // Keep the workshop inexpensive: no shadow-map passes or postprocessing.
+    this.renderer.shadowMap.enabled = false;
+    this.renderer.toneMapping = T.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.08;
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     host.appendChild(this.renderer.domElement);
-    this.scene.fog = new T.Fog(0xdce9df, 130, 700);
-    this.scene.add(new T.HemisphereLight(0xfff9dc, 0x68887d, 2.3));
-    const sun = new T.DirectionalLight(0xfff5df, 3);
+    this.scene.fog = new T.Fog(0xc7d7e5, 130, 700);
+    this.scene.add(new T.HemisphereLight(0xeaf2ff, 0x555b63, 1.7));
+    const sun = new T.DirectionalLight(0xffffff, 2.7);
     sun.position.set(30, 80, 35);
     this.scene.add(sun);
     this.scene.add(this.craft, this.overlay);
     this.craft.add(this.com);
-    this.ground = this.box(1200, 2, 360, 0x83a99a, 250, -2, 0);
+    this.ground = this.box(1200, 2, 360, 0x717b82, 250, -1, 0);
     this.scene.add(this.ground);
-    this.scene.add(this.box(24, 32, 24, 0xa5b7a2, -8, 16, 0));
-    this.scene.add(this.box(24, 0.15, 24, 0xd8cfaf, -8, 32.1, 0));
-    this.scene.add(this.box(80, 0.1, 16, 0xede7c9, 150, 0.1, 0));
+    this.scene.add(this.box(24, 32, 24, 0x70757a, -8, 16, 0));
+    this.scene.add(this.box(24, 0.15, 24, 0xbabdbd, -8, 32.1, 0));
+    this.scene.add(this.box(80, 0.1, 16, 0x373d43, 150, 0.1, 0));
     for (let x = 120; x < 190; x += 10) this.scene.add(this.box(4, 0.12, 0.3, 0xffffff, x, 0.2, 0));
-    const grid = new T.GridHelper(36, 36, 0xc4cab8, 0xd9decd);
-    grid.position.y = 33;
+    const grid = new T.GridHelper(36, 36, 0x737a80, 0xa2a8ad);
+    grid.position.y = 32.2;
     this.scene.add(grid);
+    // A light industrial service frame sits at the rear of the launch field.
+    // All new details are outside the launch corridor and purely decorative.
+    // Instancing keeps the steelwork to a single draw call.
+    const beams = [
+      [0.24, 9, 0.24, -18, 36.7, -10],
+      [0.24, 9, 0.24, -18, 36.7, 10],
+      [0.24, 9, 0.24, -10, 36.7, -10],
+      [0.24, 9, 0.24, -10, 36.7, 10],
+      [0.24, 0.3, 20.4, -18, 41.1, 0],
+      [0.24, 0.3, 20.4, -10, 41.1, 0],
+      [8.2, 0.3, 0.24, -14, 41.1, -10],
+      [8.2, 0.3, 0.24, -14, 41.1, 10],
+      [0.18, 0.18, 20, -18, 38, 0],
+      [8, 0.18, 0.18, -14, 35.5, -10],
+    ];
+    const steelwork: T.InstancedMesh = new T.InstancedMesh(
+      new T.BoxGeometry(1, 1, 1),
+      new T.MeshStandardMaterial({ color: 0x343a40, roughness: 0.65, metalness: 0.25 }),
+      beams.length,
+    );
+    const detail = new T.Object3D();
+    beams.forEach(([w, h, d, x, y, z], i) => {
+      detail.position.set(x, y, z);
+      detail.scale.set(w, h, d);
+      detail.updateMatrix();
+      steelwork.setMatrixAt(i, detail.matrix);
+    });
+    this.scene.add(steelwork);
+    // Flush paint identifies the pad edge and forward direction without adding obstacles.
+    const paint: T.InstancedMesh = new T.InstancedMesh(
+      new T.BoxGeometry(1, 0.02, 1),
+      new T.MeshBasicMaterial({ color: 0xef2b12 }),
+      12,
+    );
+    for (let i = 0; i < 12; i++) {
+      detail.position.set(3.5, 32.2, -10.5 + i * 1.9);
+      detail.scale.set(0.5, 1, 0.8);
+      detail.updateMatrix();
+      paint.setMatrixAt(i, detail.matrix);
+    }
+    this.scene.add(paint);
     for (let i = 0; i < 24; i++) {
       const x = 40 + i * 20,
         z = (i % 2 ? -1 : 1) * (35 + ((i * 17) % 60));
       const rock = new T.Mesh(
         new T.ConeGeometry(13 + (i % 4) * 5, 18 + (i % 5) * 6, 5),
-        new T.MeshStandardMaterial({ color: i % 2 ? 0xa7b897 : 0x72988b, flatShading: true }),
+        new T.MeshStandardMaterial({ color: i % 2 ? 0x959da4 : 0x757e88, flatShading: true }),
       );
       rock.position.set(x, 4, z);
       this.scene.add(rock);
     }
     const ring = new T.Mesh(
       new T.TorusGeometry(10, 0.3, 8, 40),
-      new T.MeshStandardMaterial({ color: 0xf1a078, emissive: 0x42200e }),
+      new T.MeshStandardMaterial({ color: 0xef2b12, emissive: 0x3d0600 }),
     );
     ring.rotation.y = Math.PI / 2;
     ring.position.set(65, 37, 0);
@@ -78,7 +122,7 @@ export class FlightScene {
   private box(w: number, h: number, d: number, c: number, x: number, y: number, z: number) {
     const m = new T.Mesh(
       new T.BoxGeometry(w, h, d),
-      new T.MeshStandardMaterial({ color: c, roughness: 0.8 }),
+      new T.MeshStandardMaterial({ color: c, roughness: 0.7, metalness: 0.12 }),
     );
     m.position.set(x, y, z);
     return m;
@@ -120,10 +164,13 @@ export class FlightScene {
     for (const child of [...this.craft.children])
       if (child !== this.com) {
         this.craft.remove(child);
-        if (child instanceof T.Mesh) {
-          child.geometry.dispose();
-          (child.material as T.Material).dispose();
-        }
+        child.traverse((object) => {
+          if (object instanceof T.Mesh || object instanceof T.Line) {
+            object.geometry.dispose();
+            const materials = Array.isArray(object.material) ? object.material : [object.material];
+            for (const material of materials) material.dispose();
+          }
+        });
       }
     for (const p of b.parts) {
       const thin = p.kind === 'wing' || p.kind === 'control';
@@ -131,12 +178,20 @@ export class FlightScene {
         0.94,
         thin ? 0.16 : p.kind === 'skid' ? 0.25 : 0.85,
         0.94,
-        p.id === selected ? 0xffffff : PARTS[p.kind].color,
+        p.id === selected ? 0xffbc32 : PARTS[p.kind].color,
         p.x,
         p.y,
         p.z,
       );
       if (thin && p.rotation % 2) m.rotation.x = Math.PI / 2;
+      if (p.id === selected) {
+        const outline = new T.LineSegments(
+          new T.EdgesGeometry(m.geometry),
+          new T.LineBasicMaterial({ color: 0x111111 }),
+        );
+        outline.scale.setScalar(1.02);
+        m.add(outline);
+      }
       m.userData.part = p.id;
       this.craft.add(m);
     }
@@ -174,7 +229,7 @@ export class FlightScene {
               f.force.clone().normalize(),
               f.position,
               Math.min(5, len * 0.035),
-              f.kind === 'engine' ? 0xf1a078 : 0x1e6a61,
+              f.kind === 'engine' ? 0xef2b12 : 0x30343a,
             ),
           );
       }
@@ -198,6 +253,7 @@ export class FlightScene {
     window.removeEventListener('pointermove', this.move);
     this.scene.traverse((o) => {
       if (o instanceof T.Mesh || o instanceof T.Line) {
+        if (o instanceof T.InstancedMesh) o.dispose();
         o.geometry.dispose();
         const materials = Array.isArray(o.material) ? o.material : [o.material];
         for (const m of materials) m.dispose();

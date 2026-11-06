@@ -1,5 +1,7 @@
 # Fieldwork
 
+[Play the browser beta](https://cheezecats.github.io/curriculum-games/) · [Source repository](https://github.com/Cheezecats/curriculum-games)
+
 An original browser playground for physics and machine learning. Build an aircraft, train a robot, and use the results of your experiments to work out what to change next.
 
 The first beta contains **Flight Workshop** and **Robot Vision**, with six guided missions each and unrestricted free play. It covers selected IB Physics and Computer Science concepts. It is an experimental learning project; improved exam performance and learning efficacy have not been established.

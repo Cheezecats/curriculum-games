@@ -2,6 +2,7 @@
   color: var(--ink);
   background: var(--paper);
   min-height: 100vh;
+  font: 14px/1.5 var(--font-body, 'IBM Plex Sans', sans-serif);
 }
 .flight-workshop button,
 .flight-workshop select,
@@ -11,55 +12,58 @@
 .flight-workshop button,
 .flight-upload {
   border: 1px solid var(--line);
-  background: var(--panel);
+  background: #fff;
   color: var(--ink);
-  border-radius: 7px;
-  padding: 8px 11px;
+  border-radius: 0;
+  padding: 9px 12px;
   cursor: pointer;
   transition:
     background 0.15s,
-    transform 0.15s;
+    border-color 0.15s;
 }
 .flight-workshop button:hover:not(:disabled),
 .flight-upload:hover {
-  background: #e6ecd9;
-  transform: translateY(-1px);
+  background: #ededed;
+  border-color: #111;
 }
 .flight-workshop button:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 .flight-workshop button:focus-visible,
-.flight-workshop input:focus-visible {
-  outline: 3px solid var(--orange);
-  outline-offset: 2px;
+.flight-workshop input:focus-visible,
+.flight-workshop select:focus-visible,
+.flight-workshop summary:focus-visible {
+  outline: 3px solid #ef2b12;
+  outline-offset: 3px;
 }
 .flight-header {
   display: flex;
   align-items: center;
   gap: 24px;
   padding: 20px 30px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid #111;
 }
 .flight-header h1 {
-  font-size: 25px;
-  letter-spacing: -0.8px;
-  line-height: 1.2;
+  font: 900 36px/1.1 var(--font-display, 'Roboto Condensed', sans-serif);
+  text-transform: uppercase;
+  letter-spacing: -0.4px;
   margin: 5px 0 0;
 }
 .flight-back {
-  font-size: 12px !important;
+  font-size: 13px !important;
+  white-space: nowrap;
 }
 .flight-eyebrow {
-  font-size: 10px;
-  font-weight: 750;
-  letter-spacing: 1.4px;
-  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.25px;
+  color: #626262;
 }
 .flight-status {
   margin-left: auto;
   font:
-    10px ui-monospace,
+    11px ui-monospace,
     monospace;
   letter-spacing: 1px;
   white-space: nowrap;
@@ -68,62 +72,70 @@
   display: inline-block;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
-  background: var(--teal);
+  background: #ef2b12;
   margin-right: 8px;
 }
 .flight-layout {
   display: grid;
-  grid-template-columns: 290px minmax(0, 1fr);
-  max-width: 1720px;
+  grid-template-columns: 320px minmax(0, 1fr);
+  max-width: 1800px;
   margin: auto;
 }
 .flight-sidebar {
   border-right: 1px solid var(--line);
-  padding: 6px 18px 24px;
-  max-height: calc(100vh - 95px);
+  padding: 0 20px 24px;
+  max-height: calc(100vh - 104px);
   overflow: auto;
+  scrollbar-width: thin;
 }
 .flight-section {
   padding: 17px 0;
   border-bottom: 1px solid var(--line);
-  font-size: 12px;
+  font-size: 14px;
 }
 .flight-section p {
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 9px 0;
 }
 .flight-objective {
-  background: #e7ed914d;
-  border-left: 3px solid var(--teal);
-  padding: 10px;
-  font-size: 11px;
+  background: #f2f2f2;
+  border-left: 3px solid #ef2b12;
+  padding: 10px 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 .flight-presets {
   display: grid;
-  gap: 6px;
+  gap: 0;
   margin-top: 10px;
+  border-top: 1px solid #d4d4d4;
 }
 .flight-presets button {
   text-align: left;
-  font-weight: 650;
-  font-size: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  border-width: 0 0 1px;
+  padding: 11px 12px;
 }
 .flight-presets button span {
   display: block;
-  font-size: 10px;
-  color: var(--muted);
+  font-size: 12px;
+  color: #626262;
   font-weight: 400;
-  margin-top: 5px;
+  margin-top: 3px;
 }
 .flight-presets button.selected {
-  background: var(--teal);
-  color: white;
-  border-color: var(--teal);
+  background: #111;
+  color: #fff;
+  border-color: #111;
+  border-left: 3px solid #ef2b12;
+  padding-left: 9px;
+}
+.flight-presets button.selected:hover:not(:disabled) {
+  background: #252525;
 }
 .flight-presets button.selected span {
-  color: #cce1d7;
+  color: #c7c7c7;
 }
 .flight-section-title,
 .flight-row {
@@ -134,27 +146,29 @@
 }
 .flight-section-title > span:last-child {
   font:
-    10px ui-monospace,
+    12px ui-monospace,
     monospace;
 }
 .flight-label {
   display: grid;
   gap: 6px;
   margin-top: 12px;
+  font-size: 13px;
+  font-weight: 500;
 }
 .flight-label select {
-  padding: 9px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-  border-radius: 6px;
-  color: var(--ink);
+  padding: 10px;
+  border: 1px solid #b5b5b5;
+  background: #fff;
+  border-radius: 0;
+  color: #111;
   width: 100%;
-  font-size: 12px;
+  font-size: 14px;
 }
 .flight-hint {
-  font-size: 10px;
-  color: var(--muted);
-  line-height: 1.55;
+  font-size: 12px;
+  color: #626262;
+  line-height: 1.5;
 }
 .flight-faces {
   display: grid;
@@ -162,17 +176,17 @@
   gap: 5px;
 }
 .flight-faces button {
-  font-size: 10px;
-  padding: 7px 3px;
+  font-size: 12px;
+  padding: 8px 3px;
 }
 .flight-edit {
   margin-top: 13px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .flight-workshop summary {
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
 }
 .flight-coordinates {
   display: flex;
@@ -188,34 +202,36 @@
 .flight-coordinates input {
   min-width: 0;
   width: 100%;
-  padding: 5px;
-  border: 1px solid var(--line);
-  border-radius: 4px;
+  padding: 6px;
+  border: 1px solid #b5b5b5;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
 }
 .flight-edit button {
-  padding: 6px;
-  font-size: 10px;
+  padding: 7px;
+  font-size: 12px;
 }
 .flight-section .flight-row button {
-  font-size: 10px;
+  font-size: 12px;
   flex: 1;
-  padding: 8px 5px;
+  padding: 9px 5px;
 }
 .flight-bench-results {
   display: grid;
-  gap: 8px;
-  font-size: 10px;
+  gap: 9px;
+  font-size: 12px;
   margin-top: 14px;
 }
 .flight-bench-results span {
   display: grid;
   gap: 3px;
-  color: var(--muted);
+  color: #626262;
 }
 .flight-bench-results b {
-  color: var(--ink);
+  color: #111;
   font:
-    11px ui-monospace,
+    12px ui-monospace,
     monospace;
 }
 .flight-file-actions {
@@ -223,7 +239,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 6px;
   padding-top: 12px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .flight-upload {
   position: relative;
@@ -237,6 +253,10 @@
   width: 100%;
   cursor: pointer;
 }
+.flight-upload:focus-within {
+  outline: 3px solid #ef2b12;
+  outline-offset: 3px;
+}
 .flight-main {
   padding: 20px 24px;
   min-width: 0;
@@ -245,10 +265,10 @@
   position: relative;
   overflow: hidden;
   min-height: 300px;
-  height: clamp(320px, 44vh, 510px);
-  border: 1px solid #bccbbf;
-  border-radius: 12px;
-  background: #dce9df;
+  height: clamp(300px, 40vh, 460px);
+  border: 1px solid #9ba1a6;
+  border-radius: 0;
+  background: #c4d3df;
 }
 .flight-stage canvas {
   display: block;
@@ -259,106 +279,111 @@
 .flight-stage-top {
   position: absolute;
   z-index: 1;
-  top: 18px;
-  left: 20px;
-  right: 20px;
+  top: 16px;
+  left: 18px;
+  right: 18px;
   display: flex;
   justify-content: space-between;
   pointer-events: none;
   font:
-    9px ui-monospace,
+    11px ui-monospace,
     monospace;
-  letter-spacing: 1px;
-  color: #294c43;
+  letter-spacing: 0.7px;
+  color: #172028;
 }
 .flight-stage-top small {
   display: block;
-  font-size: 8px;
-  opacity: 0.7;
+  font-size: 10px;
   margin-top: 4px;
 }
 .flight-scene-label {
   position: absolute;
   z-index: 1;
-  bottom: 22px;
-  left: 20px;
+  bottom: 18px;
+  left: 18px;
   pointer-events: none;
   font:
-    10px ui-monospace,
+    11px ui-monospace,
     monospace;
-  letter-spacing: 1px;
-  color: #294c43;
+  letter-spacing: 0.5px;
+  color: #111;
+  padding: 8px 10px;
+  background: #fffffff0;
+  border-left: 3px solid #ef2b12;
 }
 .flight-scene-label small {
   display: block;
-  font: 10px system-ui;
-  margin-top: 6px;
+  font: 12px var(--font-body, sans-serif);
+  margin-top: 4px;
   letter-spacing: 0;
 }
 .flight-overlay-controls {
   position: absolute;
   z-index: 2;
-  bottom: 16px;
-  right: 15px;
+  bottom: 18px;
+  right: 18px;
   display: grid;
   gap: 5px;
-  font-size: 10px;
-  background: #fffef9d9;
-  padding: 8px 10px;
-  border-radius: 6px;
+  font-size: 12px;
+  background: #fffffff0;
+  padding: 9px 12px;
+  border-radius: 0;
 }
 .flight-overlay-controls label {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 .flight-workshop input[type='checkbox'] {
-  accent-color: var(--teal);
+  accent-color: #ef2b12;
 }
 .flight-flightbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 0 12px;
+  padding: 16px 0 10px;
   gap: 12px;
 }
 .flight-flightbar strong {
   display: block;
-  font-size: 16px;
+  font: 900 23px/1.2 var(--font-display, 'Roboto Condensed', sans-serif);
+  text-transform: uppercase;
   margin-top: 4px;
-  letter-spacing: -0.3px;
 }
 .flight-flightbar button {
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 13px;
 }
 .flight-workshop .flight-launch {
-  background: var(--teal);
-  border-color: var(--teal);
-  color: white;
-  padding: 12px 20px;
-  font-weight: 650;
+  background: #ef2b12;
+  border-color: #ef2b12;
+  color: #fff;
+  padding: 12px 22px;
+  font: 900 24px/1.2 var(--font-display, 'Roboto Condensed', sans-serif);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 .flight-workshop .flight-launch:hover:not(:disabled) {
-  background: #174f49;
+  background: #c91e0a;
+  border-color: #c91e0a;
 }
 .flight-message {
-  min-height: 22px;
-  color: var(--muted);
-  font-size: 11px;
+  min-height: 24px;
+  color: #626262;
+  font-size: 13px;
   line-height: 1.5;
 }
 .flight-instruments {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  margin-top: 7px;
-  padding: 15px 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  margin-top: 9px;
+  padding: 14px 0;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #d4d4d4;
 }
 .flight-instruments > div {
-  padding: 0 15px;
-  border-right: 1px solid var(--line);
+  padding: 0 18px;
+  border-right: 1px solid #d4d4d4;
 }
 .flight-instruments > div:first-child {
   padding-left: 0;
@@ -368,76 +393,79 @@
 }
 .flight-instruments span {
   display: block;
-  font-size: 9px;
-  color: var(--muted);
+  font-size: 10px;
+  color: #626262;
   letter-spacing: 1px;
+  font-weight: 500;
 }
 .flight-instruments strong {
-  font:
-    24px ui-monospace,
-    monospace;
-  letter-spacing: -1px;
+  font: 900 32px/1.1 var(--font-display, 'Roboto Condensed', sans-serif);
   display: block;
-  margin-top: 7px;
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
 }
 .flight-instruments small {
-  font: 10px system-ui;
-  letter-spacing: 0;
-  color: var(--muted);
+  font: 12px var(--font-body, sans-serif);
+  color: #626262;
 }
 .flight-bottom {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 25px;
-  padding: 18px 0;
+  gap: 28px;
+  padding: 17px 0;
 }
 .flight-graph svg {
   display: block;
   width: 100%;
-  height: 65px;
+  height: 58px;
   margin: 8px 0;
 }
+.flight-graph svg polyline:first-of-type {
+  stroke: #111;
+}
+.flight-graph svg polyline:last-of-type {
+  stroke: #ef2b12;
+}
 .flight-graph .flight-eyebrow {
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 0.5px;
 }
 .flight-graph i {
   display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin: 0 3px 0 10px;
+  width: 7px;
+  height: 7px;
+  margin: 0 3px 0 9px;
 }
 .flight-graph .speed {
-  background: var(--teal);
+  background: #111;
 }
 .flight-graph .height {
-  background: var(--orange);
+  background: #ef2b12;
 }
 .flight-controls {
-  font-size: 11px;
+  font-size: 13px;
 }
 .flight-controls > div {
-  margin-top: 10px;
-  color: var(--muted);
+  margin-top: 9px;
+  color: #626262;
 }
 .flight-controls kbd {
   display: inline-block;
-  min-width: 21px;
-  background: #fffef9;
-  border: 1px solid var(--line);
+  min-width: 22px;
+  background: #f5f5f5;
+  border: 1px solid #b5b5b5;
   border-bottom-width: 2px;
-  border-radius: 4px;
+  border-radius: 0;
   padding: 3px 5px;
   font:
-    10px ui-monospace,
+    11px ui-monospace,
     monospace;
   margin: 0 3px;
-  color: var(--ink);
+  color: #111;
 }
 .flight-controls details {
-  margin-top: 10px;
-  font-size: 11px;
+  margin-top: 9px;
+  font-size: 13px;
 }
 .flight-keybindings {
   display: grid;
@@ -446,39 +474,45 @@
   margin-top: 8px;
 }
 .flight-keybindings button {
-  font-size: 10px;
+  font-size: 12px;
 }
 .flight-model {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid #d4d4d4;
   padding: 12px 0;
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.7;
+  font-size: 13px;
+  color: #626262;
+  line-height: 1.6;
 }
 .flight-model a {
-  color: var(--teal);
+  color: #111;
+  text-decoration-color: #ef2b12;
+  text-underline-offset: 3px;
 }
 @media (min-width: 1600px) {
   .flight-layout {
-    grid-template-columns: 320px minmax(0, 1fr);
+    grid-template-columns: 350px minmax(0, 1fr);
   }
 }
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .flight-layout {
-    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-columns: 285px minmax(0, 1fr);
   }
   .flight-main {
-    padding: 15px;
+    padding: 16px;
   }
   .flight-header {
-    padding: 16px;
-    gap: 14px;
+    padding: 18px;
+    gap: 18px;
   }
-  .flight-instruments strong {
-    font-size: 20px;
+  .flight-header h1 {
+    font-size: 30px;
+  }
+  .flight-status {
+    font-size: 10px;
   }
   .flight-bottom {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
   .flight-flightbar {
     align-items: flex-start;
@@ -490,13 +524,21 @@
   .flight-stage-top > span:last-child {
     display: none;
   }
+  .flight-scene-label {
+    max-width: 55%;
+  }
+  .flight-instruments > div {
+    padding: 0 10px;
+  }
 }
-@media (max-width: 700px) {
+@media (max-width: 760px) {
   .flight-header {
     flex-wrap: wrap;
+    padding: 16px;
+    gap: 12px;
   }
   .flight-header h1 {
-    font-size: 20px;
+    font-size: 28px;
   }
   .flight-status {
     display: none;
@@ -511,28 +553,48 @@
     padding: 0 20px 30px;
   }
   .flight-stage {
-    height: 340px;
+    height: 350px;
+  }
+  .flight-instruments {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 14px;
   }
   .flight-instruments > div {
-    padding: 0 7px;
+    padding: 0 7px 0 0;
+    border-right: 0;
   }
   .flight-instruments strong {
-    font-size: 17px;
+    font-size: 27px;
   }
   .flight-flightbar {
     flex-wrap: wrap;
+  }
+  .flight-flightbar .flight-row {
+    width: 100%;
+    justify-content: flex-start;
   }
   .flight-bottom {
     grid-template-columns: 1fr;
   }
   .flight-header .flight-back {
-    padding: 6px;
+    padding: 7px;
   }
   .flight-overlay-controls {
-    bottom: 55px;
+    bottom: 76px;
+    right: 12px;
+    font-size: 11px;
+  }
+  .flight-scene-label {
+    max-width: calc(100% - 24px);
+    left: 12px;
+    bottom: 12px;
   }
   .flight-stage-top {
-    font-size: 8px;
+    left: 12px;
+    font-size: 10px;
+  }
+  .flight-graph .flight-eyebrow {
+    font-size: 9px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

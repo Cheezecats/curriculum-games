@@ -10,6 +10,6 @@ This is an original browser-game collection. The approved spec is in `docs/super
 - Game modules export a default React component accepting `GameProps` from `src/core/types.ts`, and a named missions array from `missions.ts`.
 - Flight files belong under `src/games/flight/`; vision files under `src/games/vision/`. Keep subsystem styles in their respective directories. Coordinate before modifying shared types or root config.
 - Save using `readRecord`/`writeRecord` from `src/core/storage.ts`; catch save errors in the UI without discarding the live run.
-- CSS design tokens: `--paper`, `--ink`, `--muted`, `--line`, `--orange`, `--lime`, `--teal`, `--panel`; fonts are system sans and monospace. DOM controls must have accessible names.
+- Approved option1: white/near-black/vermilion (#ef2b12), Roboto Condensed Black display type, Anton wordmark, and IBM Plex Sans body. Use flat dividers and square controls; avoid the superseded pastel sage/cream/teal card theme. CSS tokens: `--paper`, `--ink`, `--muted`, `--line`, `--orange`, `--lime`, `--teal`, `--panel`, `--font-display`, `--font-body`. DOM controls must have accessible names.
 - Curriculum prose is original and cited. Exact CS objective/level labels remain unverified until checked against a current guide. Avoid claims of complete syllabus coverage or validated learning efficacy.
 - Do not commit on behalf of another task, alter another task's files, publish, or spawn further agents when delegated a subsystem. Return changed paths, meaningful red/green test evidence, and any remaining concerns.

@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-06T00:42:51.902Z",
+  "cpu": "Apple M2",
+  "memoryGiB": 16,
+  "platform": "darwin arm64",
+  "node": "v24.14.0",
+  "browser": "156.0.8078.4",
+  "channel": "chromium",
+  "graphics": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Version 26.5.2 (Build 25F84))",
+        "driverVendor": "Apple",
+        "driverVersion": "26.5.2"
+      }
+    ],
+    "webgl": "enabled"
+  },
+  "viewport": {
+    "width": 1920,
+    "height": 1080,
+    "deviceScaleFactor": 1
+  },
+  "baseUrl": "http://127.0.0.1:4173",
+  "flight": {
+    "parts": 128,
+    "windowMs": 6014.89999999553,
+    "airborneSamples": 337,
+    "meanFps": 60.00284879994302,
+    "p95FrameMs": 16.799999999999272,
+    "drawingBuffer": {
+      "width": 1400,
+      "height": 430
+    },
+    "instruments": "SPEED11.4 m/sALTITUDE36.7 mMASS80.90 kgBATTERY0.0 kJTHROTTLE0 %",
+    "finalState": "AIRBORNE"
+  },
+  "vision": {
+    "wallMs": 1654.8591670000005,
+    "workerTrainingSeconds": 1.39,
+    "actualLearningText": "Learning curve\ntrain / validation loss\n\nEpoch 16 · validation 100% · 1.39s last training"
+  },
+  "workerCleanup": {
+    "duringVision": 1,
+    "afterExit": 0
+  },
+  "pageErrors": []
+}

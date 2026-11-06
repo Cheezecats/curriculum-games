@@ -4,9 +4,9 @@ test('the curriculum hub exposes both workshops, missions, and independent free 
   page,
 }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'What happens if you try it?' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Flight Workshop', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Robot Vision', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'PLAY WITH THE BIG IDEAS.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'FLIGHT WORKSHOP', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'ROBOT VISION', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Explore flight missions' }).click();
   await expect(page.getByTestId('mission-card')).toHaveCount(6);
   await expect(
@@ -36,12 +36,17 @@ test('sources and local progress backup controls are accessible', async ({ page 
   await expect(page.getByRole('alert')).toContainText('not a valid');
 });
 
-test('workshop art badges stay compact and do not cover the illustrations', async ({ page }) => {
+test('game previews are loaded and stay within the viewport', async ({ page }) => {
   await page.goto('/');
-  const badges = page.locator('.art-tag');
-  for (const badge of await badges.all()) {
-    const box = await badge.boundingBox();
-    expect(box!.height).toBeLessThan(36);
-    expect(box!.width).toBeLessThan(230);
+  const previews = page.locator('.workshop-preview img');
+  await expect(previews).toHaveCount(2);
+  for (const preview of await previews.all()) {
+    await expect(preview).toBeVisible();
+    expect(
+      await preview.evaluate((image) => (image as HTMLImageElement).naturalWidth),
+    ).toBeGreaterThan(100);
+    const box = await preview.boundingBox();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(1440);
   }
 });

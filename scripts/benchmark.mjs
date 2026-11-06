@@ -17,7 +17,12 @@ const parts = positions.slice(0, 128).map((position, index) => ({
   rotation: 0,
 }));
 const blueprint = { version: 1, name: '128-part rendering stress fixture', parts };
-const browser = await chromium.launch();
+// The regular Chromium channel uses the desktop rendering path. The separate
+// headless shell may fall back to SwiftShader; keep that backend measurable too.
+const channel = process.env.BENCHMARK_CHANNEL ?? 'chromium';
+const browser = await chromium.launch(channel === 'shell' ? {} : { channel });
+const browserSession = await browser.newBrowserCDPSession();
+const { gpu } = await browserSession.send('SystemInfo.getInfo');
 const page = await browser.newPage({
   viewport: { width: 1920, height: 1080 },
   deviceScaleFactor: 1,
@@ -31,6 +36,8 @@ const report = {
   platform: `${os.platform()} ${os.arch()}`,
   node: process.version,
   browser: browser.version(),
+  channel,
+  graphics: { devices: gpu.devices, webgl: gpu.featureStatus.webgl },
   viewport: { width: 1920, height: 1080, deviceScaleFactor: 1 },
   baseUrl,
 };

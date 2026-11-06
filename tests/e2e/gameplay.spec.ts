@@ -79,8 +79,24 @@ test('the robot trains, sorts a held-out batch, trains an image model, and cance
   await page.getByRole('button', { name: 'Restore last model' }).click();
   await expect(deploy).toBeEnabled();
   await page.getByRole('button', { name: '← Workshop hub' }).click();
-  await expect(page.getByRole('heading', { name: 'What happens if you try it?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'PLAY WITH THE BIG IDEAS.' })).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test('a real crash can be reviewed, rebuilt, and immediately retried', async ({ page }) => {
+  await page.goto('/#/flight');
+  await page.getByRole('button', { name: 'Launch aircraft ↗' }).click();
+  await page.keyboard.down('w');
+  await expect(page.getByRole('dialog')).toContainText('touched down too hard');
+  await page.keyboard.up('w');
+  await page.getByRole('button', { name: 'Back to the workshop', exact: true }).click();
+  await page.getByRole('button', { name: 'Rebuild', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Launch aircraft ↗' })).toBeEnabled();
+  await page.getByLabel('Attach a part').selectOption('cargo');
+  await page.getByRole('button', { name: 'Above +Y' }).click();
+  await expect(page.getByRole('status')).toContainText('Part attached');
+  await page.getByRole('button', { name: 'Launch aircraft ↗' }).click();
+  await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeVisible();
 });
 
 test('a locked deep link offers free play without granting completion', async ({ page }) => {

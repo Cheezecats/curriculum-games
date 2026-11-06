@@ -4,7 +4,7 @@ import Home from './components/Home';
 import Notebook from './components/Notebook';
 import Debrief from './components/Debrief';
 import GameBoundary from './components/GameBoundary';
-import { allMissions, sourceRepository } from './core/registry';
+import { allMissions } from './core/registry';
 import {
   emptyProgress,
   isMissionUnlocked,
@@ -152,11 +152,7 @@ export default function App() {
       </a>
       <header className={`site-header${route ? ' game-header' : ''}`}>
         <button type="button" className="brand" aria-label="Fieldwork home" onClick={exit}>
-          <span className="brand-symbol">f</span>
-          <span className="brand-word">
-            fieldwork<span style={{ color: 'var(--teal)' }}>.</span>
-          </span>
-          {!route && <span className="brand-tag">a playground for understanding</span>}
+          <span className="brand-word">FIELDWORK</span>
         </button>
         {route ? (
           <div className="game-crumb">
@@ -171,21 +167,15 @@ export default function App() {
         ) : (
           <nav className="header-right" aria-label="Main navigation">
             <a className="header-link active" href="#main-content">
-              The workshops
+              WORKSHOPS
             </a>
-            {sourceRepository && (
-              <a className="header-link" href={sourceRepository} target="_blank" rel="noreferrer">
-                Open source <ArrowUpRight size={12} />
-              </a>
-            )}
             <button
               type="button"
               className="notebook-button"
               aria-label="Open notebook"
               onClick={() => setNotebook(true)}
             >
-              <BookOpen size={14} /> Your notebook{' '}
-              <span className="count">{completedCount}/12</span>
+              <BookOpen size={14} /> NOTEBOOK <span className="count">{completedCount}/12</span>
             </button>
           </nav>
         )}

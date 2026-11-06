@@ -16,7 +16,7 @@ Learning fixtures use genuine optimization and unchanged held-out data. The defa
 
 ## Browser observations
 
-Chromium, Firefox, and WebKit have each completed the real build/save/restore/fly/check/unlock workflow and the train/deploy/image-training/cancel/restore workflow. They also pass locked-route/free-play and keyboard skip-navigation checks. Firefox's four gameplay checks took 32.8 seconds; WebKit's took 40.3 seconds. A keyboard skip-link regression was observed exiting the active workshop; its repair keeps the route and focuses content.
+All 24 browser workflow checks passed in 2.5 minutes against the production preview. After selection and narrow-layout repairs, the six affected flight checks passed again across all three engines. Chromium, Firefox, and WebKit have each completed the real build/save/restore/fly/check/unlock workflow and the train/deploy/image-training/cancel/restore workflow. They also pass actual crash/rebuild/retry, locked-route/free-play and keyboard skip-navigation checks. The option 1 redesign was compared in combined source/implementation images, with the evidence and resolved findings in [design QA](../design-qa.md). Firefox's four gameplay checks took 32.8 seconds; WebKit's took 40.3 seconds. A keyboard skip-link regression was observed exiting the active workshop; its repair keeps the route and focuses content.
 
 The test browsers run outside the restricted macOS execution sandbox because Chromium's Mach-port startup is blocked inside it. No personal browser profile is used. The in-app browser control connection timed out; local isolated browser capture is the working verification path.
 
@@ -24,15 +24,20 @@ The test browsers run outside the restricted macOS execution sandbox because Chr
 
 The design targets 60 FPS at 1080p for a capped 128-part craft and default training under 30 seconds on the reference machine. Run `npm run benchmark` against a running app, or set `BENCHMARK_URL` to a production preview server. The report is written to `output/benchmark.json`.
 
-On 2026-11-06, a production build in headless Chromium 156.0.8078.4, with a 1920×1080 viewport, device scale 1, and 1350×473 drawing buffer, measured:
+On 2026-11-06, the final production build in regular Chromium's new headless mode (156.0.8078.4, channel `chromium`), with a 1920×1080 viewport, device scale 1, and 1400×430 drawing buffer, measured:
 
 | Workload                                                                     | Result                                                        |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| 128-part aircraft, 6-second window, 315 airborne frame samples after warm-up | 56.1 mean FPS; 16.8 ms 95th-percentile frame interval         |
-| Default 16-epoch CNN, 72 training examples                                   | 0.48 seconds recorded worker training; 0.56 seconds wall time |
+| 128-part aircraft, 6-second window, 337 airborne frame samples after warm-up | 60.0 mean FPS; 16.8 ms 95th-percentile frame interval         |
+| Graphics device                                                              | ANGLE Metal Renderer: Apple M2; WebGL enabled                 |
+| Default 16-epoch CNN, 72 training examples                                   | 1.39 seconds recorded worker training; 1.65 seconds wall time |
 | Dedicated vision workers after exiting the game                              | 0, down from 1 during the game                                |
 | Page errors during the benchmark                                             | 0                                                             |
 
-The measured flight mean is below the 60 FPS target. It is a bounded workload result on one machine, not a universal performance guarantee. The 30-second training target was met for this default task. Results can change with viewport, display refresh, graphics backend, device load, overlays, or a different training configuration. Repeat after material rendering or model changes.
+[Recorded accelerated result](design/qa/benchmark-metal.json). Both measured targets were met for this bounded workload on the reference machine; this does not establish universal performance. The canvas occupies part of the 1080p interface, with its exact drawing-buffer dimensions disclosed above.
+
+The separate Chromium headless shell used by the correctness suite fell back to SwiftShader software graphics in a diagnostic run. Its final fixture measured 29.0 mean FPS and 0.79 seconds of training ([record](design/qa/benchmark-software.json)); an earlier shell run before the redesign measured 56.1 FPS. These variable software-rendered results do not establish native GPU performance. The benchmark now records the graphics backend and defaults to the regular `chromium` channel; use `BENCHMARK_CHANNEL=shell npm run benchmark` to explicitly measure the shell. [Playwright documents the two headless implementations](https://playwright.dev/docs/browsers#chromium-new-headless-mode).
+
+Results can change with viewport, refresh rate, graphics backend, device load, overlays, or training configuration. Repeat after material rendering or model changes.
 
 Human enjoyment, long-term learning, exam improvement, complete syllabus coverage, and experimentally accurate aircraft engineering have not been established by these checks.
