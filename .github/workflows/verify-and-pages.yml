@@ -33,7 +33,19 @@ jobs:
         env:
           VITE_REPOSITORY_URL: ${{ github.server_url }}/${{ github.repository }}
       - run: npx playwright install --with-deps chromium firefox webkit
-      - run: npm run test:e2e
+      - name: Verify browser graphics support
+        run: xvfb-run --auto-servernum node scripts/check-browser-graphics.mjs
+      - name: Exercise games in display-backed browsers
+        run: xvfb-run --auto-servernum npm run test:e2e -- --headed
+      - name: Save browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-checks
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
       - uses: actions/configure-pages@v6
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v5
