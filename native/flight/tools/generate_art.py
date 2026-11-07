@@ -65,6 +65,9 @@ def asset(name, family):
     return ROOT
 
 def link(obj, name, material, parent=None):
+    if ROOT.name=='tree_pine' and material=='Wood':material='Bark'
+    if ROOT.name=='tree_broad':material={'Wood':'Bark','Pine':'Leaf'}.get(material,material)
+    if ROOT.name=='rock' and material=='Concrete':material='Stone'
     for c in list(obj.users_collection): c.objects.unlink(obj)
     COL.objects.link(obj); obj.name=name
     if obj.type=='MESH':
@@ -163,6 +166,22 @@ def finish(name):
         if len(meshes)>1: bpy.ops.object.join()
         ob=bpy.context.object; ob.name=f'{parent_name}_{material}'
     entry=ASSETS[name]; allobs=list(entry['collection'].objects)
+    budgets={'tree_pine':1450,'tree_broad':1950,'rock':950}
+    if name in budgets:
+        total=sum(sum(len(p.vertices)-2 for p in ob.data.polygons) for ob in allobs if ob.type=='MESH')
+        if total>budgets[name]:
+            ratio=budgets[name]*.96/total
+            for ob in allobs:
+                if ob.type=='MESH':
+                    bpy.context.view_layer.objects.active=ob
+                    modifier=ob.modifiers.new('Game ready silhouette budget','DECIMATE');modifier.ratio=ratio;modifier.use_collapse_triangulate=True
+                    bpy.ops.object.modifier_apply(modifier=modifier.name)
+        targets={
+            'tree_pine':((-1.664455533,0,-1.502282262),(1.670660138,6.579495907,1.604054093)),
+            'tree_broad':((-2.641707182,0,-2.457465410),(2.760451317,6.627632618,2.550907850)),
+            'rock':((-1.519595146,.0250000004,-.992641449),(1.567541718,1.553832769,.956432223)),
+        }
+        normalize_environment_bounds(name,*targets[name])
     verts=sum(len(o.data.vertices) for o in allobs if o.type=='MESH')
     tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in allobs if o.type=='MESH')
     entry['vertices']=verts;entry['triangles']=tris;entry['mesh_nodes']=sum(o.type=='MESH' for o in allobs)
@@ -326,40 +345,108 @@ for x in [-.24,.24]: box('Tie down grip',(x,.055,0),(.055,.035,.22),'Brass',.012
 finish('cargo_mount')
 
 # --- Island airfield / landscape -----------------------------------------
+def foliage_blob(name,pos,size,material,rng,yaw=0,detail=1):
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=detail,radius=1,location=cv(pos))
+    ob=bpy.context.object
+    for v in ob.data.vertices:
+        # Stable low-frequency lobes, with a little tip variation instead of perfect ellipsoids.
+        p=v.co
+        p*=1+.085*math.sin(p.x*5+p.y*3)+rng.uniform(-.06,.06)
+    ob.scale=(size[0]/2,size[2]/2,size[1]/2);ob.rotation_euler.z=yaw
+    return link(ob,name,material)
+
+def normalize_environment_bounds(name,lo,hi):
+    # Keep old physics/presentation placement bounds exactly while changing the silhouette inside.
+    points=[v.co for ob in COL.objects if ob.type=='MESH' for v in ob.data.vertices]
+    lows=[min(p[i] for p in points) for i in range(3)];highs=[max(p[i] for p in points) for i in range(3)]
+    blo=cv((lo[0],lo[1],hi[2]));bhi=cv((hi[0],hi[1],lo[2]))
+    for ob in COL.objects:
+        if ob.type=='MESH':
+            for v in ob.data.vertices:
+                for i in range(3):v.co[i]=blo[i]+(v.co[i]-lows[i])/(highs[i]-lows[i])*(bhi[i]-blo[i])
+            ob.data.update()
+
 asset('tree_pine','environment')
-cylinder('Pine trunk',(0,0,0),(0,5.7,0),.23,'Wood',12,r2=.095)
-for j,(y,r,h) in enumerate([(1.1,1.65,2.7),(2.3,1.4,2.5),(3.5,1.05,2.2),(4.6,.72,1.9)]):
-    # Ring variation gives sculpted scalloped boughs instead of perfect cones.
-    vs=[];fs=[];n=11
-    for ring,(dy,scale) in enumerate([(0,.85),(.35,1),(h,.04)]):
-        for i in range(n):
-            a=2*math.pi*i/n; rr=r*scale*(1+random.uniform(-.1,.1))
-            vs.append((rr*math.cos(a),y+dy+random.uniform(-.08,.08),rr*math.sin(a)))
-    for k in range(2):
-        for i in range(n): fs.append((k*n+i,k*n+(i+1)%n,(k+1)*n+(i+1)%n,(k+1)*n+i))
-    fs.append(tuple(reversed(range(n)))); mesh('Layered pine boughs',vs,[tuple(reversed(f)) for f in fs],'Pine' if j%2 else 'Leaf')
+rng=random.Random(119)
+trunk=[(0,.06,0),(-.05,1.45,.01),(.03,2.9,-.04),(.12,4.4,0),(.23,5.75,.05),(.26,6.35,.08)]
+for i in range(len(trunk)-1):cylinder('Crooked coastal pine trunk',trunk[i],trunk[i+1],.23-i*.036,'Bark',10,r2=.20-i*.035)
+for i in range(6):
+    a=i*math.pi/3
+    cylinder('Pine flared roots',(.36*math.cos(a),.06,.36*math.sin(a)),(0,.60,0),.09,'Bark',8,r2=.12)
+# Broken, wind-shaped branch fans carry individual needle pillows. No conical crown shells.
+for level,(y,radius,count,phase) in enumerate([(1.7,1.06,5,.2),(2.6,1.28,6,1.15),(3.55,1.08,5,.45),(4.45,.80,4,1.4),(5.3,.49,3,.8)]):
+    for i in range(count):
+        a=phase+i*2*math.pi/count+rng.uniform(-.17,.17)
+        radius_i=radius*rng.uniform(.82,1.10);ey=y+rng.uniform(-.16,.18)
+        start=(.03+level*.04,y-.32,0)
+        end=(radius_i*math.cos(a)+level*.035,ey,radius_i*math.sin(a))
+        mid=tuple(start[j]*.35+end[j]*.65 for j in range(3))
+        cylinder('Exposed pine branch',start,mid,.060-level*.007,'Bark',8,r2=.038)
+        cylinder('Branch rising tip',mid,(end[0],ey+.30,end[2]),.035,'Bark',7,r2=.012)
+        color='Pine' if (i+level)%3 else 'NeedleLight'
+        foliage_blob('Irregular needle fan',(end[0]*.86,ey+.24,end[2]*.86),(1.10-level*.11,.60-level*.035,.90-level*.07),color,rng,a)
+        offset=a+(.60 if i%2 else -.60)
+        tip=(end[0]+.19*math.cos(offset),ey+.38,end[2]+.19*math.sin(offset))
+        foliage_blob('Needle tuft',tip,(.70-level*.065,.54,.63-level*.04),'NeedleLight' if i%3==1 else 'Pine',rng,a+.7)
+for pos,size in [((.22,5.85,.08),(.77,.78,.72)),((.28,6.30,.12),(.53,.68,.50)),((.04,5.63,-.16),(.61,.53,.55))]:
+    foliage_blob('Broken pine leader',pos,size,'NeedleLight' if pos[1]>6 else 'Pine',rng,.4)
+for a in [0,1.9,3.7,5.0]:
+    curve('Pine bark ridges',[(.205*math.cos(a),.20,.205*math.sin(a)),(.14*math.cos(a)-.04,1.3,.14*math.sin(a)),(.11*math.cos(a),2.2,.11*math.sin(a))],.011,'Wood')
+normalize_environment_bounds('tree_pine',(-1.664455533,0,-1.502282262),(1.670660138,6.579495907,1.604054093))
 finish('tree_pine')
 
 asset('tree_broad','environment')
-cylinder('Broadleaf trunk',(0,0,0),(0,3.7,0),.31,'Wood',12,r2=.16)
-for i in range(6):
-    a=i*math.pi/3; end=(1.25*math.cos(a),3.8+random.random()*.8,1.25*math.sin(a))
-    cylinder('Forking branches',(0,2.1,0),end,.14,'Wood',10,r2=.055)
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1,location=cv((end[0],end[1]+.6,end[2])))
-    ob=bpy.context.object; ob.scale=(1.45,1.35,1.4)
-    for v in ob.data.vertices: v.co*=random.uniform(.89,1.1)
-    link(ob,'Sculpted leaf crown','Leaf' if i%2 else 'LeafLight')
-sphere('Central leaf crown',(0,5.0,0),(3.1,2.5,3.0),'Leaf',12,6)
+rng=random.Random(173)
+main=[(0,.08,0),(-.13,1.1,.08),(.05,2.30,-.03),(.37,3.44,.04),(.48,4.40,.10)]
+for i in range(len(main)-1):cylinder('Weather bent broadleaf trunk',main[i],main[i+1],.36-i*.052,'Bark',12,r2=.30-i*.05)
+for i in range(7):
+    a=i*math.pi*2/7
+    cylinder('Broadleaf root buttress',(.55*math.cos(a),.05,.55*math.sin(a)),(-.07,.75,.05),.10,'Bark',8,r2=.18)
+for i in range(8):
+    a=i*math.pi/4+.19;radius=rng.uniform(1.25,1.88)
+    end=(.28+radius*math.cos(a),4.12+rng.uniform(-.20,.65),radius*math.sin(a))
+    joint=(end[0]*.53,3.20+rng.uniform(-.15,.32),end[2]*.53)
+    cylinder('Broadleaf primary fork',(.0,2.05,.02),joint,.16,'Bark',10,r2=.095)
+    cylinder('Broadleaf crown limb',joint,end,.10,'Bark',8,r2=.035)
+    for j,offset in enumerate([-.45,.48]):
+        a2=a+offset
+        tip=(end[0]+.45*math.cos(a2),end[1]+.36+j*.22,end[2]+.45*math.sin(a2))
+        cylinder('Visible forked twig',end,tip,.040,'Bark',7,r2=.012)
+        foliage_blob('Sculpted leaf spray',tip,(1.32+j*.20,1.03,1.35),['Leaf','LeafLight','Pine'][(i+j)%3],rng,a2)
+    foliage_blob('Lower broken crown',(end[0],end[1]-.05,end[2]),(1.45,.85,1.52),'Leaf',rng,a)
+for i in range(5):
+    a=i*math.pi*2/5
+    foliage_blob('Sunlit upper leaf crown',(.40+.72*math.cos(a),5.45+rng.uniform(-.13,.17),.72*math.sin(a)),(1.52,1.18,1.45),'LeafLight' if i%2 else 'Leaf',rng,a)
+for a in [0,1.2,2.8,4.1]:
+    curve('Broadleaf bark groove',[(.29*math.cos(a),.12,.29*math.sin(a)),(-.12+.23*math.cos(a),1.08,.07+.23*math.sin(a)),(.03+.17*math.cos(a),2.2,.17*math.sin(a))],.014,'Wood')
+normalize_environment_bounds('tree_broad',(-2.641707182,0,-2.457465410),(2.760451317,6.627632618,2.550907850))
 finish('tree_broad')
 
 asset('rock','environment')
-bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1,location=(0,0,0))
-ob=bpy.context.object
-for v in ob.data.vertices:
-    v.co.x*=1.5*random.uniform(.85,1.15); v.co.y*=1.05*random.uniform(.85,1.15)
-    v.co.z=max(.025,(v.co.z+1)*.75*random.uniform(.88,1.12))
-link(ob,'Weathered faceted boulder','Stone')
+rng=random.Random(211);rings=[];n=16
+for j,(y,r) in enumerate([(.025,.72),(.18,.98),(.43,1.0),(.48,.90),(.77,.95),(.83,.85),(1.17,.76),(1.47,.43)]):
+    ring=[]
+    for i in range(n):
+        a=i*math.pi*2/n
+        radial=r*(1+.10*math.sin(a*3+.8)+rng.uniform(-.045,.045))
+        ring.append((1.5*radial*math.cos(a)+.07*math.sin(j),y+.024*math.sin(a*2+j),.95*radial*math.sin(a)+.04*math.cos(j)))
+    rings.append(ring)
+for j in range(len(rings)-1):
+    fs=[(i,n+i,n+(i+1)%n,(i+1)%n) for i in range(n)]
+    ob=mesh('Eroded stratified stone ledge',rings[j]+rings[j+1],fs,'StoneDark' if j in [2,4] else ('Concrete' if j==6 else 'Stone'))
+    for p in ob.data.polygons:p.use_smooth=False
+ob=mesh('Stone top and ground faces',rings[0]+rings[-1],[tuple(range(n)),tuple(reversed([n+i for i in range(n)]))],'Stone')
+for p in ob.data.polygons:p.use_smooth=False
+for pos,size in [((-.30,1.42,-.14),(1.12,.12,.73)),((.16,1.37,.17),(.82,.11,.58)),((-.85,.88,.27),(.59,.085,.39))]:
+    foliage_blob('Coastal moss mat',pos,size,'Moss',rng,.3,detail=1)
+normalize_environment_bounds('rock',(-1.519595146,.0250000004,-.992641449),(1.567541718,1.553832769,.956432223))
 finish('rock')
+
+# Keep later original props reproducible when only foliage geometry changes.
+# The original pine/broadleaf/rock consumed 648 scalar RNG draws at Blender 5.1.
+legacy_rng=random.Random(29)
+for _ in range(648):legacy_rng.random()
+random.setstate(legacy_rng.getstate())
 
 asset('crate','environment')
 box('Dark interior',(0,.65,0),(1.21,1.23,1.21),'Wood',.025)
@@ -696,6 +783,10 @@ def label(scene,text,pos,size=.18):
     ob=bpy.data.objects.new(text,cu);scene.collection.objects.link(ob);ob.location=cv(pos)
     ob.rotation_euler=(math.pi/2,0,0);cu.materials.append(M['Navy'])
 
+def render_inspection(scene):
+    if FOLIAGE_PREVIEW and scene.name!='Coastal foliage inspection':return
+    bpy.context.window.scene=scene;bpy.ops.render.render(write_still=True)
+
 # Inspection sheet with honest individual pieces, not concept art.
 preview=bpy.data.scenes.new('Aircraft kit inspection');setup_world(preview)
 names=[n for n,e in ASSETS.items() if e['family']=='models']
@@ -706,28 +797,38 @@ for i,name in enumerate(names):
 camera(preview,(9,15,13),(5.3,0,-2.4),17.0)
 preview.render.resolution_x=1800;preview.render.resolution_y=1250
 preview.render.filepath=str(BASE/'previews'/'aircraft_kit.png')
-bpy.context.window.scene=preview;bpy.ops.render.render(write_still=True)
+render_inspection(preview)
 
 environment=bpy.data.scenes.new('Airfield architecture inspection');setup_world(environment)
 for name,pos in [('hangar',(0,0,0)),('tower',(15,0,-3)),('wind_sock',(-12,0,6)),('tree_pine',(-14,0,-6)),('tree_broad',(14,0,7)),('rock',(-10,0,12)),('crate',(9,0,10)),('lamp',(-8,0,10)),('barrel',(7,0,11)),('beacon',(-6,0,12))]: instance(environment,name,pos)
 camera(environment,(28,23,35),(0,2,0),46)
 environment.render.resolution_x=1800;environment.render.resolution_y=1200
 environment.render.filepath=str(BASE/'previews'/'airfield_props.png')
-bpy.context.window.scene=environment;bpy.ops.render.render(write_still=True)
+render_inspection(environment)
 
 hero=bpy.data.scenes.new('Assembled kit proportion check');setup_world(hero)
 for name,pos in [('cockpit',(0,1.0,-.75)),('fuselage',(0,.95,.55)),('fuselage',(0,.95,1.66)),('motor',(0,.88,-1.64)),('wing',(-1.15,.9,-.30)),('wing',(1.15,.9,-.30)),('elevator',(0,1.02,2.20)),('rudder',(0,1.40,2.18)),('gear',(-.53,.35,-.65)),('gear',(.53,.35,-.65)),('cargo_mount',(0,.56,.33))]: instance(hero,name,pos)
 camera(hero,(5,3.8,-6),(0,.9,.2),7.2)
 hero.render.resolution_x=1600;hero.render.resolution_y=1100
 hero.render.filepath=str(BASE/'previews'/'assembled_aircraft.png')
-bpy.context.window.scene=hero;bpy.ops.render.render(write_still=True)
+render_inspection(hero)
 
 coastal=bpy.data.scenes.new('Coastal landmarks inspection');setup_world(coastal)
 for name,pos in [('rock_arch',(0,0,-15)),('cottage',(-16,0,7)),('lighthouse',(18,0,-2)),('fishing_boat',(4,0,14))]: instance(coastal,name,pos)
 camera(coastal,(44,32,49),(0,4,-3),64)
 coastal.render.resolution_x=2100;coastal.render.resolution_y=1400
 coastal.render.filepath=str(BASE/'previews'/'coastal_props.png')
-bpy.context.window.scene=coastal;bpy.ops.render.render(write_still=True)
+render_inspection(coastal)
+
+foliage=bpy.data.scenes.new('Coastal foliage inspection');setup_world(foliage)
+for name,pos in [('tree_pine',(-4.0,0,0)),('tree_broad',(2.0,0,-1)),('rock',(0,0,4.9))]:instance(foliage,name,pos)
+label(foliage,'COASTAL PINE',(-4,.01,1.9),.20)
+label(foliage,'BROADLEAF',(2,.01,1.95),.20)
+label(foliage,'STRATIFIED ROCK',(0,.01,6.25),.18)
+camera(foliage,(11,8.8,15),(-.4,2.4,1.45),16.4)
+foliage.render.resolution_x=1800;foliage.render.resolution_y=1350
+foliage.render.filepath=str(BASE/'previews'/'foliage_refinement.png')
+render_inspection(foliage)
 
 # Default editable master opens on composed aircraft, with separate source collections/scenes.
 bpy.context.preferences.filepaths.save_version=0

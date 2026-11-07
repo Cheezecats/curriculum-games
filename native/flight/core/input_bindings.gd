@@ -65,15 +65,38 @@ static func _valid_key(value: int) -> bool:
  var text: String = OS.get_keycode_string(value)
  return not text.is_empty() and OS.find_keycode_from_string(text) == value
 
+static func event_label(event:InputEvent)->String:
+ if event is InputEventKey:
+  return OS.get_keycode_string(event.physical_keycode if event.physical_keycode else event.keycode)
+ if event is InputEventMouseButton:
+  return {1:"Mouse left",2:"Mouse right",3:"Mouse middle",4:"Wheel up",5:"Wheel down"}.get(event.button_index,"Mouse %d"%event.button_index)
+ if event is InputEventJoypadButton:
+  return {0:"Pad A",1:"Pad B",2:"Pad X",3:"Pad Y",6:"Pad Start",9:"Pad LB",10:"Pad RB"}.get(event.button_index,"Pad button %d"%event.button_index)
+ if event is InputEventJoypadMotion:
+  if event.axis==4:return "Pad LT"
+  if event.axis==5:return "Pad RT"
+  return "Pad "+({0:("LS left" if event.axis_value<0 else "LS right"),1:("LS up" if event.axis_value<0 else "LS down")}.get(event.axis,"axis %d%s"%[event.axis,"−" if event.axis_value<0 else "+"]))
+ return ""
+
 static func label(action: String) -> String:
- var labels: PackedStringArray = []
+ var labels:PackedStringArray=[]
  for event in InputMap.action_get_events(action):
-  if event is InputEventKey:
-   var code: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
-   var text: String = OS.get_keycode_string(code)
-   if not text.is_empty() and not labels.has(text):
-    labels.append(text)
+  var value=event_label(event)
+  if not value.is_empty() and not labels.has(value):labels.append(value)
  return " / ".join(labels)
+
+static func short_label(action:String)->String:
+ var events=InputMap.action_get_events(action)
+ for event in events:
+  if event is InputEventKey and event.physical_keycode not in [KEY_SHIFT,KEY_CTRL,KEY_ALT,KEY_META]:return event_label(event)
+ return event_label(events[0]) if not events.is_empty() else "Unassigned"
+
+static func conflict_for(action:String,token:String)->String:
+ var event=parse_token(token)
+ if event==null:return ""
+ for other in DEFAULTS:
+  if other!=action and InputMap.event_is_action(event,other,true):return other
+ return ""
 
 static func token_for(event: InputEvent) -> String:
  var token: String = ""

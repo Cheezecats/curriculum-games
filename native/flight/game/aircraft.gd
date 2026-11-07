@@ -86,7 +86,7 @@ func configure(bp: Dictionary, payload = 0.0):
 		var cargo = Node3D.new()
 		cargo.name = "Payload"
 		cargo.position = inverse * (properties.cargo_position - properties.com)
-		cargo.basis = inverse
+		cargo.basis = inverse * properties.cargo_basis
 		add_child(cargo)
 		var model = _model("crate",Vector3(.8,.65,.85))
 		var bounds = _model_bounds(model)
@@ -100,7 +100,7 @@ func configure(bp: Dictionary, payload = 0.0):
 		shape.size = properties.cargo_size
 		box.shape = shape
 		box.position = inverse * (properties.cargo_position-properties.com)
-		box.basis = inverse
+		box.basis = inverse * properties.cargo_basis
 		add_child(box)
 	energy = capacity
 	throttle = 0.0
@@ -271,7 +271,9 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 		var offset: Vector3 = cb*(properties.cargo_position-properties.com)
 		var v: Vector3 = state.linear_velocity+state.angular_velocity.cross(offset)-wind
 		var cargo_size:Vector3=properties.cargo_size
-		state.apply_force(-v*v.length()*(.5*1.225*cargo_size.x*cargo_size.y*.45),offset)
+		var relative=(cb*properties.cargo_basis).transposed()*v.normalized()
+		var area=absf(relative.x)*cargo_size.y*cargo_size.z+absf(relative.y)*cargo_size.x*cargo_size.z+absf(relative.z)*cargo_size.x*cargo_size.y
+		state.apply_force(-v*v.length()*(.5*1.225*area*.45),offset)
 	grounded = false
 	for part in blueprint.parts:
 		if part.kind != "gear": continue

@@ -1,0 +1,60 @@
+{
+  "checks": "PASS",
+  "models": {
+    "tree_pine": {
+      "triangles": 1390,
+      "exported_vertices": 1907,
+      "material_meshes": 3,
+      "bounds_min": [
+        -1.664455533027649,
+        0,
+        -1.5022822618484497
+      ],
+      "bounds_max": [
+        1.670660138130188,
+        6.579495906829834,
+        1.6040540933609009
+      ],
+      "sha256": "2ad2b49f22017fa7696d2d8905e099a74c0f82fa9a203eb20368aa3189a3c96b"
+    },
+    "tree_broad": {
+      "triangles": 1868,
+      "exported_vertices": 2246,
+      "material_meshes": 3,
+      "bounds_min": [
+        -2.641707181930542,
+        0,
+        -2.457465410232544
+      ],
+      "bounds_max": [
+        2.760451316833496,
+        6.6276326179504395,
+        2.550907850265503
+      ],
+      "sha256": "bfc4383c1e51cc3b1b257af7861300330930f8b41963f09c8d11dd7dbd2b9a47"
+    },
+    "rock": {
+      "triangles": 312,
+      "exported_vertices": 546,
+      "material_meshes": 3,
+      "bounds_min": [
+        -1.5195951461791992,
+        0.02500000037252903,
+        -0.9926414489746094
+      ],
+      "bounds_max": [
+        1.5675417184829712,
+        1.553832769393921,
+        0.9564322233200073
+      ],
+      "sha256": "c4a2816b9c0297c6e252f8a8cb22efa31141655fabdd1dfb2c9dfff6273f9872"
+    }
+  },
+  "changed_production_files": [
+    "environment/tree_pine.glb",
+    "environment/tree_broad.glb",
+    "environment/rock.glb"
+  ],
+  "aircraft_other_environment_branding": "byte-for-byte unchanged",
+  "native_runtime_tested_by_art_agent": false
+}

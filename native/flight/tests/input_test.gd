@@ -98,7 +98,7 @@ func run_tests() -> void:
  Input.flush_buffered_events()
  expect(not Input.is_action_pressed("yaw_left") and not Input.is_action_pressed("roll_left"),"alternate layout release leaves no stuck actions")
  var s_labels: PackedStringArray = Bindings.label("pitch_up").split(" / ")
- expect(s_labels.size() == 1 and s_labels[0] == OS.get_keycode_string(KEY_S),"logical fallback does not duplicate UI key label")
+ expect(s_labels.count(OS.get_keycode_string(KEY_S)) == 1,"logical fallback does not duplicate UI key label")
  var up_labels: PackedStringArray = Bindings.label("throttle_up").split(" / ")
  expect(up_labels.has(OS.get_keycode_string(KEY_UP)) and up_labels.has(OS.get_keycode_string(KEY_SHIFT)),"throttle UI exposes arrow and modifier choices")
  var helper_source: InputEventKey = key_event(KEY_S,false)

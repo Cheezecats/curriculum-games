@@ -553,11 +553,11 @@
     "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
   },
   "tree_pine": {
-    "vertices": 156,
-    "triangles": 256,
+    "vertices": 923,
+    "triangles": 1390,
     "mesh_nodes": 3,
     "file": "environment/tree_pine.glb",
-    "bytes": 9276,
+    "bytes": 72652,
     "bounds_min": [
       -1.664455533027649,
       0.0,
@@ -574,31 +574,21 @@
       3.1063363552093506
     ],
     "nodes": [
-      "tree_pine_Leaf",
+      "tree_pine_Bark",
+      "tree_pine_NeedleLight",
       "tree_pine_Pine",
-      "tree_pine_Wood",
       "tree_pine"
     ],
     "primitives": 3,
-    "exported_vertices": 182,
-    "exported_bounds_min": [
-      -1.664455533027649,
-      0,
-      -1.5022822618484497
-    ],
-    "exported_bounds_max": [
-      1.670660138130188,
-      6.579495906829834,
-      1.6040540933609009
-    ],
-    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+    "exported_vertices": 1907,
+    "glb_audit": "PASS: final runtime budgets, binary buffers, identity axes, exact retained bounds"
   },
   "tree_broad": {
-    "vertices": 458,
-    "triangles": 860,
+    "vertices": 1094,
+    "triangles": 1868,
     "mesh_nodes": 3,
     "file": "environment/tree_broad.glb",
-    "bytes": 33044,
+    "bytes": 86384,
     "bounds_min": [
       -2.641707181930542,
       0.0,
@@ -615,31 +605,21 @@
       5.008373260498047
     ],
     "nodes": [
+      "tree_broad_Bark",
       "tree_broad_Leaf",
       "tree_broad_LeafLight",
-      "tree_broad_Wood",
       "tree_broad"
     ],
     "primitives": 3,
-    "exported_vertices": 769,
-    "exported_bounds_min": [
-      -2.641707181930542,
-      0,
-      -2.457465410232544
-    ],
-    "exported_bounds_max": [
-      2.760451316833496,
-      6.6276326179504395,
-      2.550907850265503
-    ],
-    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+    "exported_vertices": 2246,
+    "glb_audit": "PASS: final runtime budgets, binary buffers, identity axes, exact retained bounds"
   },
   "rock": {
-    "vertices": 42,
-    "triangles": 80,
-    "mesh_nodes": 1,
+    "vertices": 292,
+    "triangles": 312,
+    "mesh_nodes": 3,
     "file": "environment/rock.glb",
-    "bytes": 3776,
+    "bytes": 18528,
     "bounds_min": [
       -1.5195951461791992,
       0.02500000037252903,
@@ -656,22 +636,14 @@
       1.9490736722946167
     ],
     "nodes": [
+      "rock_Moss",
       "rock_Stone",
+      "rock_StoneDark",
       "rock"
     ],
-    "primitives": 1,
-    "exported_vertices": 63,
-    "exported_bounds_min": [
-      -1.5195951461791992,
-      0.02500000037252903,
-      -0.9926414489746094
-    ],
-    "exported_bounds_max": [
-      1.5675417184829712,
-      1.553832769393921,
-      0.9564322233200073
-    ],
-    "glb_audit": "PASS: structure, buffers, transformed bounds, identity axes, unique pivot"
+    "primitives": 3,
+    "exported_vertices": 546,
+    "glb_audit": "PASS: final runtime budgets, binary buffers, identity axes, exact retained bounds"
   },
   "crate": {
     "vertices": 2064,

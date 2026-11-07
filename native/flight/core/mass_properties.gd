@@ -19,8 +19,13 @@ static func cargo_position(bp: Dictionary, cargo_mass: float = 18) -> Vector3:
   return Vector3.ZERO
  for part in entries:
   if part is Dictionary and part.get("kind","") == "cargo_mount":
-   return Blueprint.position(part) + Vector3.UP * (.095 + cargo_size(cargo_mass).y * .5)
+   return Blueprint.position(part) + Blueprint.basis(part) * Vector3.UP * (.095 + cargo_size(cargo_mass).y * .5)
  return Vector3.ZERO
+
+static func cargo_basis(bp:Dictionary)->Basis:
+ for part in bp.get("parts",[]):
+  if part is Dictionary and part.get("kind","")=="cargo_mount":return Blueprint.basis(part)
+ return Basis.IDENTITY
 
 static func compute(bp: Dictionary, cargo_mass: float = 0) -> Dictionary:
  if not is_finite(cargo_mass) or cargo_mass < 0 or not Blueprint.validate(bp).ok:
@@ -41,7 +46,7 @@ static func compute(bp: Dictionary, cargo_mass: float = 0) -> Dictionary:
   if not mount_found:
    return {}
   var cp: Vector3 = cargo_position(bp,cargo_mass)
-  components.append({"mass":cargo_mass,"p":cp,"size":cargo_size(cargo_mass),"basis":Basis.IDENTITY})
+  components.append({"mass":cargo_mass,"p":cp,"size":cargo_size(cargo_mass),"basis":cargo_basis(bp)})
   total += cargo_mass
   weighted += cp * cargo_mass
  if not is_finite(total) or total <= 0:
@@ -66,7 +71,7 @@ static func compute(bp: Dictionary, cargo_mass: float = 0) -> Dictionary:
  var principal: Vector3 = eigen.principal
  if not principal.is_finite() or minf(principal.x,minf(principal.y,principal.z)) <= 0:
   return {}
- return {"mass":total,"com":com,"tensor":_to_basis(matrix),"principal":principal,"axes":eigen.axes,"cargo_position":cargo_position(bp,cargo_mass),"cargo_size":cargo_size(cargo_mass)}
+ return {"mass":total,"com":com,"tensor":_to_basis(matrix),"principal":principal,"axes":eigen.axes,"cargo_position":cargo_position(bp,cargo_mass),"cargo_size":cargo_size(cargo_mass),"cargo_basis":cargo_basis(bp)}
 
 static func _to_basis(rows: Array) -> Basis:
  return Basis(Vector3(rows[0][0],rows[1][0],rows[2][0]),Vector3(rows[0][1],rows[1][1],rows[2][1]),Vector3(rows[0][2],rows[1][2],rows[2][2]))

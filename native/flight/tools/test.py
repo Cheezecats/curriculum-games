@@ -7,6 +7,7 @@ p.add_argument('tests',nargs='*')
 a=p.parse_args()
 engine=os.environ.get('GODOT_BIN','/private/tmp/flight-islands-tools/Godot.app/Contents/MacOS/Godot')
 out=root/'output'/'tests';out.mkdir(parents=True,exist_ok=True)
+(root/'output'/'.gdignore').touch()
 scripts=[root/'tests'/s for s in a.tests] if a.tests else sorted((root/'tests').glob('*_test.gd'))
 failed=[]
 for script in scripts:

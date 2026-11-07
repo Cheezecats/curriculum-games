@@ -28,6 +28,7 @@ var crash_panel:PanelContainer
 var inspector:PanelContainer
 var message_label:Label
 var objective:Label
+var save_status:Label
 var instruments:Label
 var energy_bar:ProgressBar
 var selected_label:Label
@@ -82,6 +83,7 @@ var unload_button:Button
 
 func _ready():
 	TranslationServer.set_locale("en")
+	get_tree().auto_accept_quit=false
 	var boot=get_node("/root/Boot")
 	folder=boot.profile_dir
 	var loaded=Profile.load_profile(folder)
@@ -217,6 +219,11 @@ func _construct_ui():
 	message_label.size=Vector2(560,70)
 	message_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	ui.add_child(message_label)
+	save_status=_label("",15,Color("ffb787"))
+	save_status.size=Vector2(560,60)
+	save_status.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	save_status.hide()
+	ui.add_child(save_status)
 	build_panel=_panel(ui,294)
 	build_panel.name="WorkshopPanel"
 	build_panel.position=Vector2(26,96)
@@ -247,7 +254,7 @@ func _construct_ui():
 	symmetry.button_pressed=true
 	symmetry.toggled.connect(func(v):mirror=v)
 	box.add_child(symmetry)
-	box.add_child(_button("Balance & forces  [G]",_toggle_engineering))
+	box.add_child(_button("Balance & forces  [G]",_toggle_engineering,"OverlayButton"))
 	var row=HBoxContainer.new()
 	box.add_child(row)
 	undo_button=_button("Undo",func():history.undo();_after_edit(),"UndoButton")
@@ -317,6 +324,7 @@ func _construct_ui():
 func _layout_ui():
 	var viewport=get_viewport().get_visible_rect().size
 	ui.size=viewport
+	save_status.position=Vector2(viewport.x*.5-280,190)
 	objective_panel.position=Vector2(viewport.x-426,20)
 	instrument_panel.position=Vector2(26,viewport.y-91)
 	actions_bar.position=Vector2(viewport.x-435,viewport.y-73)
@@ -340,6 +348,7 @@ func _center_panel(node_name:String,width:float)->PanelContainer:
 	return p
 
 func _clear(panel:PanelContainer)->VBoxContainer:
+	_bind_action=""
 	for child in panel.get_children():child.free()
 	return _vbox(panel)
 
@@ -557,9 +566,17 @@ func _paint(color:String):
 	bp.paint=color
 	if history.apply(bp,selected_id).ok:_after_edit()
 
-func _save_profile():
+func _save_profile()->bool:
 	var result=Profile.save(folder,profile)
-	if not result.ok:_notice("Save failed. Your live aircraft is intact: "+result.error,8)
+	if not result.ok:
+		var error="Save failed. Your live aircraft is intact: "+result.error
+		save_status.text=error
+		save_status.show()
+		_notice(error,8)
+		return false
+	save_status.hide()
+	save_status.text=""
+	return true
 
 func _save_design():
 	var bp=history.current
@@ -567,8 +584,7 @@ func _save_design():
 	if profile.blueprints.size()>=24:profile.blueprints.pop_front()
 	profile.blueprints.append(bp)
 	profile.current=history.current
-	_save_profile()
-	_notice("Blueprint saved locally. Your design survives a restart.",4)
+	if _save_profile():_notice("Blueprint saved locally. Your design survives a restart.",4)
 
 func _show_blueprints():
 	var box=_clear(pause_panel)
@@ -603,7 +619,7 @@ func start_flight():
 	ghost.hide()
 	selection_box.hide()
 	for s in sockets:s.hide()
-	_notice("Hold Shift or Up for power. S gently raises the nose; A/D bank. Space brakes.",8)
+	_notice("Hold %s for power. %s raises the nose; %s/%s bank. %s brakes."%[Bindings.short_label("throttle_up"),Bindings.short_label("pitch_up"),Bindings.short_label("roll_left"),Bindings.short_label("roll_right"),Bindings.short_label("brake")],8)
 	_play_contact(.25)
 
 func retry():
@@ -633,9 +649,9 @@ func _on_crash(text:String):
 	box.add_child(_label("A ROUGH ARRIVAL",25,Color("edbd8a")))
 	box.add_child(_label(text,17))
 	box.add_child(_label("Your aircraft design is safe. Rebuild or make another attempt.",14,Color("b6c9c9")))
-	box.add_child(_button("Fly again  [R]",retry,"CrashRetryButton"))
-	box.add_child(_button("Modify in hangar  [Tab]",return_to_hangar,"CrashBuildButton"))
-	box.add_child(_button("Inspect actual flight  [I]",_show_inspector))
+	box.add_child(_button("Fly again  [%s]"%Bindings.short_label("retry"),retry,"CrashRetryButton"))
+	box.add_child(_button("Modify in hangar  [%s]"%Bindings.short_label("hangar"),return_to_hangar,"CrashBuildButton"))
+	box.add_child(_button("Inspect actual flight  [%s]"%Bindings.short_label("inspect"),_show_inspector))
 	crash_panel.show()
 	_play_contact(.8)
 
@@ -657,6 +673,7 @@ func toggle_pause():
 	pause_panel.show()
 
 func _resume():
+	_bind_action=""
 	pause_panel.hide()
 	inspector.hide()
 	if mode=="paused":mode="flight";aircraft.set_paused(false)
@@ -762,7 +779,16 @@ func _show_inspector():
 
 func _quit():
 	profile.current=history.current
-	_save_profile()
+	if not _save_profile():
+		if mode=="flight":mode="paused";aircraft.set_paused(true)
+		var box=_clear(pause_panel)
+		box.add_child(_label("YOUR SAVE COULD NOT BE WRITTEN",22))
+		box.add_child(_label("Your live design is still here. Retry saving, or choose explicitly to leave without these changes.",16))
+		box.add_child(_button("Try saving & quit",_quit))
+		box.add_child(_button("Keep playing",_resume))
+		box.add_child(_button("Quit without saving",func():get_tree().quit()))
+		pause_panel.show()
+		return
 	get_tree().quit()
 
 func _notice(text:String,duration=5.0):
@@ -813,7 +839,11 @@ func _update_hud():
 	var percent=t.energy/maxf(1,t.capacity)*100
 	energy_bar.value=percent
 	instruments.text="%02.0f m/s   |   %03.0f m   |   PWR %.0f%%   BAT %.0f%%"%[t.speed,t.altitude,t.throttle*100,percent]
-	assist_hint.text="W/S pitch · A/D bank · Q/E yaw · Shift/Up power · Ctrl/Down reduce · Space brake" if mode=="flight" else "Right-drag orbit · scroll zoom · Tab hangar · R retry"
+	assist_hint.text="%s/%s pitch · %s/%s bank · %s/%s power · %s brake"%[Bindings.short_label("pitch_down"),Bindings.short_label("pitch_up"),Bindings.short_label("roll_left"),Bindings.short_label("roll_right"),Bindings.short_label("throttle_down"),Bindings.short_label("throttle_up"),Bindings.short_label("brake")] if mode=="flight" else "Hold %s + move to orbit · wheel zoom"%Bindings.short_label("orbit")
+	find_child("RetryButton",true,false).text="Retry  [%s]"%Bindings.short_label("retry")
+	find_child("HangarButton",true,false).text="Hangar  [%s]"%Bindings.short_label("hangar")
+	find_child("OverlayButton",true,false).text="Balance & forces  [%s]"%Bindings.short_label("overlay")
+	unload_button.text="Unload parcel  [%s]"%Bindings.short_label("interact")
 	if t.stall and mode=="flight":assist_hint.text="STALL · lower the nose and build airspeed";assist_hint.modulate=Color("efb06d")
 	else:assist_hint.modulate=Color.WHITE
 	if contract.is_empty():objective.text="FREE FLIGHT\nExplore the islands at your own pace."
@@ -821,7 +851,7 @@ func _update_hud():
 	else:
 		var distance=aircraft.craft_origin().distance_to(contract.destination)
 		objective.text="%s   ·   %.0f kg\n%s   ·   %.0f m away"%[contract.title.to_upper(),contract.cargo_mass,"HARBOUR POST" if contract.id!="ridge_run" else "RIDGE OBSERVATORY",distance]
-		if mode=="flight" and Contracts.can_deliver(contract,t):_notice("Delivery pad reached · press F / gamepad B to unload",.2)
+		if mode=="flight" and Contracts.can_deliver(contract,t):_notice("Delivery pad reached · press %s to unload"%Bindings.label("interact"),.2)
 
 func _update_camera(dt):
 	var origin=aircraft.craft_origin()
@@ -847,18 +877,27 @@ func _update_camera(dt):
 	camera.global_position=camera.global_position.lerp(desired,amount)
 	camera.look_at(target,Vector3.UP)
 
-func _unhandled_input(event):
-	if _bind_action!="":
-		var token=Bindings.token_for(event)
-		if token!="":
-			profile.settings.bindings[_bind_action]=[token]
-			Bindings.install(profile.settings.bindings)
-			_bind_action=""
-			_save_profile()
-			_show_settings()
-			_notice("Control saved.",3)
-			get_viewport().set_input_as_handled()
+func _input(event):
+	if _bind_action.is_empty():return
+	get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.pressed and (event.physical_keycode==KEY_ESCAPE or event.keycode==KEY_ESCAPE):
+		_bind_action=""
+		_notice("Rebinding cancelled.",3)
 		return
+	var token=Bindings.token_for(event)
+	if token.is_empty():return
+	var conflict=Bindings.conflict_for(_bind_action,token)
+	if not conflict.is_empty():
+		_notice("Already assigned to "+conflict.replace("_"," ").capitalize()+". Choose another input, or Esc to cancel.",20)
+		return
+	profile.settings.bindings[_bind_action]=[token]
+	Bindings.install(profile.settings.bindings)
+	_bind_action=""
+	var saved=_save_profile()
+	_show_settings()
+	if saved:_notice("Control saved.",3)
+
+func _unhandled_input(event):
 	if event.is_action_pressed("pause_game"):toggle_pause();return
 	if event.is_action_pressed("retry") and mode!="build":retry();return
 	if event.is_action_pressed("hangar") and mode!="build":return_to_hangar();return
@@ -869,17 +908,16 @@ func _unhandled_input(event):
 		if event.button_index==MOUSE_BUTTON_WHEEL_UP:chase_distance=maxf(8,chase_distance-1)
 		if event.button_index==MOUSE_BUTTON_WHEEL_DOWN:chase_distance=minf(26,chase_distance+1)
 	if mode!="build" or pause_panel.visible or inspector.visible:return
-	if event is InputEventKey and event.pressed and not event.echo:
-		if event.is_action_pressed("rotate_yaw"):rotation_quarters.y=fmod(rotation_quarters.y+90,360)
-		if event.is_action_pressed("rotate_pitch"):rotation_quarters.x=fmod(rotation_quarters.x+90,360)
-		if event.is_action_pressed("rotate_roll"):rotation_quarters.z=fmod(rotation_quarters.z+90,360)
-		if event.physical_keycode in [KEY_DELETE,KEY_BACKSPACE]:_remove_selected()
-		if event.is_action_pressed("undo_build"):history.undo();_after_edit()
-		if event.is_action_pressed("redo_build"):history.redo();_after_edit()
+	if event.is_action_pressed("rotate_yaw"):rotation_quarters.y=fmod(rotation_quarters.y+90,360)
+	if event.is_action_pressed("rotate_pitch"):rotation_quarters.x=fmod(rotation_quarters.x+90,360)
+	if event.is_action_pressed("rotate_roll"):rotation_quarters.z=fmod(rotation_quarters.z+90,360)
+	if event.is_action_pressed("undo_build"):history.undo();_after_edit()
+	if event.is_action_pressed("redo_build"):history.redo();_after_edit()
+	if event.is_action("orbit"):
+		_dragging=event.is_pressed()
+		_drag_distance=0
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode in [KEY_DELETE,KEY_BACKSPACE]:_remove_selected()
 	if event is InputEventMouseButton:
-		if event.is_action("orbit"):
-			_dragging=event.pressed
-			_drag_distance=0
 		if event.button_index==MOUSE_BUTTON_WHEEL_UP:orbit_distance=maxf(5,orbit_distance-1)
 		if event.button_index==MOUSE_BUTTON_WHEEL_DOWN:orbit_distance=minf(40,orbit_distance+1)
 		if event.button_index==MOUSE_BUTTON_LEFT:
