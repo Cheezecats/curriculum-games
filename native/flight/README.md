@@ -14,7 +14,7 @@ For a silent source run, set `GODOT_BIN` to the Godot executable and run:
 ./tools/run-silent.sh
 ```
 
-This launcher chooses the Dummy audio output before startup and enforces master mute. Its default save folder is a temporary test profile. It does not change macOS volume or the player's saved volume setting. All automated editor, game, export and recording sessions use these two audio safeguards. Audible sound quality has not been assessed.
+The Mac application has a native launcher that also forces Dummy output and master mute, including automatic relaunches. It preserves local designs in the normal game profile. This source launcher chooses the Dummy audio output before startup and enforces master mute. Its default save folder is a temporary test profile. It does not change macOS volume or the player's saved volume setting. All automated editor, game, export and recording sessions use these two audio safeguards. Audible sound quality has not been assessed.
 
 ## First flight
 
@@ -65,12 +65,13 @@ The heavy contract needs more than the stock trainer. One tested solution uses l
 
 ## Build and verify
 
-Install official Godot4.7.2 and its matching macOS export templates. With `GODOT_BIN` configured:
+Install official Godot4.7.2, its matching macOS export templates and Apple Command Line Tools for the native silent launcher. With `GODOT_BIN` configured:
 
 ```sh
 ./tools/run-silent.sh --headless --editor --import
 python3 tools/test.py
-./tools/run-silent.sh --headless --export-release macOS
+python3 tests/launcher_test.py
+python3 tools/build_mac.py
 python3 tools/gameplay.py --app 'build/Flight Islands.app'
 python3 tools/benchmark.py --app 'build/Flight Islands.app' --duration 600
 ```
@@ -80,3 +81,7 @@ The strict runners reject script errors even when Godot exits with status0. The 
 The original Blender master and GLB generation code are retained in `assets/source/` and `tools/generate_art.py`. Branding is editable SVG with a reproducible generator. [Asset provenance](assets/README.md), [original art licence](assets/LICENSE-ART.md), [third-party notices](THIRD_PARTY_NOTICES.txt), and the root MIT/CC BY4.0 licences cover redistribution.
 
 This alpha teaches through engineering choices. It does not claim validated learning gains, complete curriculum coverage or published SL/HL mappings.
+
+## Technical references
+
+The underlying force structure follows the [NASA lift equation](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/lift-equation/). Native force and body-frame APIs are documented in Godot's [RigidBody3D](https://docs.godotengine.org/en/stable/classes/class_rigidbody3d.html) and [PhysicsDirectBodyState3D](https://docs.godotengine.org/en/stable/classes/class_physicsdirectbodystate3d.html) references. The chosen coefficients, assistance, stall blend and battery parameters are this game's simplified calibration; those sources do not validate its handling or learning effects.

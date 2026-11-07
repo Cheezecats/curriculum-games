@@ -62,6 +62,18 @@ func run():
   await shot("restored_hauler")
   await finish();return
  check(AudioServer.get_driver_name()=="Dummy" and AudioServer.is_bus_mute(0),"silent output and master mute")
+ if "--quality-reset" in OS.get_cmdline_user_args():
+  app.start_flight()
+  Input.action_press("throttle_up");Input.action_press("pitch_up",.6)
+  for frame in range(2400):await get_tree().physics_frame
+  Input.action_release("throttle_up");Input.action_release("pitch_up")
+  app.return_to_hangar()
+  for frame in range(6):await get_tree().physics_frame
+  for frame in range(3):await get_tree().process_frame
+  check(app.aircraft.craft_origin().distance_to(Vector3(110,15.5,440))<.01,"native rendered workshop returns to the home apron")
+  await shot("reset-home")
+  print("NATIVE_RESET_RESULT ",JSON.stringify({"failures":failures,"position":str(app.aircraft.craft_origin()),"driver":AudioServer.get_driver_name(),"muted":AudioServer.is_bus_mute(0)}))
+  await finish();return
  if "--quality-clip" in OS.get_cmdline_user_args():
   await shot("workshop")
   app.start_flight()

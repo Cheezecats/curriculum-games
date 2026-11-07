@@ -19,7 +19,9 @@ jobs:
       - name: Import original assets silently
         run: native/flight/tools/run-silent.sh --headless --editor --import
       - name: Native correctness
-        run: python3 native/flight/tools/test.py
+        run: |
+          python3 native/flight/tests/launcher_test.py
+          python3 native/flight/tools/test.py
       - name: Native gameplay and save/relaunch
         run: python3 native/flight/tools/gameplay.py --headless
       - uses: actions/upload-artifact@v7

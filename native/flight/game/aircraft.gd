@@ -194,14 +194,14 @@ func unload_cargo():
 	var was_frozen=freeze
 	configure(blueprint,0.0)
 	global_transform=Transform3D(orientation*properties.axes,origin+orientation*properties.com)
+	flying=was_flying
+	freeze=was_frozen
 	linear_velocity=velocity
 	angular_velocity=spin
 	energy=minf(remaining,capacity)
 	elapsed=duration
 	peak_height=peak
 	launch_origin=launch_point
-	flying=was_flying
-	freeze=was_frozen
 
 func set_paused(value: bool):
 	if value:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Package an already tested Mac alpha. Does not run or unmute the game."""
-import argparse,hashlib,json,pathlib,shutil,subprocess
+import argparse,hashlib,json,pathlib,shutil,subprocess,plistlib
 project=pathlib.Path(__file__).resolve().parents[1]
 repo=project.parents[1]
 p=argparse.ArgumentParser(description=__doc__)
@@ -12,6 +12,9 @@ stage=destination/'Flight Islands Alpha'
 if stage.exists():p.error('Staging folder already exists; select a fresh destination.')
 stage.mkdir();app=stage/'Flight Islands.app'
 shutil.copytree(a.app.resolve(),app,symlinks=True)
+marker=app/'Contents/Resources/test-profile.txt'
+if marker.exists():marker.unlink()
+subprocess.run(['codesign','--force','--deep','--sign','-',str(app)],check=True)
 subprocess.run(['codesign','--verify','--deep','--strict',str(app)],check=True)
 launcher=stage/'Play Flight Islands — Silent.command'
 launcher.write_text('''#!/bin/bash
@@ -19,16 +22,16 @@ set -euo pipefail
 flight_bundle_dir="$(cd "$(dirname "$0")" && pwd)"
 flight_player_profile="$HOME/Library/Application Support/Godot/app_userdata/Flight Islands/profile"
 flight_silent_log="${TMPDIR:-/tmp}/flight-islands-silent.log"
-exec "$flight_bundle_dir/Flight Islands.app/Contents/MacOS/Flight Islands" --audio-driver Dummy --log-file "$flight_silent_log" -- --test-muted "--profile-dir=$flight_player_profile"
+exec "$flight_bundle_dir/Flight Islands.app/Contents/MacOS/Flight Islands Launcher" --audio-driver Dummy --log-file "$flight_silent_log" -- --test-muted "--profile-dir=$flight_player_profile"
 ''')
 launcher.chmod(0o755)
 (stage/'START HERE.txt').write_text('''FLIGHT ISLANDS — NATIVE MAC ALPHA
 
-Open “Play Flight Islands — Silent.command” for silent play with persistent local designs and progress. It does not change macOS volume or your saved volume setting. The normal .app uses the player’s audio settings; audible sound quality has not been assessed.
+Open “Play Flight Islands — Silent.command” for silent play with persistent local designs and progress. It does not change macOS volume or your saved volume setting. The .app itself also enforces silence. Audible sound quality has not been assessed.
 
 Roll out to runway. Hold Up for power; gently press S at11m/s to lift off, then release. A/D bank, Q/E ground steering, Down reduces power, Space brakes. Land on the harbour runway, taxi into the gold pad below2m/s, F unloads. Tab returns to the workshop; R retries with the design and launch payload preserved. Esc opens controls, remapping and settings. I opens actual flight evidence; G shows forces and balance. Right-drag orbits the builder; wheel zooms.
 
-This is an ad hoc signed alpha, not notarized. macOS may restrict an internet-downloaded copy. Source and Godot setup instructions are supplied separately. Physical keyboard/gamepad and first-time human usability acceptance remain open; see verification.md for measured limits.
+This is an ad hoc signed alpha, not notarized. macOS may restrict an internet-downloaded copy. Source and Godot setup instructions are supplied separately. Full manual control, real gamepad and first-time human usability acceptance remain open; see verification.md for measured limits.
 
 Code MIT. Original art and educational prose CC BY4.0. Credits and engine notices are included and available in the game’s settings.
 ''')
@@ -54,7 +57,7 @@ def sha(path):
  with path.open('rb') as f:
   for chunk in iter(lambda:f.read(1024*1024),b''):h.update(chunk)
  return h.hexdigest()
-manifest={'version':a.version,'source_commit':subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip(),'archives':[{ 'name':v.name,'bytes':v.stat().st_size,'sha256':sha(v)} for v in [archive,source_archive]],'application':{'pck_sha256':sha(app/'Contents/Resources/Flight Islands.pck'),'executable_sha256':sha(app/'Contents/MacOS/Flight Islands'),'signing':'ad hoc; not notarized'}}
+manifest={'version':a.version,'source_commit':subprocess.check_output(['git','-C',str(repo),'rev-parse','HEAD'],text=True).strip(),'archives':[{ 'name':v.name,'bytes':v.stat().st_size,'sha256':sha(v)} for v in [archive,source_archive]],'application':{'pck_sha256':sha(app/'Contents/Resources/Flight Islands.pck'),'engine_sha256':sha(app/'Contents/MacOS/Flight Islands'),'launcher_sha256':sha(app/'Contents/MacOS/Flight Islands Launcher'),'signing':'ad hoc; not notarized'}}
 (destination/'release-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 (destination/'SHA256SUMS.txt').write_text(''.join(v['sha256']+'  '+v['name']+'\n' for v in manifest['archives']))
 print(json.dumps(manifest,indent=2))

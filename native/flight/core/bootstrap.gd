@@ -17,6 +17,13 @@ func _init():
 	if test_mode:
 		AudioServer.set_bus_mute(0, true)
 	startup_audio_driver = AudioServer.get_driver_name()
+	if test_mode:
+		print("SILENT_SESSION driver=",startup_audio_driver," master_muted=",AudioServer.is_bus_mute(0))
+		if DirAccess.make_dir_recursive_absolute(profile_dir)==OK:
+			var audit=FileAccess.open(profile_dir.path_join("audio-session.json"),FileAccess.WRITE)
+			if audit:
+				audit.store_string(JSON.stringify({"driver":startup_audio_driver,"master_muted":AudioServer.is_bus_mute(0),"pid":OS.get_process_id()}))
+				audit.close()
 	if test_mode and startup_audio_driver != "Dummy":
 		push_error("Silent tests require --audio-driver Dummy before startup. Refusing audible session.")
 		Engine.time_scale = 0.0

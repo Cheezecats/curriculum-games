@@ -76,6 +76,7 @@ var sound_wind:AudioStreamPlayer
 var sound_contact:AudioStreamPlayer
 var audio_events=0
 var navigation:Control
+var _snap_camera=false
 var hud_graph:Control
 var reticle:Control
 var engineering
@@ -84,6 +85,8 @@ var unload_button:Button
 func _ready():
 	TranslationServer.set_locale("en")
 	get_tree().auto_accept_quit=false
+	get_window().close_requested.connect(_quit)
+	get_window().focus_exited.connect(_on_window_focus_exited)
 	var boot=get_node("/root/Boot")
 	folder=boot.profile_dir
 	var loaded=Profile.load_profile(folder)
@@ -119,7 +122,7 @@ func _ready():
 	_notice("Welcome to the islands. Your first parcel is ready at the harbour desk.",8)
 	if loaded.error!="":_notice(loaded.error,10)
 	get_window().title="Flight Islands — Native Alpha"
-	if boot.test_mode and ("--quality-flow" in OS.get_cmdline_user_args() or "--quality-restore" in OS.get_cmdline_user_args() or "--quality-clip" in OS.get_cmdline_user_args()):
+	if boot.test_mode and ("--quality-flow" in OS.get_cmdline_user_args() or "--quality-restore" in OS.get_cmdline_user_args() or "--quality-clip" in OS.get_cmdline_user_args() or "--quality-reset" in OS.get_cmdline_user_args()):
 		var runner=preload("res://qa/gameplay.gd").new()
 		runner.app=self
 		add_child(runner)
@@ -406,6 +409,20 @@ func _build_tools():
 		sockets.append(node)
 
 func _rebuild():
+	# A fresh frozen body avoids a late state-sync from the previous flight
+	# moving the workshop model back to its old physical position.
+	if aircraft:
+		aircraft.flying=false
+		aircraft.freeze=true
+		remove_child(aircraft)
+		aircraft.queue_free()
+	aircraft=AircraftType.new()
+	aircraft.name="PlayerAircraft"
+	add_child(aircraft)
+	aircraft.impact.connect(func(text):call_deferred("_on_crash",text))
+	if navigation:navigation.aircraft=aircraft
+	if engineering:engineering.aircraft=aircraft
+	_snap_camera=true
 	completed_this_run=false
 	selected_id=history.selected
 	var payload=contract.get("cargo_mass",0.0) if launch_payload else 0.0
@@ -608,6 +625,7 @@ func _load_blueprint(bp:Dictionary):
 
 func start_flight():
 	if mode=="paused":return
+	_snap_camera=true
 	aircraft.launch(WorldType.HOME+Vector3(0,1.55,88))
 	aircraft.throttle=.0
 	mode="flight"
@@ -732,9 +750,10 @@ func _show_settings():
 	volume.max_value=1
 	volume.step=.05
 	volume.value=profile.settings.master_volume
+	volume.editable=not get_node("/root/Boot").test_mode
 	volume.custom_minimum_size=Vector2(270,26)
 	volume.value_changed.connect(func(v):profile.settings.master_volume=v;if_not_testing_volume(v);_save_profile())
-	list.add_child(_label("Game volume",13))
+	list.add_child(_label("Audio is off in this silent alpha" if get_node("/root/Boot").test_mode else "Game volume",13))
 	list.add_child(volume)
 	box.add_child(_button("Back to game",func():pause_panel.hide();_resume()))
 	box.add_child(_button("Credits & licences",_show_credits))
@@ -873,7 +892,8 @@ func _update_camera(dt):
 	desired.y=maxf(desired.y,world.terrain_height(desired.x,desired.z)+.8)
 	var obstruction=get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(target,desired,1))
 	if not obstruction.is_empty():desired=obstruction.position+obstruction.normal*.5
-	var amount=1.0 if profile.settings.get("reduced_motion",false) else 1-exp(-dt*6)
+	var amount=1.0 if _snap_camera or profile.settings.get("reduced_motion",false) else 1-exp(-dt*6)
+	_snap_camera=false
 	camera.global_position=camera.global_position.lerp(desired,amount)
 	camera.look_at(target,Vector3.UP)
 
@@ -929,9 +949,8 @@ func _unhandled_input(event):
 		orbit_yaw-=event.relative.x*.007
 		orbit_pitch=clampf(orbit_pitch+event.relative.y*.005,-.05,1.1)
 
-func _notification(what):
-	if what==NOTIFICATION_WM_WINDOW_FOCUS_OUT and mode=="flight" and not has_meta("quality_flow_active") and not has_meta("quality_benchmark_active"):toggle_pause()
-	if what==NOTIFICATION_WM_CLOSE_REQUEST and is_inside_tree() and profile!=null and not profile.is_empty():_quit()
+func _on_window_focus_exited():
+	if mode=="flight" and not has_meta("quality_flow_active") and not has_meta("quality_benchmark_active"):toggle_pause()
 
 func _create_audio():
 	sound_engine=AudioStreamPlayer.new()

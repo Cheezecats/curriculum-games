@@ -1,14 +1,62 @@
-# Native implementation interfaces
+# Native subsystem contracts
 
-Coordinates: metres,+Yup,-Zforward,+Xright. Source undernative/flight. AllGodot tests --headless --audio-driver Dummy; visualruns --audio-driver Dummy -- --test-muted. Godotbinary /private/tmp/flight-islands-tools/Godot.app/Contents/MacOS/Godot (downloading). Rootownsproject.godot/bootstrap/game/world/UI/physics/integration; art agentownsassetsandgeneratoronly.
-Part kinds:cockpit,fuselage,strut,wing,large_wing,aileron,elevator,rudder,motor,battery,gear,cargo_mount. Models assets/models/<kind>.glb, rootorigin atphysicalcentre, -Zforward. Named animatedchild Propeller motorrotateslocalZ, Flap surfacechildrotatesX(aileron/elevator)/Y(rudder), Wheel gearchildrotatesX. Bodydimensions fullmetres:cockpit[.85,.8,1.5],fuselage[.7,.55,1.2],strut[.18,.18,1],wing[2.2,.14,.7],large_wing[3.2,.16,.85],aileron[1.2,.1,.3],elevator[1.5,.12,.4],rudder[.12,.8,.65],motor[.55,.55,.7],battery[.5,.35,.7],gear[.3,.65,.45],cargo_mount[.7,.15,.8]. Renderedmeshdetailswithinbroadbounds, surfacescanbeunderthinphysicalAABB, no texturesrequired. EditableoneblendmasterandPython generator; GLBs staticallyloaded byrootvisualfactory, editorimported. Buildmodelsmaterials primaryivory/paintred/navy/aluminium/wood; exposedpaintmaterial named Paint. Curvedairfoils/bubblecanopy/beveledhardware, no plaincubeplane.
-EnvironmentGLBs requested tree_pine,tree_broad,rock,crate,hangar,tower,wind_sock,lamp,barrel,beacon withnamefiles. Modelterrainbuildingsrootcanproceduralmesh ifartpackdoesn'tsupply. Originsgroundcentre, hangaropeningfaces+Z. OptionalGLB environmentmodels scaleconsistentmetres. 3cohesiveL0Dsnotrequiredforfirstassetpack (rootMultiMesh caninstance).
+Godot4.7.2, GDScript and Jolt. SI units; +Y up, -Z forward, +X right. Physics120Hz. Original browser prototypes remain separate.
 
-## Pure core API (core agent owns only core/parts.gd,blueprint.gd,mass_properties.gd,history.gd,profile.gd,contracts.gd and tests/core_test.gd)
+## Components and artwork
 
-No class_name necessary; consumers preloadscript. Parts:static kinds()->Array[String],definition(kind:String)->Dictionary keys label,mass:float,size:Vector3,area:float,energy:float,thrust:float,model:String. Halfphysicalextents=size/2. Exactinitialmasses kg:cockpit4,fuselage1.5,strut.35,wing1.1,large_wing1.65,aileron.25,elevator.35,rudder.3,motor1.8,battery2,gear.9,cargo_mount.45; wingarea1.5,largewing2.5,aileron.32,elevator.5,rudder.4,motorthrust65N,battery120000J. Modelpathsres://assets/models/<kind>.glb. Unknownkind {}.
-Blueprint: JSONfriendlydict {version:1,name:String,paint:String(hex6),parts:Array[Dictionary]}; part{id:String,kind:String,p:[float,float,float],r:[float,float,float]} anglesDEGREESquarterturns; godotposition()-Zforward. static starter()->Dictionary (connectedflyabletrainer with2standardwings,1motor,1battery,tailcontrols,3gear,cargomount),position(part)->Vector3,basis(part)->Basis, validate(bp:Dictionary)->Dictionary {ok:bool,error:String};128max,uniqueids,finiteboundedpositions32m,rotations90deg,onecockpit,connectedphysicalAABB graph gap<=.08m, overlapallowedatconnectionthinmeshroots but rejectsamekindandtransform/identicalposition,invalideditatomic. Slotplacementrootusesaxisalignedextentsofrotatedparts.
-MassProperties:static compute(bp:Dictionary,cargo_mass:float=0)->Dictionary {mass:float,com:Vector3,tensor:Basis,principal:Vector3,axes:Basis,cargo_position:Vector3}; cuboidcentroidinertia+parallelaxis, rotatecomponentinertia, cargoatfirstcargomountp+Vector3(0,.42,0),cargo_dimensions[.8,.65,.85], nativebodypositionisCOM,axescolumnsprincipalunitvectors (right handed), tensor=axes*diag(principal)*axes.transposed(). Eigenvaluespositiveandcomputevalidatedfinite. static cargo_position(bp)->Vector3.
-History:RefCountedinstance new(initial:Dictionary,selected_id:String), current:Dictionary,selected:String,can_undo()->bool,can_redo()->bool,apply(bp:Dictionary,selected_id:String)->Dictionary{ok,error} validonly,undo()->void,redo()->void;40undostatesdeepcopies/rejectinvalidnohistorymutation.
-Profile:static defaults()->Dictionary {version:1,blueprints:Array,current:Dictionary,completed:Array,discovered:Array,settings:Dictionary {master_volume:.6,invert_pitch:false,bindings:{}}}; static save(folder:String,data:Dictionary)->Dictionary {ok,error}; static load_profile(folder:String)->Dictionary {profile:Dictionary,recovered:bool,error:String}. AtomicJSONvalidatedbeforeoverwrite,previousknownvalidbackup,corruptcurrentrecoversbackup,errorretainslivegame. No userprefs testmuted writes; root passes /private/tmp testfolder. Unknown/malformedprofilefailssafely,boundsalllists.
-Contracts:static all()->Array[Dictionary] withidsfirst_delivery,heavy_cargo,ridge_run; {id,title,description,cargo_mass,destination:Vector3,pad_radius:float,reward:String}; destharbour[-430,9,-260] first/heavy, ridge[420,118,-360];cargo2/18/10kg;static can_deliver(contract:Dictionary,telemetry:Dictionary)->bool checksactualcargo_world_positionwithinpadXZandheight<3m,grounded:true,speed<2,notcrashed,hascargo:true. Returnsfalsemissing/nonfiniteevidence. Roothandlesprogressunlocks. No automaticallypassedjobs. static next_contract(completed:Array)->Dictionary (firstuncompleted,afterallfirstpractice).
+`core/parts.gd` exposes `kinds()` and `definition(kind)`. A definition contains `label`, `mass`, full cuboid `size`, lifting `area`, stored `energy`, maximum `thrust`, parasitic `drag` coefficient and GLB `model` path. Unknown kinds return an empty dictionary.
+
+| Family      | Mass kg | Full size m     |
+| ----------- | ------: | --------------- |
+| cockpit     |       4 | .85 × .8 × 1.5  |
+| fuselage    |     1.5 | .7 × .55 × 1.2  |
+| strut       |     .35 | .18 × .18 × 1   |
+| wing        |     1.1 | 2.2 × .14 × .7  |
+| large_wing  |    1.65 | 3.2 × .16 × .85 |
+| aileron     |     .25 | 1.2 × .1 × .3   |
+| elevator    |     .35 | 1.5 × .12 × .4  |
+| rudder      |      .3 | .12 × .8 × .65  |
+| motor       |     1.8 | .55 × .55 × .7  |
+| battery     |       2 | .5 × .35 × .7   |
+| gear        |      .9 | .3 × .65 × .45  |
+| cargo_mount |     .45 | .7 × .15 × .8   |
+
+Wing areas are1.5/2.5m²; aileron/elevator/rudder areas .32/.5/.4m². Each motor has65N maximum thrust and each battery120kJ capacity. See the native README for aerodynamic and electrical assumptions.
+
+Aircraft GLBs live under `assets/models/`, centred on their physical component frame. Environment models under `assets/environment/` have ground-centred origins. Moving child names are `Propeller` (localZ), `Flap` (localX for aileron/elevator, Y for rudder) and `Wheel` (localX). Paintable materials are named `Paint`. Preserve these pivots, model bounds and original editable sources when changing art.
+
+## Blueprints and editing
+
+A blueprint is JSON-compatible:
+
+```text
+{version:1, name:String, paint:"rrggbb", parts:[
+  {id:String, kind:String, p:[x,y,z], r:[degrees_x,degrees_y,degrees_z]}
+]}
+```
+
+`core/blueprint.gd` provides `starter()`, `position(part)`, `basis(part)` and `validate(blueprint) -> {ok,error}`. A build has1–128 parts, one cockpit, unique nonempty IDs and centres, finite positions within32m, quarter-turn rotations and a connected rotated-AABB graph with maximum .08m separation. Overlap at connections is permitted. Invalid edits must leave live state intact.
+
+`core/history.gd` exposes a deep-copy `current`, selected ID, validated `apply`, `undo` and `redo`; history is bounded to40 edits. Mirror placement reflects position and yaw/roll. Static visual instancing must preserve component transforms, authored geometry and all individual collision shapes.
+
+## Mass and physical frame
+
+`Mass.compute(blueprint,cargo_mass=0)` returns `mass`, `com`, full `tensor`, positive principal moments `principal`, right-handed principal `axes`, `cargo_position`, `cargo_size` and `cargo_basis`. Invalid data returns an empty dictionary. The tensor includes rotated cuboid centroid inertia and parallel-axis terms.
+
+The rigid body's origin is the total centre of mass. Its axes are the principal axes; model and collision transforms counter-rotate into that frame. `tensor = axes × diag(principal) × axes.transposed()`.
+
+The18kg cargo box measures .8 × .65 × .85m. Dimensions scale by `(mass/18)^(1/3)`. Its centre is the first mount's position plus its rotated local-UP direction times `.095 + cargo_height/2`. The mount basis rotates cargo geometry, inertia and its attachment offset together. Cargo drag uses projected area. Unloading preserves world position, battery energy and elapsed-flight evidence.
+
+`game/aircraft.gd` owns force integration, landing gear, animation and crashes. It provides `configure`, `place`, `launch`, `set_paused`, `unload_cargo`, `craft_basis`, `craft_origin` and actual `telemetry`. Guidance may set normal controls/throttle/brake. It must not manufacture lift or energy or override flight velocity.
+
+## Contracts and persistence
+
+`core/contracts.gd` provides `all()`, `can_deliver(contract,telemetry)` and `next_contract(completed)`. Cargo masses are2/18/10kg. Harbour pad centre is(-402,9,-250); ridge pad centre(448,118,-350). Both painted pads have8m radius. Delivery uses the actual cargo centre, horizontal radius, height difference below3m, grounded state, speed below2m/s, present cargo and no crash. Missing or nonfinite evidence fails. Completion unlocks the next job; after all three, repeat contracts and free flight remain available.
+
+`core/profile.gd` stores version1 designs, progress and settings, with atomic replacement and a validated previous backup. The current aircraft and every saved blueprint are validated. Corrupt current data may recover from the backup. Save failure preserves the live session, remains visible and prevents implicit quit; discarding changes requires the player's explicit choice.
+
+## Silent verification
+
+Every agent-run editor/game/export starts with `--audio-driver Dummy` and user argument `--test-muted`. Boot enforces master mute before audio nodes start and refuses a testing session using another output driver. Never change system volume or save the testing override as the player's preference. Test profiles are isolated in temporary folders.
+
+QA controllers operate through actual Input actions after normal ground launch. Render batching may reduce draw overhead without deleting physical parts. Headless smoke tests do not qualify GPU performance. The benchmark verifies an actual1920×1080 image and records ten minutes, slow-frame percentiles and hardware; open gates must remain explicit.
