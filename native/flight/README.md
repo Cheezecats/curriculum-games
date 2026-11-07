@@ -24,20 +24,20 @@ This launcher chooses the Dummy audio output before startup and enforces master 
 4. Reduce power with **Down** or **Ctrl**. Line up with the runway early. Descend gently at approximately 11–13 m/s, level the wings, then use **Space** to brake after touchdown.
 5. Taxi into the gold pad and stop below **2 m/s**. Press **F** to unload. Cargo must physically be inside the pad and grounded. Returning to the workshop selects the next contract.
 
-| Action | Keyboard / mouse | Gamepad default |
-| --- | --- | --- |
-| Pitch / bank | W/S · A/D | Left stick |
-| Ground steering / yaw | Q/E | Shoulder buttons |
-| Increase / reduce power | Up or Shift / Down or Ctrl | Right / left trigger |
-| Brake | Space | A / south |
-| Unload | F | B / east |
-| Workshop / retry | Tab / R | X / west · Y / north |
-| Pause / notebook | Esc / I | Start for pause |
-| Engineering overlay | G | Remappable |
-| Orbit / zoom | Right drag in workshop / wheel in either mode | Mouse for construction |
-| Undo / redo | Z / Y | Remappable |
-| Rotate placement | C pitch · X yaw · V roll | Remappable |
-| Remove selected component | Delete / Backspace | Workshop button |
+| Action                    | Keyboard / mouse                              | Gamepad default        |
+| ------------------------- | --------------------------------------------- | ---------------------- |
+| Pitch / bank              | W/S · A/D                                     | Left stick             |
+| Ground steering / yaw     | Q/E                                           | Shoulder buttons       |
+| Increase / reduce power   | Up or Shift / Down or Ctrl                    | Right / left trigger   |
+| Brake                     | Space                                         | A / south              |
+| Unload                    | F                                             | B / east               |
+| Workshop / retry          | Tab / R                                       | X / west · Y / north   |
+| Pause / notebook          | Esc / I                                       | Start for pause        |
+| Engineering overlay       | G                                             | Remappable             |
+| Orbit / zoom              | Right drag in workshop / wheel in either mode | Mouse for construction |
+| Undo / redo               | Z / Y                                         | Remappable             |
+| Rotate placement          | C pitch · X yaw · V roll                      | Remappable             |
+| Remove selected component | Delete / Backspace                            | Workshop button        |
 
 Controls can be rebound to keys, mouse buttons or gamepad inputs in **Controls & settings**. The alpha's construction view uses a mouse. Real gamepad hardware acceptance remains open; engine-level event routing is checked automatically.
 

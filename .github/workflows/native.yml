@@ -6,10 +6,10 @@ on:
     paths: ['native/flight/**', '.github/workflows/native.yml']
 jobs:
   native:
-    runs-on: macos-14
+    runs-on: macos-26
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install official Godot4.7.2
         run: |
           curl --fail --location --retry 3 -o "$RUNNER_TEMP/godot.zip" https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_macos.universal.zip
@@ -22,7 +22,7 @@ jobs:
         run: python3 native/flight/tools/test.py
       - name: Native gameplay and save/relaunch
         run: python3 native/flight/tools/gameplay.py --headless
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: native-check-evidence
