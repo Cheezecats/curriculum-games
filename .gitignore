@@ -16,3 +16,5 @@ native/flight/.tools/
 native/flight/builds/
 native/flight/output/
 *.blend1
+
+native/flight/build/

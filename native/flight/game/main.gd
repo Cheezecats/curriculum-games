@@ -43,6 +43,7 @@ var rotation_quarters=Vector3.ZERO
 var orbit_yaw=-.90
 var orbit_pitch=.30
 var orbit_distance=9.0
+var chase_distance=12.0
 var chase_heading=Vector3.FORWARD
 var look_yaw=0.0
 var selected_id=""
@@ -76,6 +77,8 @@ var audio_events=0
 var navigation:Control
 var hud_graph:Control
 var reticle:Control
+var engineering
+var unload_button:Button
 
 func _ready():
 	TranslationServer.set_locale("en")
@@ -106,11 +109,22 @@ func _ready():
 	_construct_ui()
 	_build_tools()
 	_create_audio()
+	engineering=preload("res://game/engineering_overlay.gd").new()
+	engineering.aircraft=aircraft
+	add_child(engineering)
 	_rebuild()
 	camera.global_position=aircraft.craft_origin()+Vector3(-10,6,10)
 	_notice("Welcome to the islands. Your first parcel is ready at the harbour desk.",8)
 	if loaded.error!="":_notice(loaded.error,10)
 	get_window().title="Flight Islands — Native Alpha"
+	if boot.test_mode and ("--quality-flow" in OS.get_cmdline_user_args() or "--quality-restore" in OS.get_cmdline_user_args() or "--quality-clip" in OS.get_cmdline_user_args()):
+		var runner=preload("res://qa/gameplay.gd").new()
+		runner.app=self
+		add_child(runner)
+	if boot.test_mode and "--quality-benchmark" in OS.get_cmdline_user_args():
+		var runner=load("res://qa/performance.gd").new()
+		runner.app=self
+		add_child(runner)
 
 func _style(bg:Color,border=Color(0,0,0,0),radius=8)->StyleBoxFlat:
 	var style=StyleBoxFlat.new()
@@ -173,7 +187,10 @@ func _construct_ui():
 		if state=="disabled":color=Color("1c2a30")
 		theme.set_stylebox(state,"Button",_style(color,Color(.6,.7,.7,.15),5))
 	ui.theme=theme
-	var brand=_label("FLIGHT ISLANDS",25)
+	var brand=TextureRect.new()
+	brand.texture=preload("res://assets/branding/flight_islands_title_light.png")
+	brand.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	brand.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	brand.position=Vector2(26,20)
 	brand.size=Vector2(300,40)
 	ui.add_child(brand)
@@ -230,6 +247,7 @@ func _construct_ui():
 	symmetry.button_pressed=true
 	symmetry.toggled.connect(func(v):mirror=v)
 	box.add_child(symmetry)
+	box.add_child(_button("Balance & forces  [G]",_toggle_engineering))
 	var row=HBoxContainer.new()
 	box.add_child(row)
 	undo_button=_button("Undo",func():history.undo();_after_edit(),"UndoButton")
@@ -237,7 +255,10 @@ func _construct_ui():
 	row.add_child(undo_button)
 	row.add_child(redo_button)
 	box.add_child(_button("Replace selected with chosen part",_replace_selected,"ReplaceButton"))
-	box.add_child(_button("Rotate placement 90°  [X]",func():rotation_quarters.y=fmod(rotation_quarters.y+90,360),"RotateButton"))
+	var rotation_row=HBoxContainer.new()
+	box.add_child(rotation_row)
+	for axis in range(3):
+		rotation_row.add_child(_button(["Pitch ↻","Yaw ↻","Roll ↻"][axis],func():rotation_quarters[axis]=fmod(rotation_quarters[axis]+90,360)))
 	box.add_child(_button("Remove selected  [Delete]",_remove_selected,"RemoveButton"))
 	var paints=HBoxContainer.new()
 	box.add_child(paints)
@@ -274,6 +295,9 @@ func _construct_ui():
 	actions.add_child(_button("Hangar  [Tab]",return_to_hangar,"HangarButton"))
 	actions.add_child(_button("Retry  [R]",retry,"RetryButton"))
 	actions.add_child(_button("Pause",toggle_pause,"PauseButton"))
+	unload_button=_button("Unload parcel  [F]",_deliver,"UnloadButton")
+	ui.add_child(unload_button)
+	unload_button.hide()
 	navigation=preload("res://game/navigation.gd").new()
 	navigation.name="IslandChart"
 	navigation.aircraft=aircraft
@@ -326,6 +350,18 @@ func _draw_reticle():
 	reticle.draw_line(centre+Vector2(-24,0),centre+Vector2(-7,0),color,1.6,true)
 	reticle.draw_line(centre+Vector2(7,0),centre+Vector2(24,0),color,1.6,true)
 	reticle.draw_circle(centre,2,color)
+	if contract.is_empty() or completed_this_run:return
+	var target:Vector3=contract.destination+Vector3.UP*7
+	var point:Vector2
+	if camera.is_position_behind(target):
+		var local=camera.global_basis.transposed()*(target-camera.global_position)
+		point=Vector2(70 if local.x<0 else ui.size.x-270,ui.size.y*.4)
+	else:
+		point=camera.unproject_position(target)
+		point=point.clamp(Vector2(80,180),ui.size-Vector2(270,150))
+	var gold=Color("eecb7d")
+	reticle.draw_polyline(PackedVector2Array([point+Vector2(-8,0),point+Vector2(0,8),point+Vector2(8,0),point+Vector2(0,-8),point+Vector2(-8,0)]),gold,2,true)
+	reticle.draw_string(ThemeDB.fallback_font,point+Vector2(14,5),"%.0f m · delivery pad"%aircraft.craft_origin().distance_to(contract.destination),HORIZONTAL_ALIGNMENT_LEFT,-1,14,gold)
 
 func _build_tools():
 	ghost=MeshInstance3D.new()
@@ -361,6 +397,7 @@ func _build_tools():
 		sockets.append(node)
 
 func _rebuild():
+	completed_this_run=false
 	selected_id=history.selected
 	var payload=contract.get("cargo_mass",0.0) if launch_payload else 0.0
 	var has_mount=false
@@ -447,6 +484,8 @@ func _update_ghost():
 		var mirrored=next.duplicate(true)
 		mirrored.id+="_mirror"
 		mirrored.p[0]=-p.x
+		mirrored.r[1]=-mirrored.r[1]
+		mirrored.r[2]=-mirrored.r[2]
 		if not _position_used(bp,Vector3(mirrored.p[0],mirrored.p[1],mirrored.p[2])):bp.parts.append(mirrored)
 	var validation=BP.validate(bp)
 	candidate={"bp":bp,"selected":next.id,"ok":validation.ok,"error":validation.error}
@@ -534,9 +573,14 @@ func _save_design():
 func _show_blueprints():
 	var box=_clear(pause_panel)
 	box.add_child(_label("YOUR BLUEPRINTS",24))
-	box.add_child(_button("Island trainer",func():_load_blueprint(BP.starter())))
+	var scroll=ScrollContainer.new()
+	scroll.custom_minimum_size=Vector2(385,330)
+	box.add_child(scroll)
+	var list=_vbox(scroll)
+	list.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	list.add_child(_button("Island trainer",func():_load_blueprint(BP.starter())))
 	for bp in profile.blueprints:
-		box.add_child(_button(bp.name+" · %d parts"%bp.parts.size(),func():_load_blueprint(bp)))
+		list.add_child(_button(bp.name+" · %d parts"%bp.parts.size(),func():_load_blueprint(bp)))
 	box.add_child(_button("Back",func():pause_panel.hide()))
 	pause_panel.show()
 
@@ -571,8 +615,10 @@ func retry():
 func return_to_hangar():
 	if mode=="build":return
 	_record_attempt()
+	var finished_job=completed_this_run
+	if finished_job:contract=Contracts.next_contract(profile.completed)
 	_rebuild()
-	_notice("Back at the hangar. Your design is preserved.",4)
+	_notice("Next job: "+contract.title+" · "+contract.description if finished_job else "Back at the hangar. Your design is preserved.",7)
 
 func _record_attempt():
 	if aircraft.elapsed<.1:return
@@ -580,6 +626,7 @@ func _record_attempt():
 	last_trace=flight_trace.duplicate(true)
 
 func _on_crash(text:String):
+	if not aircraft.crashed:return
 	mode="crashed"
 	_record_attempt()
 	var box=_clear(crash_panel)
@@ -605,6 +652,7 @@ func toggle_pause():
 	box.add_child(_button("Inspect this flight",_show_inspector))
 	box.add_child(_button("Controls & settings",_show_settings))
 	box.add_child(_button("Return to hangar",return_to_hangar))
+	box.add_child(_button("Credits & licences",_show_credits))
 	box.add_child(_button("Save & quit",_quit))
 	pause_panel.show()
 
@@ -634,11 +682,7 @@ func _deliver():
 	if not profile.completed.has(contract.id):profile.completed.append(contract.id)
 	_save_profile()
 	_record_attempt()
-	var origin=aircraft.craft_origin()
-	var heading=aircraft.craft_basis().get_euler().y
-	aircraft.configure(history.current,0.0)
-	aircraft.launch(origin,heading)
-	aircraft.throttle=0
+	aircraft.unload_cargo()
 	_play_contact(.4)
 	_notice("DELIVERED · "+contract.reward+" unlocked. Return to the hangar for your next job.",10)
 
@@ -652,7 +696,7 @@ func _show_settings():
 	var list=_vbox(scroll)
 	list.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_binding_buttons.clear()
-	for action in ["pitch_up","pitch_down","roll_left","roll_right","yaw_left","yaw_right","throttle_up","throttle_down","brake","hangar","retry","interact","pause_game"]:
+	for action in ["pitch_up","pitch_down","roll_left","roll_right","yaw_left","yaw_right","throttle_up","throttle_down","brake","hangar","retry","interact","pause_game","inspect","overlay","orbit","undo_build","redo_build","rotate_pitch","rotate_yaw","rotate_roll"]:
 		var b=_button(action.replace("_"," ").capitalize()+"   "+Bindings.label(action),func():_bind_action=action;_notice("Press a key, mouse button or gamepad control for "+action.replace("_"," "),20))
 		list.add_child(b)
 		_binding_buttons[action]=b
@@ -673,14 +717,30 @@ func _show_settings():
 	volume.value=profile.settings.master_volume
 	volume.custom_minimum_size=Vector2(270,26)
 	volume.value_changed.connect(func(v):profile.settings.master_volume=v;if_not_testing_volume(v);_save_profile())
-	list.add_child(_label("Game volume (silent test override stays active)",13))
+	list.add_child(_label("Game volume",13))
 	list.add_child(volume)
 	box.add_child(_button("Back to game",func():pause_panel.hide();_resume()))
+	box.add_child(_button("Credits & licences",_show_credits))
 	box.add_child(_button("Save & quit",_quit))
+	pause_panel.show()
+
+func _show_credits():
+	var box=_clear(pause_panel)
+	box.add_child(_label("FLIGHT ISLANDS · NATIVE ALPHA",22))
+	var text=RichTextLabel.new()
+	text.custom_minimum_size=Vector2(385,360)
+	text.text=FileAccess.get_file_as_string("res://THIRD_PARTY_NOTICES.txt")
+	text.add_theme_font_size_override("normal_font_size",13)
+	box.add_child(text)
+	box.add_child(_button("Back",_show_settings))
 	pause_panel.show()
 
 func if_not_testing_volume(value):
 	if not get_node("/root/Boot").test_mode:AudioServer.set_bus_volume_db(0,linear_to_db(maxf(value,.0001)))
+
+func _toggle_engineering():
+	engineering.enabled=not engineering.enabled
+	_notice("Gold: centre of mass / weight · cyan: wing forces · orange: engines. Arrows scale at 1.8 cm/N, capped at 6 m." if engineering.enabled else "Engineering overlay hidden.",7)
 
 func _show_inspector():
 	if mode=="flight":mode="paused";aircraft.set_paused(true)
@@ -692,7 +752,7 @@ func _show_inspector():
 		box.add_child(_label("Make a flight first. This notebook records your actual measurements.",16))
 	else:
 		box.add_child(_label("%.1f m/s airspeed · %.1f m altitude\n%.2f kg loaded mass · %.1f kJ remaining\n%.0f m travelled · %.1f s elapsed\nPitch %.1f° · bank %.1f°"%[t.airspeed,t.altitude,t.mass,t.energy/1000,t.distance,t.elapsed,rad_to_deg(t.pitch),rad_to_deg(t.bank)],16))
-		box.add_child(_label("Centre of mass: %.2f, %.2f, %.2f m\nPrincipal inertia: %.2f, %.2f, %.2f kg·m²"%[aircraft.properties.com.x,aircraft.properties.com.y,aircraft.properties.com.z,aircraft.inertia.x,aircraft.inertia.y,aircraft.inertia.z],14,Color("b6c9c9")))
+		box.add_child(_label("Centre of mass: %.2f, %.2f, %.2f m\nPrincipal inertia: %.2f, %.2f, %.2f kg·m²"%[t.com.x,t.com.y,t.com.z,t.principal.x,t.principal.y,t.principal.z],14,Color("b6c9c9")))
 		var graph=preload("res://game/flight_graph.gd").new()
 		graph.samples=flight_trace.duplicate(true) if mode!="build" else last_trace.duplicate(true)
 		box.add_child(graph)
@@ -747,6 +807,9 @@ func _process(dt):
 
 func _update_hud():
 	var t=aircraft.telemetry()
+	unload_button.visible=mode=="flight" and not contract.is_empty() and not completed_this_run and aircraft.craft_origin().distance_to(contract.destination)<35
+	unload_button.disabled=not Contracts.can_deliver(contract,t)
+	unload_button.position=get_viewport().get_visible_rect().size*Vector2(.5,.78)-Vector2(100,0)
 	var percent=t.energy/maxf(1,t.capacity)*100
 	energy_bar.value=percent
 	instruments.text="%02.0f m/s   |   %03.0f m   |   PWR %.0f%%   BAT %.0f%%"%[t.speed,t.altitude,t.throttle*100,percent]
@@ -758,7 +821,7 @@ func _update_hud():
 	else:
 		var distance=aircraft.craft_origin().distance_to(contract.destination)
 		objective.text="%s   ·   %.0f kg\n%s   ·   %.0f m away"%[contract.title.to_upper(),contract.cargo_mass,"HARBOUR POST" if contract.id!="ridge_run" else "RIDGE OBSERVATORY",distance]
-		if mode=="flight" and Contracts.can_deliver(contract,t):_notice("Delivery pad reached · press E / gamepad B to unload",.2)
+		if mode=="flight" and Contracts.can_deliver(contract,t):_notice("Delivery pad reached · press F / gamepad B to unload",.2)
 
 func _update_camera(dt):
 	var origin=aircraft.craft_origin()
@@ -775,8 +838,11 @@ func _update_camera(dt):
 			_last_heading=rotate_toward(_last_heading,angle,dt*1.8)
 		chase_heading=Vector3(-sin(_last_heading),0,-cos(_last_heading))
 		var side=chase_heading.cross(Vector3.UP)
-		desired=origin-chase_heading*14+Vector3.UP*4+side*2.6
+		desired=origin-chase_heading*chase_distance+Vector3.UP*3.5+side*2.0
 		target=origin+Vector3.UP*1+chase_heading*4
+	desired.y=maxf(desired.y,world.terrain_height(desired.x,desired.z)+.8)
+	var obstruction=get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(target,desired,1))
+	if not obstruction.is_empty():desired=obstruction.position+obstruction.normal*.5
 	var amount=1.0 if profile.settings.get("reduced_motion",false) else 1-exp(-dt*6)
 	camera.global_position=camera.global_position.lerp(desired,amount)
 	camera.look_at(target,Vector3.UP)
@@ -797,15 +863,21 @@ func _unhandled_input(event):
 	if event.is_action_pressed("retry") and mode!="build":retry();return
 	if event.is_action_pressed("hangar") and mode!="build":return_to_hangar();return
 	if event.is_action_pressed("interact") and mode=="flight":_deliver()
+	if event.is_action_pressed("overlay"):_toggle_engineering();return
 	if event.is_action_pressed("inspect"):_show_inspector();return
+	if mode=="flight" and event is InputEventMouseButton and event.pressed:
+		if event.button_index==MOUSE_BUTTON_WHEEL_UP:chase_distance=maxf(8,chase_distance-1)
+		if event.button_index==MOUSE_BUTTON_WHEEL_DOWN:chase_distance=minf(26,chase_distance+1)
 	if mode!="build" or pause_panel.visible or inspector.visible:return
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.physical_keycode==KEY_X:rotation_quarters.y=fmod(rotation_quarters.y+90,360)
+		if event.is_action_pressed("rotate_yaw"):rotation_quarters.y=fmod(rotation_quarters.y+90,360)
+		if event.is_action_pressed("rotate_pitch"):rotation_quarters.x=fmod(rotation_quarters.x+90,360)
+		if event.is_action_pressed("rotate_roll"):rotation_quarters.z=fmod(rotation_quarters.z+90,360)
 		if event.physical_keycode in [KEY_DELETE,KEY_BACKSPACE]:_remove_selected()
-		if event.physical_keycode==KEY_Z:history.undo();_after_edit()
-		if event.physical_keycode==KEY_Y:history.redo();_after_edit()
+		if event.is_action_pressed("undo_build"):history.undo();_after_edit()
+		if event.is_action_pressed("redo_build"):history.redo();_after_edit()
 	if event is InputEventMouseButton:
-		if event.button_index==MOUSE_BUTTON_RIGHT:
+		if event.is_action("orbit"):
 			_dragging=event.pressed
 			_drag_distance=0
 		if event.button_index==MOUSE_BUTTON_WHEEL_UP:orbit_distance=maxf(5,orbit_distance-1)
@@ -820,7 +892,7 @@ func _unhandled_input(event):
 		orbit_pitch=clampf(orbit_pitch+event.relative.y*.005,-.05,1.1)
 
 func _notification(what):
-	if what==NOTIFICATION_WM_WINDOW_FOCUS_OUT and mode=="flight":toggle_pause()
+	if what==NOTIFICATION_WM_WINDOW_FOCUS_OUT and mode=="flight" and not has_meta("quality_flow_active") and not has_meta("quality_benchmark_active"):toggle_pause()
 	if what==NOTIFICATION_WM_CLOSE_REQUEST and is_inside_tree() and profile!=null and not profile.is_empty():_quit()
 
 func _create_audio():

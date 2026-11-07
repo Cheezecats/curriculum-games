@@ -2,6 +2,18 @@
 
 26 original procedural GLBs: twelve aircraft part families in `models/` and fourteen airfield/coastal/landscape props in `environment/`. All geometry and materials were authored for this project by the included generator. No downloaded meshes, textures, or third-party asset licenses are involved. The project owner controls distribution of these generated assets.
 
+## License and attribution
+
+Original application/generator code is MIT licensed under the repository's [LICENSE](../../../LICENSE), copyright 2026 Curriculum Games contributors. This includes `tools/generate_art.py` and `branding/generate_branding.py`.
+
+The original artwork in this directory is licensed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**: production GLBs, the editable Blender master, authored materials, SVG branding, generated icon/title PNGs, ICNS and rendered previews. See [LICENSE-ART.md](LICENSE-ART.md). Attribute **“Flight Islands / Curriculum Games contributors”**, link to the [source repository](https://github.com/Cheezecats/curriculum-games) and [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and indicate changes when redistributing adaptations. The repository's separate educational-content license continues to cover educational prose; this notice explicitly covers the original native art. No external asset license or claimed asset download is involved.
+
+## Branding
+
+`branding/flight_islands_icon.svg` is the editable aviation/island emblem: ivory monoplane, warm coral island and sun, and navy rounded badge. `branding/flight_islands_title.svg` is the transparent navy title mark; `_light.svg` uses ivory lettering for dark backgrounds. All letterforms are original vector paths, with no font installation or external font dependency.
+
+For packaging, use `branding/flight_islands_icon_1024.png` or the multi-resolution macOS `branding/flight_islands.icns`. PNG icon sizes from 16 through 1024 px and transparent PNG title marks are supplied. `branding/previews/` contains inspected icon-size and title-mark proofs and is excluded from Godot import. Rebuild with `python3 native/flight/assets/branding/generate_branding.py` (Pillow required). The generator rasterizes the same authored geometry; it does not fetch or use external images. Its manifest records dimensions, hashes and licensing.
+
 ## Rebuild and edit
 
 From the repository root, run:
@@ -10,7 +22,7 @@ From the repository root, run:
 /Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python native/flight/tools/generate_art.py
 ```
 
-Blender 5.1.2 was used for the verified build. The script accepts `-- --exports-only` for a quick GLB/manifest rebuild without rendering or replacing the master. The full command exports all models, renders four inspection scenes, and saves `source/flight_islands_master.blend`. Its source collections contain the original editable meshes, and its separate scenes show the aircraft kit, airfield, a composed aircraft, and the coastal landmarks. Source and preview folders contain `.gdignore` so Godot imports only the production GLBs.
+Blender 5.1.2 was used for the verified build. The script accepts `-- --exports-only` for a quick GLB/manifest rebuild without rendering or replacing the master. The full command exports all models, renders four inspection scenes, and saves `source/flight_islands_master.blend`. Its source collections contain the original editable meshes, and its separate scenes show the aircraft kit, airfield, a composed aircraft, and the coastal landmarks. Source and preview folders contain `.gdignore`; the production GLBs and branding assets remain importable.
 
 ## Coordinates and integration
 

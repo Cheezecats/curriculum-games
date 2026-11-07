@@ -21,6 +21,8 @@ COL = None
 ROOT = None
 ASSETS = {}
 GROUPS = {}
+EXPORT_ONLY=set(next((a.split('=',1)[1] for a in sys.argv if a.startswith('--only=')),'').split(','))- {''}
+FOLIAGE_PREVIEW='--foliage-preview' in sys.argv
 
 def cv(v): return Vector((v[0], -v[2], v[1]))
 def mat(name, rgb, rough=.55, metal=0):
@@ -44,6 +46,10 @@ M = {
  'Stone':mat('Stone',(.38,.43,.43),.96),
  'Concrete':mat('Concrete',(.56,.57,.49),.95),
  'Glow':mat('Glow',(.99,.62,.19),.28),
+ 'Bark':mat('Bark',(.20,.13,.085),.94),
+ 'NeedleLight':mat('NeedleLight',(.18,.34,.25),.93),
+ 'StoneDark':mat('StoneDark',(.25,.30,.29),.97),
+ 'Moss':mat('Moss',(.23,.34,.14),.98),
 }
 glow=M['Glow'].node_tree.nodes.get('Principled BSDF')
 glow.inputs['Emission Color'].default_value=(1,.34,.07,1)
@@ -157,6 +163,12 @@ def finish(name):
         if len(meshes)>1: bpy.ops.object.join()
         ob=bpy.context.object; ob.name=f'{parent_name}_{material}'
     entry=ASSETS[name]; allobs=list(entry['collection'].objects)
+    verts=sum(len(o.data.vertices) for o in allobs if o.type=='MESH')
+    tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in allobs if o.type=='MESH')
+    entry['vertices']=verts;entry['triangles']=tris;entry['mesh_nodes']=sum(o.type=='MESH' for o in allobs)
+    if EXPORT_ONLY and name not in EXPORT_ONLY:
+        print('ART_PRESERVED',name,flush=True)
+        return
     bpy.ops.object.select_all(action='DESELECT')
     for ob in allobs: ob.select_set(True)
     dest=BASE/entry['family']/(name+'.glb')
@@ -174,9 +186,6 @@ def finish(name):
     encoded += b' '*((-len(encoded))%4)
     remainder=payload[20+json_length:]
     dest.write_bytes(struct.pack('<4sII',b'glTF',2,20+len(encoded)+len(remainder))+struct.pack('<I4s',len(encoded),b'JSON')+encoded+remainder)
-    verts=sum(len(o.data.vertices) for o in allobs if o.type=='MESH')
-    tris=sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in allobs if o.type=='MESH')
-    entry['vertices']=verts;entry['triangles']=tris;entry['mesh_nodes']=sum(o.type=='MESH' for o in allobs)
     print('ART_ASSET',name,verts,tris,entry['mesh_nodes'],flush=True)
 
 # --- Aircraft kit ----------------------------------------------------------

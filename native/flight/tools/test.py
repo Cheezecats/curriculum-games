@@ -11,16 +11,17 @@ scripts=[root/'tests'/s for s in a.tests] if a.tests else sorted((root/'tests').
 failed=[]
 for script in scripts:
  start=time.monotonic()
- cmd=[engine,'--headless','--audio-driver','Dummy','--fixed-fps','120','--log-file',str(out/(script.stem+'-engine.log')),'--path',str(root),'--script','res://tests/'+script.name,'--','--test-muted','--profile-dir=/private/tmp/flight-islands-check-'+str(os.getpid())+'-'+script.stem]
+ cmd=[engine,'--headless','--audio-driver','Dummy','--log-file',str(out/(script.stem+'-engine.log')),'--path',str(root),'--script','res://tests/'+script.name,'--','--test-muted','--profile-dir=/private/tmp/flight-islands-check-'+str(os.getpid())+'-'+script.stem]
+ if script.name!='render_rate_test.gd':cmd[1:1]=['--fixed-fps','120']
  try:
   r=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=120)
   log=r.stdout
-  bad=r.returncode!=0 or re.search(r'SCRIPT ERROR|ERROR:|FAIL ',log) is not None
+  bad=r.returncode!=0 or re.search(r'SCRIPT ERROR|ERROR:|WARNING:|FAIL(?:\s|:)',log) is not None
  except subprocess.TimeoutExpired as e:
   log=(e.stdout or b'').decode(errors='replace') if isinstance(e.stdout,bytes) else (e.stdout or '')
   log+='\nFAIL timed out after120seconds\n';bad=True
  (out/(script.stem+'.log')).write_text(log)
- summaries=[line for line in log.splitlines() if any(x in line for x in ['checks:','assertions:','FAIL ','ERROR:'])]
+ summaries=[line for line in log.splitlines() if any(x in line.lower() for x in ['checks','assertions','fail','error:','warning:'])]
  print(('FAIL' if bad else 'PASS'),script.name,'%.2fs'%(time.monotonic()-start),' | '.join(summaries[-4:]),flush=True)
  if bad:failed.append(script.name)
 print('Godot suites:',len(scripts)-len(failed),'/',len(scripts),'passed')

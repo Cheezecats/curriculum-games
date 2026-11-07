@@ -107,8 +107,10 @@ func configure(bp: Dictionary, payload = 0.0):
 	crashed = false
 	crash_message = ""
 	elapsed = 0.0
+	peak_height = 0.0
 	grounded = false
 	previous_velocity = Vector3.ZERO
+	force_samples.clear()
 	paint(Color("#"+blueprint.paint))
 
 func _model(kind: String, size: Vector3) -> Node3D:
@@ -158,11 +160,35 @@ func place(origin: Vector3, heading = 0.0):
 func launch(origin: Vector3, heading = 0.0):
 	place(origin,heading)
 	launch_origin = origin
+	peak_height = origin.y
 	crashed = false
 	elapsed = 0.0
 	energy = capacity
 	flying = true
 	freeze = false
+
+func unload_cargo():
+	# Rebuild collision geometry without refilling the battery or resetting the flight.
+	var origin=craft_origin()
+	var orientation=craft_basis()
+	var velocity=linear_velocity
+	var spin=angular_velocity
+	var remaining=energy
+	var duration=elapsed
+	var peak=peak_height
+	var launch_point=launch_origin
+	var was_flying=flying
+	var was_frozen=freeze
+	configure(blueprint,0.0)
+	global_transform=Transform3D(orientation*properties.axes,origin+orientation*properties.com)
+	linear_velocity=velocity
+	angular_velocity=spin
+	energy=minf(remaining,capacity)
+	elapsed=duration
+	peak_height=peak
+	launch_origin=launch_point
+	flying=was_flying
+	freeze=was_frozen
 
 func set_paused(value: bool):
 	if value:
@@ -224,7 +250,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 			state.apply_force(aero.force,offset)
 			if part.kind in ["wing","large_wing"]:
 				stalled = stalled or (aero.stall and speed>6)
-				force_samples.append({"p":origin+cb*pos,"f":aero.force})
+				force_samples.append({"p":origin+cb*pos,"f":aero.force,"kind":"aero"})
 		else:
 			var v = local_velocity.length()
 			if v>0.01:
@@ -238,7 +264,9 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 	var fraction = minf(1.0,energy/total_energy) if total_energy>0 else 0.0
 	energy = maxf(0.0,energy-total_energy*fraction)
 	for request in engine_requests:
-		state.apply_force(request.direction*request.thrust*fraction,request.p)
+		var force=request.direction*request.thrust*fraction
+		state.apply_force(force,request.p)
+		force_samples.append({"p":state.transform.origin+request.p,"f":force,"kind":"engine"})
 	if cargo_mass > 0:
 		var offset: Vector3 = cb*(properties.cargo_position-properties.com)
 		var v: Vector3 = state.linear_velocity+state.angular_velocity.cross(offset)-wind
@@ -287,8 +315,11 @@ func _crash(message: String):
 	crashed = true
 	crash_message = message
 	throttle = 0.0
-	set_deferred("freeze",true)
+	call_deferred("_freeze_after_crash")
 	impact.emit(message)
+
+func _freeze_after_crash():
+	if crashed:freeze=true
 
 func _process(dt):
 	if properties.is_empty(): return
@@ -310,4 +341,4 @@ func telemetry() -> Dictionary:
 	var basis_craft = craft_basis()
 	var origin = craft_origin()
 	var pos = origin+basis_craft*properties.get("cargo_position",Vector3.ZERO)
-	return {"speed":linear_velocity.length(),"airspeed":(linear_velocity-wind).length(),"altitude":origin.y,"energy":energy,"capacity":capacity,"throttle":throttle,"grounded":grounded,"crashed":crashed,"has_cargo":cargo_mass>0,"cargo_world_position":pos,"mass":mass,"com":properties.get("com",Vector3.ZERO),"pitch":asin(clampf((-basis_craft.z).y,-1,1)),"bank":atan2(basis_craft.x.y,basis_craft.y.y),"stall":stalled,"elapsed":elapsed,"vertical_speed":linear_velocity.y,"position":origin,"distance":Vector2(origin.x-launch_origin.x,origin.z-launch_origin.z).length(),"climb":peak_height-launch_origin.y,"crash_message":crash_message}
+	return {"speed":linear_velocity.length(),"airspeed":(linear_velocity-wind).length(),"altitude":origin.y,"energy":energy,"capacity":capacity,"throttle":throttle,"grounded":grounded,"crashed":crashed,"has_cargo":cargo_mass>0,"cargo_world_position":pos,"mass":mass,"com":properties.get("com",Vector3.ZERO),"principal":properties.get("principal",Vector3.ZERO),"pitch":asin(clampf((-basis_craft.z).y,-1,1)),"bank":atan2(basis_craft.x.y,basis_craft.y.y),"stall":stalled,"elapsed":elapsed,"vertical_speed":linear_velocity.y,"position":origin,"distance":Vector2(origin.x-launch_origin.x,origin.z-launch_origin.z).length(),"climb":peak_height-launch_origin.y,"crash_message":crash_message}

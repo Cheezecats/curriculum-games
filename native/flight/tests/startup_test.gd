@@ -21,4 +21,6 @@ func run():
 	print("Startup checks: ",6-failures,"/6")
 	app.queue_free()
 	for i in range(3):await process_frame
+	OS.delay_msec(250)
+	await process_frame
 	quit(1 if failures else 0)

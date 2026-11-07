@@ -44,7 +44,20 @@ func run():
 	for i in range(12): await physics_frame
 	check(plane.global_position.distance_to(paused.origin)<.001,"pause preserves rigid-body position")
 	check(AudioServer.get_driver_name()=="Dummy" and AudioServer.is_bus_mute(0),"native runtime remains silent")
-	print("Flight assertions: ",11-failures,"/11")
+	plane.energy=4321.0
+	var elapsed_before=plane.elapsed
+	var origin_before=plane.craft_origin()
+	plane.unload_cargo()
+	check(plane.cargo_mass==0 and absf(plane.mass-17.3)<.001,"unloading removes physical cargo mass")
+	check(plane.energy==4321 and plane.elapsed==elapsed_before,"unloading preserves battery and flight evidence")
+	check(plane.craft_origin().distance_to(origin_before)<.001,"unloading preserves aircraft position across centre-of-mass change")
+	plane.launch(Vector3(0,80,0))
+	plane._crash("retry race fixture")
+	plane.configure(BP.starter(),2)
+	plane.launch(Vector3(0,80,0))
+	for i in range(2):await process_frame
+	check(not plane.freeze and not plane.crashed,"deferred crash cannot freeze a fresh retry")
+	print("Flight assertions: ",15-failures,"/15")
 	plane.queue_free()
 	await process_frame
 	quit(1 if failures else 0)

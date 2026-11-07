@@ -5,9 +5,9 @@ const DEFAULTS = {
  "yaw_left":["key:81","button:9"],"yaw_right":["key:69","button:10"],
  "throttle_up":["key:4194325","key:4194320","axis:5:1"],"throttle_down":["key:4194326","key:4194322","axis:4:1"],
  "brake":["key:32","button:0"],"hangar":["key:4194306","button:2"],
- "retry":["key:82","button:3"],"interact":["key:69","button:1"],
+ "retry":["key:82","button:3"],"interact":["key:70","button:1"],
  "pause_game":["key:4194305","button:6"],"inspect":["key:73"],
- "orbit":["mouse:2"],"undo_build":["key:90"],"redo_build":["key:89"]}
+ "overlay":["key:71"],"rotate_yaw":["key:88"],"rotate_pitch":["key:67"],"rotate_roll":["key:86"],"orbit":["mouse:2"],"undo_build":["key:90"],"redo_build":["key:89"]}
 
 static func install(saved: Dictionary) -> void:
  for action in DEFAULTS:

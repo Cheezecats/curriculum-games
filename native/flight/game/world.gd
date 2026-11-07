@@ -60,7 +60,7 @@ func _environment():
 	e.sky=sky
 	e.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR
 	e.ambient_light_color=Color("b6cedc")
-	e.ambient_light_energy=.45
+	e.ambient_light_energy=.62
 	e.reflected_light_source=Environment.REFLECTION_SOURCE_SKY
 	e.tonemap_mode=Environment.TONE_MAPPER_ACES
 	e.fog_enabled=true
@@ -109,6 +109,18 @@ func _terrain():
 	var material=_mat("terrain",Color.WHITE)
 	material.vertex_color_use_as_albedo=true
 	material.vertex_color_is_srgb=true
+	var grain=NoiseTexture2D.new()
+	grain.width=256;grain.height=256
+	grain.seamless=true
+	var noise=FastNoiseLite.new()
+	noise.seed=43217;noise.frequency=.07;noise.fractal_octaves=3
+	grain.noise=noise
+	var ramp=Gradient.new()
+	ramp.set_color(0,Color(.73,.76,.70))
+	ramp.set_color(1,Color(1,1,1))
+	grain.color_ramp=ramp
+	material.albedo_texture=grain
+	material.uv1_scale=Vector3(3,3,1)
 	node.material_override=material
 	add_child(node)
 	var body=StaticBody3D.new()
@@ -169,6 +181,9 @@ func _prop(kind:String,pos:Vector3,scale_value=1.0,rotation_value=0.0)->Node3D:
 	node.scale=Vector3.ONE*scale_value
 	node.rotation.y=rotation_value
 	add_child(node)
+	if kind in ["hangar","tower","lighthouse","rock_arch","fishing_boat"]:
+		for piece in node.find_children("*","MeshInstance3D",true,false):
+			if piece.mesh:piece.create_trimesh_collision()
 	return node
 
 func _airfield(p:Vector3,title:String,home:bool):
@@ -184,11 +199,7 @@ func _airfield(p:Vector3,title:String,home:bool):
 		for x in [-11.2,11.2]:
 			_prop("lamp",p+Vector3(x,0,z),.6)
 	_box(p+Vector3(34,.03,26),Vector3(42,.10,50),_mat("apron",Color("8c9389")))
-	var hangar=_prop("hangar",p+Vector3(44,0,34),1.6 if home else 1.0,-PI/2)
-	if hangar:
-		var collision_size=Vector3(28,13,22) if home else Vector3(18,8,14)
-		# Three solid walls leave the apron-facing doorway physically accessible.
-		_box(p+Vector3(54,5,34),Vector3(.4,10,22),_mat("hangarwall",Color("a1a99b")),true)
+	_prop("hangar",p+Vector3(44,0,34),1.6 if home else 1.0,-PI/2)
 	_prop("tower",p+Vector3(34,0,-22),1.1)
 	_prop("wind_sock",p+Vector3(-19,0,runway_length/2-25),1.2)
 	for i in range(5):

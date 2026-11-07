@@ -33,4 +33,6 @@ func run():
 	print("Handling checks: ",5-failures,"/5")
 	app.queue_free()
 	await process_frame
+	OS.delay_msec(250)
+	await process_frame
 	quit(1 if failures else 0)
