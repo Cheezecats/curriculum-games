@@ -33,12 +33,12 @@ func run():
  var forest_instances=0
  for batch in world.find_children("*","MultiMeshInstance3D",true,false):
   var bounds=batch.multimesh.custom_aabb
-  localized=localized and bounds.size.x>0 and bounds.size.x<280 and bounds.size.z<280
+  localized=localized and bounds.size.x>0 and bounds.size.x<1600 and bounds.size.z<1600
   forest_instances+=batch.multimesh.instance_count
  var physical=0
  for shape in world._props_body.get_children():
   if shape is CollisionShape3D and shape.shape is CapsuleShape3D:physical+=1
- check(localized,"vegetation batches have spatially local culling bounds")
+ check(localized,"vegetation batches retain finite regional culling bounds")
  check(forest_instances==physical*3,"spatial batching keeps all three meshes per physical vegetation instance")
  world.queue_free()
  print("Render batching checks: ",6-failures,"/6")

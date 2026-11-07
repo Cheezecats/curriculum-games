@@ -74,8 +74,8 @@ func _environment():
 	sun.light_color=Color("fff1d8")
 	sun.light_energy=1.1
 	sun.shadow_enabled=true
-	sun.directional_shadow_max_distance=180
-	sun.directional_shadow_mode=DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	sun.directional_shadow_max_distance=230
+	sun.directional_shadow_mode=DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	sun.shadow_bias=.04
 	add_child(sun)
 
@@ -252,34 +252,20 @@ func _batch_props(kind:String,transforms:Array):
 	var scene=load(path).instantiate()
 	var meshes:Array=[]
 	_collect_meshes(scene,Transform3D.IDENTITY,meshes)
-	# Local batches let the renderer cull and choose LOD for distant groves,
-	# rather than treating all vegetation as one island-sized object.
-	var chunks:Dictionary={}
-	for transform_value in transforms:
-		var cell=Vector2i(floori(transform_value.origin.x/256),floori(transform_value.origin.z/256))
-		if not chunks.has(cell):chunks[cell]=[]
-		chunks[cell].append(transform_value)
-	for cell in chunks:
-		var chunk_origin=Vector3(cell.x*256,0,cell.y*256)
-		var instances:Array=chunks[cell]
-		for entry in meshes:
-			var mm=MultiMesh.new()
-			mm.transform_format=MultiMesh.TRANSFORM_3D
-			mm.mesh=entry.mesh
-			mm.instance_count=instances.size()
-			var bounds:AABB
-			for i in range(instances.size()):
-				var local:Transform3D=instances[i]
-				local.origin-=chunk_origin
-				local=local*entry.transform
-				mm.set_instance_transform(i,local)
-				var item_bounds=local*entry.mesh.get_aabb()
-				bounds=item_bounds if i==0 else bounds.merge(item_bounds)
-			mm.custom_aabb=bounds
-			var node=MultiMeshInstance3D.new()
-			node.multimesh=mm
-			node.position=chunk_origin
-			add_child(node)
+	for entry in meshes:
+		var mm=MultiMesh.new()
+		mm.transform_format=MultiMesh.TRANSFORM_3D
+		mm.mesh=entry.mesh
+		mm.instance_count=transforms.size()
+		var bounds=(transforms[0]*entry.transform)*entry.mesh.get_aabb()
+		for i in range(transforms.size()):
+			var placement=transforms[i]*entry.transform
+			mm.set_instance_transform(i,placement)
+			bounds=bounds.merge(placement*entry.mesh.get_aabb())
+		mm.custom_aabb=bounds
+		var node=MultiMeshInstance3D.new()
+		node.multimesh=mm
+		add_child(node)
 	scene.free()
 	# Collider trunks/rocks correspond to visible instances, rather than a decorative forest.
 	for t in transforms:
