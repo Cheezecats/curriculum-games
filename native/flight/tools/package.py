@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Package an already tested Mac alpha. Does not run or unmute the game."""
-import argparse,hashlib,json,pathlib,shutil,subprocess,plistlib
+import argparse,hashlib,json,pathlib,shutil,subprocess,plistlib,tempfile
 project=pathlib.Path(__file__).resolve().parents[1]
 repo=project.parents[1]
 p=argparse.ArgumentParser(description=__doc__)
@@ -8,8 +8,9 @@ p.add_argument('--app',type=pathlib.Path,default=project/'build'/'Flight Islands
 p.add_argument('--destination',type=pathlib.Path,required=True)
 p.add_argument('--version',default='0.1.0-alpha.1')
 a=p.parse_args();destination=a.destination.resolve();destination.mkdir(parents=True,exist_ok=True)
-stage=destination/'Flight Islands Alpha'
-if stage.exists():p.error('Staging folder already exists; select a fresh destination.')
+# Signing must happen outside File Provider-backed folders: they recreate
+# Finder metadata after it is removed. Only finished archives go to destination.
+stage=pathlib.Path(tempfile.mkdtemp(prefix='flight-islands-package-',dir='/private/tmp'))/'Flight Islands Alpha'
 stage.mkdir();app=stage/'Flight Islands.app'
 shutil.copytree(a.app.resolve(),app,symlinks=True)
 # File Provider-backed Desktop folders add FinderInfo during a copy. Only
@@ -70,3 +71,4 @@ manifest={'version':a.version,'source_commit':subprocess.check_output(['git','-C
 (destination/'release-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 (destination/'SHA256SUMS.txt').write_text(''.join(v['sha256']+'  '+v['name']+'\n' for v in manifest['archives']))
 print(json.dumps(manifest,indent=2))
+print('Verified unpacked release:',stage)

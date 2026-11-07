@@ -80,6 +80,8 @@ python3 tools/benchmark.py --app 'build/Flight Islands.app' --duration 600
 
 The strict runners reject script errors even when Godot exits with status0. The gameplay controller uses the game's actual Input actions after a normal ground launch; it does not teleport or set body velocities. It tests a real crash, retry, two aircraft designs, physical deliveries and a separate-process restore. The performance runner checks the actual rendered image size before measuring ten minutes of a 128-part aircraft. Recording workloads are excluded from performance qualification.
 
+`python3 tools/package.py --destination /path/to/downloads` signs in a local temporary staging folder and writes the finished app/source archives, manifest and checksums to the destination. This avoids cloud-sync services adding Finder metadata during signing. Keep the unpacked application in a local Applications or Downloads folder if a synced folder changes its signature metadata.
+
 The original Blender master and GLB generation code are retained in `assets/source/` and `tools/generate_art.py`. Branding is editable SVG with a reproducible generator. [Asset provenance](assets/README.md), [original art licence](assets/LICENSE-ART.md), [third-party notices](THIRD_PARTY_NOTICES.txt), and the root MIT/CC BY4.0 licences cover redistribution.
 
 This alpha teaches through engineering choices. It does not claim validated learning gains, complete curriculum coverage or published SL/HL mappings.
