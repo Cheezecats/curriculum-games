@@ -6,6 +6,8 @@ Build an improbable aircraft, lift off from a coastal airfield, carry a real loa
 
 The Mac alpha contains an offline, single-player 3D workshop, twelve component families, a fixed coastal region, three delivery contracts, two discoveries and free flight. Repairs cost nothing. A crash preserves your design; retry restores your launch cargo and battery.
 
+[Download the Mac alpha and editable source](https://github.com/Cheezecats/curriculum-games/releases/tag/flight-islands-v0.1.0-alpha.1). Extract the macOS archive and open **Flight Islands.app**. This alpha always runs silently. The archive includes controls, verification evidence and an audio-free gameplay recording.
+
 Use Godot **4.7.2** to open `project.godot`, or use the packaged Mac application. The alpha is ad hoc signed, **not notarized**. It is an early playable build, with the remaining acceptance limits recorded in [verification.md](verification.md).
 
 For a silent source run, set `GODOT_BIN` to the Godot executable and run:

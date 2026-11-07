@@ -38,16 +38,19 @@ Code MIT. Original art and educational prose CC BY4.0. Credits and engine notice
 for name in ['README.md','verification.md','THIRD_PARTY_NOTICES.txt']:
  shutil.copy2(project/name,stage/name)
 shutil.copy2(repo/'LICENSE',stage/'LICENSE-CODE.txt')
+shutil.copy2(repo/'LICENSE-CONTENT.md',stage/'LICENSE-CONTENT.md')
 shutil.copy2(project/'assets'/'LICENSE-ART.md',stage/'LICENSE-ART.md')
 evidence=stage/'Evidence';evidence.mkdir()
-for name in ['final-packaged-gameplay.json','final-packaged-gameplay.flow.log','final-packaged-gameplay.restore.log']:
+for name in ['final-packaged-gameplay.json','final-packaged-gameplay.flow.log','final-packaged-gameplay.restore.log','correctness.log','launcher-test.log','reset-native.log','video-metadata.json']:
  source=project/'output'/name
  if source.exists():shutil.copy2(source,evidence/name)
-for name in ['mac-m2-1080p-128.json','mac-m2-1080p-128.hardware.json','mac-m2-1080p-128.launcher.json']:
+for name in ['mac-m2-1080p-128.json','mac-m2-1080p-128.hardware.json','mac-m2-1080p-128.launcher.json','mac-m2-1080p-128.console.log','mac-m2-1080p-128.engine.log','mac-m2-1080p-128-viewport.png']:
  source=project/'output'/'benchmarks'/name
  if source.exists():shutil.copy2(source,evidence/name)
 video=project/'output'/'flight-islands-gameplay-silent.mp4'
 if video.exists():shutil.copy2(video,stage/video.name)
+preview=project/'output'/'capture'/'gameplay'/'first_delivery_cruise.png'
+if preview.exists():shutil.copy2(preview,stage/'flight-islands-preview.png')
 archive=destination/('Flight-Islands-'+a.version+'-macOS.zip')
 subprocess.run(['ditto','-c','-k','--sequesterRsrc','--keepParent',str(stage),str(archive)],check=True)
 source_archive=destination/('Flight-Islands-'+a.version+'-source.zip')

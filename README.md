@@ -1,6 +1,6 @@
 # Fieldwork
 
-**Native Flight Islands alpha:** [game, controls, build and verification](native/flight/README.md). The browser games below remain available as earlier prototypes.
+**Native Flight Islands alpha:** [Mac download and source](https://github.com/Cheezecats/curriculum-games/releases/tag/flight-islands-v0.1.0-alpha.1) · [controls, build and verification](native/flight/README.md). The browser games below remain available as earlier prototypes.
 
 [Play the browser beta](https://cheezecats.github.io/curriculum-games/) · [Source repository](https://github.com/Cheezecats/curriculum-games)
 
