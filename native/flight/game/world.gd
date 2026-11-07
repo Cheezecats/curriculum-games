@@ -252,15 +252,34 @@ func _batch_props(kind:String,transforms:Array):
 	var scene=load(path).instantiate()
 	var meshes:Array=[]
 	_collect_meshes(scene,Transform3D.IDENTITY,meshes)
-	for entry in meshes:
-		var mm=MultiMesh.new()
-		mm.transform_format=MultiMesh.TRANSFORM_3D
-		mm.mesh=entry.mesh
-		mm.instance_count=transforms.size()
-		for i in range(transforms.size()):mm.set_instance_transform(i,transforms[i]*entry.transform)
-		var node=MultiMeshInstance3D.new()
-		node.multimesh=mm
-		add_child(node)
+	# Local batches let the renderer cull and choose LOD for distant groves,
+	# rather than treating all vegetation as one island-sized object.
+	var chunks:Dictionary={}
+	for transform_value in transforms:
+		var cell=Vector2i(floori(transform_value.origin.x/128),floori(transform_value.origin.z/128))
+		if not chunks.has(cell):chunks[cell]=[]
+		chunks[cell].append(transform_value)
+	for cell in chunks:
+		var chunk_origin=Vector3(cell.x*128,0,cell.y*128)
+		var instances:Array=chunks[cell]
+		for entry in meshes:
+			var mm=MultiMesh.new()
+			mm.transform_format=MultiMesh.TRANSFORM_3D
+			mm.mesh=entry.mesh
+			mm.instance_count=instances.size()
+			var bounds:AABB
+			for i in range(instances.size()):
+				var local:Transform3D=instances[i]
+				local.origin-=chunk_origin
+				local=local*entry.transform
+				mm.set_instance_transform(i,local)
+				var item_bounds=local*entry.mesh.get_aabb()
+				bounds=item_bounds if i==0 else bounds.merge(item_bounds)
+			mm.custom_aabb=bounds
+			var node=MultiMeshInstance3D.new()
+			node.multimesh=mm
+			node.position=chunk_origin
+			add_child(node)
 	scene.free()
 	# Collider trunks/rocks correspond to visible instances, rather than a decorative forest.
 	for t in transforms:

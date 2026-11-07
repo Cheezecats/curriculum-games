@@ -840,9 +840,9 @@ func _update_hud():
 	energy_bar.value=percent
 	instruments.text="%02.0f m/s   |   %03.0f m   |   PWR %.0f%%   BAT %.0f%%"%[t.speed,t.altitude,t.throttle*100,percent]
 	assist_hint.text="%s/%s pitch · %s/%s bank · %s/%s power · %s brake"%[Bindings.short_label("pitch_down"),Bindings.short_label("pitch_up"),Bindings.short_label("roll_left"),Bindings.short_label("roll_right"),Bindings.short_label("throttle_down"),Bindings.short_label("throttle_up"),Bindings.short_label("brake")] if mode=="flight" else "Hold %s + move to orbit · wheel zoom"%Bindings.short_label("orbit")
-	find_child("RetryButton",true,false).text="Retry  [%s]"%Bindings.short_label("retry")
-	find_child("HangarButton",true,false).text="Hangar  [%s]"%Bindings.short_label("hangar")
-	find_child("OverlayButton",true,false).text="Balance & forces  [%s]"%Bindings.short_label("overlay")
+	ui.find_child("RetryButton",true,false).text="Retry  [%s]"%Bindings.short_label("retry")
+	ui.find_child("HangarButton",true,false).text="Hangar  [%s]"%Bindings.short_label("hangar")
+	ui.find_child("OverlayButton",true,false).text="Balance & forces  [%s]"%Bindings.short_label("overlay")
 	unload_button.text="Unload parcel  [%s]"%Bindings.short_label("interact")
 	if t.stall and mode=="flight":assist_hint.text="STALL · lower the nose and build airspeed";assist_hint.modulate=Color("efb06d")
 	else:assist_hint.modulate=Color.WHITE

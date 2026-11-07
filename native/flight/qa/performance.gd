@@ -136,7 +136,8 @@ func _begin() -> void:
   window.size = TARGET_SIZE
   DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
   RenderingServer.viewport_set_measure_render_time(window.get_viewport_rid(),true)
- Engine.max_fps = 120 if smoke else 0
+ Engine.max_fps = 120
+ # Match the product render ceiling; physics remains120Hz and vsync is off for measurement.
  OS.low_processor_usage_mode = false
  app._load_blueprint(bp)
  app.launch_payload = true

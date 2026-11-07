@@ -26,6 +26,10 @@ var pitch_command = 0.0
 var roll_command = 0.0
 var yaw_command = 0.0
 var _part_nodes: Dictionary = {}
+var _components:Array=[]
+var _gears:Array=[]
+var _animations:Array=[]
+var _paint_cache:Dictionary={}
 var _pause_velocity = Vector3.ZERO
 var _pause_angular = Vector3.ZERO
 var _selected = ""
@@ -57,6 +61,7 @@ func configure(bp: Dictionary, payload = 0.0):
 	if properties.is_empty():
 		push_error("Invalid aircraft assembly")
 		return
+	_components.clear();_gears.clear();_animations.clear();_paint_cache.clear()
 	for child in get_children():
 		child.free()
 	_part_nodes.clear()
@@ -69,6 +74,9 @@ func configure(bp: Dictionary, payload = 0.0):
 	for part in blueprint.parts:
 		var def = Parts.definition(part.kind)
 		capacity += def.energy
+		var component={"kind":part.kind,"p":BP.position(part),"offset":BP.position(part)-properties.com,"axes":BP.basis(part),"def":def}
+		_components.append(component)
+		if part.kind=="gear":_gears.append(component)
 		var transform_part = Transform3D(inverse * BP.basis(part), inverse * (BP.position(part) - properties.com))
 		var shape = BoxShape3D.new()
 		shape.size = def.size if part.kind != "gear" else Vector3(.2,.15,.3)
@@ -82,6 +90,10 @@ func configure(bp: Dictionary, payload = 0.0):
 		visual.set_meta("part_id", part.id)
 		add_child(visual)
 		_part_nodes[part.id] = visual
+		var prop=visual.find_child("Propeller",true,false)
+		var flap=visual.find_child("Flap",true,false)
+		var wheel=visual.find_child("Wheel",true,false)
+		if prop or flap or wheel:_animations.append({"prop":prop,"flap":flap,"wheel":wheel,"kind":part.kind,"side":signf(BP.position(part).x)})
 	if cargo_mass > 0:
 		var cargo = Node3D.new()
 		cargo.name = "Payload"
@@ -112,6 +124,7 @@ func configure(bp: Dictionary, payload = 0.0):
 	previous_velocity = Vector3.ZERO
 	force_samples.clear()
 	paint(Color("#"+blueprint.paint))
+	_batch_static_parts()
 
 func _model(kind: String, size: Vector3) -> Node3D:
 	var path = "res://assets/models/%s.glb" % kind
@@ -209,11 +222,48 @@ func _paint_node(node: Node, color: Color):
 		for surface in range(node.mesh.get_surface_count()):
 			var mat = node.get_active_material(surface)
 			if mat is StandardMaterial3D and ("paint" in mat.resource_name.to_lower() or node.name.to_lower().contains("paint")):
-				var copy = mat.duplicate()
-				copy.albedo_color = color
-				node.set_surface_override_material(surface,copy)
+				var key=str(mat.get_instance_id())+color.to_html()
+				if not _paint_cache.has(key):
+					var copy=mat.duplicate()
+					copy.albedo_color=color
+					_paint_cache[key]=copy
+				node.set_surface_override_material(surface,_paint_cache[key])
 	for child in node.get_children():
 		_paint_node(child,color)
+
+func _batch_static_parts():
+	# Instancing only changes presentation. Individual component colliders and
+	# force locations remain intact, including every battery and strut.
+	if blueprint.parts.size()<32:return
+	var groups:Dictionary={}
+	for part in blueprint.parts:
+		if part.kind not in ["strut","battery"]:continue
+		for node in _part_nodes[part.id].find_children("*","MeshInstance3D",true,false):
+			if not node.mesh:continue
+			var materials:Array=[]
+			var key=str(node.mesh.get_instance_id())
+			for surface in range(node.mesh.get_surface_count()):
+				var material=node.get_active_material(surface)
+				materials.append(material)
+				key+="/"+str(material.get_instance_id() if material else 0)
+			if not groups.has(key):groups[key]={"mesh":node.mesh,"materials":materials,"transforms":[]}
+			groups[key].transforms.append(global_transform.affine_inverse()*node.global_transform)
+			node.visible=false
+	for group in groups.values():
+		var mesh=group.mesh.duplicate()
+		for surface in range(mesh.get_surface_count()):mesh.surface_set_material(surface,group.materials[surface])
+		var multimesh=MultiMesh.new()
+		multimesh.transform_format=MultiMesh.TRANSFORM_3D
+		multimesh.mesh=mesh
+		multimesh.instance_count=group.transforms.size()
+		var bounds=group.transforms[0]*mesh.get_aabb()
+		for i in range(group.transforms.size()):
+			multimesh.set_instance_transform(i,group.transforms[i])
+			bounds=bounds.merge(group.transforms[i]*mesh.get_aabb())
+		multimesh.custom_aabb=bounds
+		var batch=MultiMeshInstance3D.new()
+		batch.multimesh=multimesh
+		add_child(batch)
 
 func _integrate_forces(state: PhysicsDirectBodyState3D):
 	if not flying or crashed or properties.is_empty(): return
@@ -235,12 +285,12 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 	stalled = false
 	var engine_requests: Array = []
 	var total_energy = 0.0
-	for part in blueprint.parts:
-		var def = Parts.definition(part.kind)
-		var pos: Vector3 = BP.position(part)
-		var offset: Vector3 = cb * (pos-properties.com)
+	for part in _components:
+		var def:Dictionary = part.def
+		var pos:Vector3 = part.p
+		var offset:Vector3 = cb * part.offset
 		var local_velocity: Vector3 = state.linear_velocity + state.angular_velocity.cross(offset) - wind
-		var axes: Basis = cb * BP.basis(part)
+		var axes: Basis = cb * part.axes
 		var deflection = 0.0
 		if part.kind == "elevator": deflection = -pitch_command*.36
 		if part.kind == "aileron": deflection = roll_command*signf(pos.x)*.30
@@ -275,10 +325,9 @@ func _integrate_forces(state: PhysicsDirectBodyState3D):
 		var area=absf(relative.x)*cargo_size.y*cargo_size.z+absf(relative.y)*cargo_size.x*cargo_size.z+absf(relative.z)*cargo_size.x*cargo_size.y
 		state.apply_force(-v*v.length()*(.5*1.225*area*.45),offset)
 	grounded = false
-	for part in blueprint.parts:
-		if part.kind != "gear": continue
-		var pos: Vector3 = BP.position(part)
-		var offset: Vector3 = cb*(pos-properties.com)
+	for part in _gears:
+		var pos:Vector3 = part.p
+		var offset:Vector3 = cb*part.offset
 		var from: Vector3 = state.transform.origin+offset+cb.y*.32
 		var to: Vector3 = from-cb.y*1.03
 		var query = PhysicsRayQueryParameters3D.create(from,to,1,[get_rid()])
@@ -325,19 +374,13 @@ func _freeze_after_crash():
 
 func _process(dt):
 	if properties.is_empty(): return
-	for part in blueprint.get("parts",[]):
-		var node: Node3D = _part_nodes.get(part.id)
-		if node == null: continue
-		var prop = node.find_child("Propeller",true,false)
-		if prop:
-			prop.rotate_z(dt*(18+throttle*125) if flying and energy>0 else 0)
-		var flap = node.find_child("Flap",true,false)
-		if flap:
-			if part.kind=="rudder": flap.rotation.y = yaw_command*.30
-			elif part.kind=="elevator": flap.rotation.x = -pitch_command*.36
-			else: flap.rotation.x = roll_command*signf(BP.position(part).x)*.30
-		var wheel = node.find_child("Wheel",true,false)
-		if wheel and grounded: wheel.rotate_x(-linear_velocity.length()*dt/.20)
+	for animation in _animations:
+		if animation.prop:animation.prop.rotate_z(dt*(18+throttle*125) if flying and energy>0 else 0)
+		if animation.flap:
+			if animation.kind=="rudder":animation.flap.rotation.y=yaw_command*.30
+			elif animation.kind=="elevator":animation.flap.rotation.x=-pitch_command*.36
+			else:animation.flap.rotation.x=roll_command*animation.side*.30
+		if animation.wheel and grounded:animation.wheel.rotate_x(-linear_velocity.length()*dt/.20)
 
 func telemetry() -> Dictionary:
 	var basis_craft = craft_basis()
