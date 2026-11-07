@@ -1,5 +1,7 @@
 # Fieldwork
 
+**Native Flight Islands alpha:** [Mac download and source](https://github.com/Cheezecats/curriculum-games/releases/tag/flight-islands-v0.1.0-alpha.1) · [controls, build and verification](native/flight/README.md). The browser games below remain available as earlier prototypes.
+
 [Play the browser beta](https://cheezecats.github.io/curriculum-games/) · [Source repository](https://github.com/Cheezecats/curriculum-games)
 
 An original browser playground for physics and machine learning. Build an aircraft, train a robot, and use the results of your experiments to work out what to change next.

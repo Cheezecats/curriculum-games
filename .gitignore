@@ -9,3 +9,12 @@ output/
 .env
 .env.*
 !.env.example
+
+# Native game local tools, imported cache and build evidence
+native/flight/.godot/
+native/flight/.tools/
+native/flight/builds/
+native/flight/output/
+*.blend1
+
+native/flight/build/

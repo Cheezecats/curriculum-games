@@ -1,0 +1,31 @@
+name: Native flight checks
+on:
+  push:
+    paths: ['native/flight/**', '.github/workflows/native.yml']
+  pull_request:
+    paths: ['native/flight/**', '.github/workflows/native.yml']
+jobs:
+  native:
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install official Godot4.7.2
+        run: |
+          curl --fail --location --retry 3 -o "$RUNNER_TEMP/godot.zip" https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_macos.universal.zip
+          echo "c58a24e31d720be9d62f60cb5627c4e695fb72f21b0cfe1bc9ccaa9a3b3ba63e  $RUNNER_TEMP/godot.zip" | shasum -a 256 -c -
+          ditto -x -k "$RUNNER_TEMP/godot.zip" "$RUNNER_TEMP/native-tools"
+          echo "GODOT_BIN=$RUNNER_TEMP/native-tools/Godot.app/Contents/MacOS/Godot" >> "$GITHUB_ENV"
+      - name: Import original assets silently
+        run: native/flight/tools/run-silent.sh --headless --editor --import
+      - name: Native correctness
+        run: |
+          python3 native/flight/tests/launcher_test.py
+          python3 native/flight/tools/test.py
+      - name: Native gameplay and save/relaunch
+        run: python3 native/flight/tools/gameplay.py --headless
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: native-check-evidence
+          path: native/flight/output/

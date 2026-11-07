@@ -1,0 +1,106 @@
+{
+  "name": "Flight Islands original identity",
+  "code_license": "MIT",
+  "art_license": "CC-BY-4.0",
+  "copyright": "2026 Curriculum Games contributors",
+  "attribution": "Flight Islands / Curriculum Games contributors",
+  "source": "https://github.com/Cheezecats/curriculum-games",
+  "external_images": false,
+  "font_dependencies": false,
+  "palette": {
+    "navy": "#153440",
+    "coral": "#DF6750",
+    "ivory": "#F4E9CD",
+    "sea": "#375B65",
+    "shore": "#EAA774"
+  },
+  "files": {
+    "flight_islands.icns": {
+      "bytes": 214043,
+      "sha256": "36ef5605655722dda43eb0317f4acb6fcceb1b91eb86694caae00f1090f3d1a0",
+      "license": "CC-BY-4.0",
+      "size": [1024, 1024]
+    },
+    "flight_islands_icon.svg": {
+      "bytes": 1819,
+      "sha256": "9b92edb87d0ec0bc79376767871d8760ae3fde8d5fb3fee385917e16fbc4fa78",
+      "license": "CC-BY-4.0"
+    },
+    "flight_islands_icon_1024.png": {
+      "bytes": 86478,
+      "sha256": "4c0ee3ad6de491bb3254ba6b478e6e07df80a0316269a026b82c39fc22b3ebb9",
+      "license": "CC-BY-4.0",
+      "size": [1024, 1024]
+    },
+    "flight_islands_icon_128.png": {
+      "bytes": 10032,
+      "sha256": "b847fcb885e7cb36a30f3961a675bd755c2fa68a7942c9033cd71ed4aec16d7b",
+      "license": "CC-BY-4.0",
+      "size": [128, 128]
+    },
+    "flight_islands_icon_16.png": {
+      "bytes": 732,
+      "sha256": "c826eb61bc743ba892eb9a6dcb11668ea301698ebc91ad1c258b4d0414d097af",
+      "license": "CC-BY-4.0",
+      "size": [16, 16]
+    },
+    "flight_islands_icon_256.png": {
+      "bytes": 22714,
+      "sha256": "27a6c4ade327fd88df8679b9292cd32a47736d45ac94d9902c71790015f99acc",
+      "license": "CC-BY-4.0",
+      "size": [256, 256]
+    },
+    "flight_islands_icon_32.png": {
+      "bytes": 1768,
+      "sha256": "245842634cfb25a775e20cc17208e23d88e9a08ecdfee7db9ed73fb3b3a5eca1",
+      "license": "CC-BY-4.0",
+      "size": [32, 32]
+    },
+    "flight_islands_icon_512.png": {
+      "bytes": 48501,
+      "sha256": "6636583cf3d0085ffe5daa6310a2ff1d3e2e0b64819490d36279b0df3aa282f4",
+      "license": "CC-BY-4.0",
+      "size": [512, 512]
+    },
+    "flight_islands_icon_64.png": {
+      "bytes": 4224,
+      "sha256": "b9490a1281cf4fb196ae822fe063ecb03b1526ce569343516ca523e84c7d6785",
+      "license": "CC-BY-4.0",
+      "size": [64, 64]
+    },
+    "flight_islands_title.png": {
+      "bytes": 35039,
+      "sha256": "fd779a7b1023e8ab88184d80dd813ff75b499896e91e72bcb7eccf1dc3f5809c",
+      "license": "CC-BY-4.0",
+      "size": [1090, 176]
+    },
+    "flight_islands_title.svg": {
+      "bytes": 2941,
+      "sha256": "b45e88c39cba053aab10bdf2c5ddf92ec60e3a7aade8b78b16a20fc1bbd8b346",
+      "license": "CC-BY-4.0"
+    },
+    "flight_islands_title_light.png": {
+      "bytes": 38208,
+      "sha256": "e191c6bea47bc40262736f10a897a4a1a0ce668c7e691624c71afc56e2cbe838",
+      "license": "CC-BY-4.0",
+      "size": [1090, 176]
+    },
+    "flight_islands_title_light.svg": {
+      "bytes": 2941,
+      "sha256": "128d12a72b845b7fb11f565755e3c22cac98063cf11ceabd71463ef256126c2c",
+      "license": "CC-BY-4.0"
+    },
+    "previews/branding_proof.png": {
+      "bytes": 121422,
+      "sha256": "8e53ff7876c15b30b7a8b9777be162982535946ca87a946fb0118374265f9edd",
+      "license": "CC-BY-4.0",
+      "size": [1450, 1100]
+    },
+    "previews/title_marks_proof.png": {
+      "bytes": 64757,
+      "sha256": "aaff4135d99c6b298046fe9e6c5878511db92eb3d385fed9e90e91a75ee303df",
+      "license": "CC-BY-4.0",
+      "size": [1160, 420]
+    }
+  }
+}

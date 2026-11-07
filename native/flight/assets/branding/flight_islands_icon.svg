@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+<title id="title">Flight Islands</title><desc id="desc">Ivory aircraft flying over a coral island and sun on a navy aviation badge.</desc>
+<metadata>Original Flight Islands identity, Copyright 2026 Curriculum Games contributors.
+Artwork licensed CC BY 4.0; generator code MIT. No external images or fonts.</metadata><rect x="72" y="72" width="880" height="880" rx="202" fill="#153440"/>
+<rect x="92" y="92" width="840" height="840" rx="184" fill="none" stroke="#375B65" stroke-width="3"/>
+<circle cx="700" cy="314" r="104" fill="#DF6750"/>
+<path d="M 231 797 C 293 761 334 768 373 744 C 431 707 476 758 531 758 C 594 760 617 727 663 751 C 711 776 750 762 797 797 C 737 823 672 828 611 820 C 550 812 504 843 447 831 C 367 815 311 838 231 797 Z " fill="#DF6750"/>
+<path d="M 345 791 C 414 774 424 792 467 793 C 523 793 556 781 599 790" fill="none" stroke="#EAA774" stroke-width="15" stroke-linecap="round"/>
+<path d="M 330 860 C 407 880 457 854 510 864 C 568 876 620 865 670 860" fill="none" stroke="#375B65" stroke-width="12" stroke-linecap="round"/>
+<g transform="rotate(27 512 465)">
+<path d="M 512 215 C 537 215 544 251 544 283 L 544 368 L 756 469 Q 776 478 776 492 L 776 518 Q 776 531 763 527 L 541 470 L 534 627 L 623 681 L 623 712 L 529 689 L 523 728 L 501 728 L 495 689 L 401 712 L 401 681 L 490 627 L 483 470 L 261 527 Q 248 531 248 518 L 248 492 Q 248 478 268 469 L 480 368 L 480 283 C 480 251 487 215 512 215 Z " fill="#F4E9CD" stroke="#153440" stroke-width="15" stroke-linejoin="round"/>
+<path d="M 512 289 C 528 292 531 320 528 350 Q 512 358 496 350 C 493 320 496 292 512 289 Z " fill="#153440"/>
+<path d="M 496 574 L 528 574" stroke="#DF6750" stroke-width="14"/>
+</g>
+</svg>

@@ -1,0 +1,6 @@
+# Flight Islands — native Godot game
+
+The user-approved native plan supersedes the root browser-specific architecture for this subtree. Use Godot4.7.2/GDScript/Jolt;120Hz SI physics. +Y up, -Z forward,+X right.
+Quality, handling, and graphics outrank content count. Native playtesting must remain silent: EVERY Godot editor/game process must start with --audio-driver Dummy and -- --test-muted. Never change system volume or audition media. Blender runs background/factory-startup only. Test-mode mute never rewrites player preferences.
+Use meaningful behavioral RED/GREEN tests for mathematics, saves, cargo and lifecycle. Presentation/prose/asset generation do not need mirrored tests. No test shortcuts in production physics or fake telemetry. Do not claim complete gameplay from tests alone.
+No agent may alter another owner's files, start unmuted apps, publish, commit, or spawn children. Return changed paths, actual checks, limitations. Root handles integration/testing/publication. Do not edit legacy browser code.
