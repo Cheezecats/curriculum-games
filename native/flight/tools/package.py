@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Package an already tested Mac alpha. Does not run or unmute the game."""
-import argparse,hashlib,json,pathlib,shutil,subprocess,plistlib,os
+import argparse,hashlib,json,pathlib,shutil,subprocess,plistlib
 project=pathlib.Path(__file__).resolve().parents[1]
 repo=project.parents[1]
 p=argparse.ArgumentParser(description=__doc__)
@@ -15,8 +15,9 @@ shutil.copytree(a.app.resolve(),app,symlinks=True)
 # File Provider-backed Desktop folders add FinderInfo during a copy. Only
 # remove signing-incompatible metadata on this newly generated app copy.
 for item in [app,*app.rglob('*')]:
+ attributes=subprocess.check_output(['xattr',str(item)],text=True).splitlines()
  for attribute in ('com.apple.FinderInfo','com.apple.ResourceFork'):
-  if attribute in os.listxattr(item):os.removexattr(item,attribute)
+  if attribute in attributes:subprocess.run(['xattr','-d',attribute,str(item)],check=True)
 marker=app/'Contents/Resources/test-profile.txt'
 if marker.exists():marker.unlink()
 subprocess.run(['codesign','--force','--deep','--sign','-',str(app)],check=True)
