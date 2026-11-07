@@ -33,7 +33,7 @@ func run():
  var forest_instances=0
  for batch in world.find_children("*","MultiMeshInstance3D",true,false):
   var bounds=batch.multimesh.custom_aabb
-  localized=localized and bounds.size.x>0 and bounds.size.x<160 and bounds.size.z<160
+  localized=localized and bounds.size.x>0 and bounds.size.x<280 and bounds.size.z<280
   forest_instances+=batch.multimesh.instance_count
  var physical=0
  for shape in world._props_body.get_children():

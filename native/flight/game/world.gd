@@ -74,8 +74,8 @@ func _environment():
 	sun.light_color=Color("fff1d8")
 	sun.light_energy=1.1
 	sun.shadow_enabled=true
-	sun.directional_shadow_max_distance=230
-	sun.directional_shadow_mode=DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_max_distance=180
+	sun.directional_shadow_mode=DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	sun.shadow_bias=.04
 	add_child(sun)
 
@@ -256,11 +256,11 @@ func _batch_props(kind:String,transforms:Array):
 	# rather than treating all vegetation as one island-sized object.
 	var chunks:Dictionary={}
 	for transform_value in transforms:
-		var cell=Vector2i(floori(transform_value.origin.x/128),floori(transform_value.origin.z/128))
+		var cell=Vector2i(floori(transform_value.origin.x/256),floori(transform_value.origin.z/256))
 		if not chunks.has(cell):chunks[cell]=[]
 		chunks[cell].append(transform_value)
 	for cell in chunks:
-		var chunk_origin=Vector3(cell.x*128,0,cell.y*128)
+		var chunk_origin=Vector3(cell.x*256,0,cell.y*256)
 		var instances:Array=chunks[cell]
 		for entry in meshes:
 			var mm=MultiMesh.new()
